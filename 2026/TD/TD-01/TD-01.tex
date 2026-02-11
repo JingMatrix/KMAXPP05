@@ -1,35 +1,11 @@
-\documentclass[11pt,a4paper]{article}
-
-% --- Packages de base ---
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[french]{babel}
-\usepackage{geometry}
-\geometry{margin=2.5cm}
-
-% --- Mathématiques avancées ---
-\usepackage{amsmath, amssymb, amsthm} % Fondamentaux pour le ML
-\usepackage{bm} % Pour les vecteurs en gras : \bm{x}
-
-% --- Graphiques et Algorithmes ---
-\usepackage{graphicx}
-\usepackage{booktabs} % Tableaux de qualité professionnelle
-\usepackage{listings} % Pour l'insertion de code Python
-\usepackage{xcolor}
-
-% --- Mise en page spécifique TD ---
-\usepackage{tcolorbox} % Pour encadrer les exercices ou notes
-
-\title{Travaux Dirigés n°1 \\ Régression Linéaire}
-\author{KMAXPP05}
-\date{2025-2026}
+\documentclass[solutions]{../exercices}
 
 \begin{document}
-	
-\maketitle
-	
-\section*{Exercice 1}
-	
+
+\makeheader{2025}{2026}
+\tdtitle{1}{Régression Linéaire}
+
+\begin{exercice}
 Nous disposons des données suivantes pour des joueurs de rugby. L'espace des caractéristiques d'entrée est défini par la taille et noté $\mathcal{X} \subseteq \mathbb{R}$. L'espace des caractéristiques de sortie est défini par le poids et noté $\mathcal{Y} \subseteq \mathbb{R}$:
 
 \begin{center}
@@ -54,11 +30,110 @@ On cherche à obtenir un modèle linéaire de la forme: $\text{poids}^{(i)} = \b
 	\item Donner une interprétation de $\beta_0$ et de $\beta_1$.
 	\item A l'aide de cette estimation de modèle, quels seraient les poids de deux joueurs qui mesureraient 188 cm et 200 cm.
 \end{enumerate}
-	
-\section*{Exercice 2}
+\end{exercice}
 
+\begin{solution}
+    \begin{enumerate}
+        \item L'application $\Phi$ ajoute le terme de biais (intercept) aux caractéristiques d'entrée :
+        \[
+            \Phi: x^{(i)} \mapsto \left(1, x^{(i)}\right)^T
+        \]
+        L'espace augmenté est donc $\tilde{\mathcal{X}} \subseteq \mathbb{R}^2$.
+
+        \item La matrice de design $\tilde{X}$ est de dimension $(4 \times 2)$ :
+        \[
+            \tilde{X} = \begin{bmatrix}
+                1 & 190 \\
+                1 & 172 \\
+                1 & 186 \\
+                1 & 180
+            \end{bmatrix}
+        \]
+
+        \item Calculons le produit $\tilde{X}^T \tilde{X}$ :
+        \[
+            \tilde{X}^T \tilde{X} = \begin{bmatrix}
+                1 & 1 & 1 & 1 \\
+                190 & 172 & 186 & 180
+            \end{bmatrix}
+            \begin{bmatrix}
+                1 & 190 \\
+                1 & 172 \\
+                1 & 186 \\
+                1 & 180
+            \end{bmatrix}
+            = \begin{bmatrix}
+                4 & 728 \\
+                728 & 132680
+            \end{bmatrix}
+        \]
+        Calculons le déterminant de cette matrice :
+        \[
+            \det(\tilde{X}^T \tilde{X}) = 4 \times 132680 - 728^2 = 530720 - 529984 = 736
+        \]
+        Le déterminant est strictement positif, la matrice est donc inversible.
+
+        \item L'estimateur des moindres carrés est donné par $\hat{\beta} = (\tilde{X}^T \tilde{X})^{-1} \tilde{X}^T Y$.
+
+        Calculons d'abord l'inverse de la matrice :
+        \[
+            (\tilde{X}^T \tilde{X})^{-1} = \frac{1}{736} \begin{bmatrix}
+                132680 & -728 \\
+                -728 & 4
+            \end{bmatrix}
+        \]
+        Calculons ensuite le vecteur $\tilde{X}^T Y$ :
+        \[
+            \tilde{X}^T Y = \begin{bmatrix}
+                1 & 1 & 1 & 1 \\
+                190 & 172 & 186 & 180
+            \end{bmatrix}
+            \begin{bmatrix}
+                112 \\ 85 \\ 135 \\ 92
+            \end{bmatrix}
+            = \begin{bmatrix}
+                424 \\
+                77570
+            \end{bmatrix}
+        \]
+        Enfin, nous obtenons $\hat{\beta}$ :
+        \[
+            \hat{\beta} = \frac{1}{736} \begin{bmatrix}
+                132680 & -728 \\
+                -728 & 4
+            \end{bmatrix}
+            \begin{bmatrix}
+                424 \\
+                77570
+            \end{bmatrix}
+            = \frac{1}{736} \begin{bmatrix}
+                -214640 \\
+                1608
+            \end{bmatrix}
+            \approx \begin{bmatrix}
+                -291.63 \\
+                2.185
+            \end{bmatrix}
+        \]
+        D'où $\beta_0 \approx -291.63$ et $\beta_1 \approx 2.185$.
+
+        \item \textbf{Interprétation :}
+        \begin{itemize}
+            \item $\beta_0$ correspond théoriquement au poids d'un joueur mesurant 0 cm. Cela n'a pas de sens physiquement dans ce contexte.
+            \item $\beta_1$ correspond à l'augmentation moyenne de poids (en kg) lorsque la taille augmente de 1 cm.
+        \end{itemize}
+
+        \item Pour prédire le poids, on utilise la formule $\hat{y} = \hat{\beta}_0 + \hat{\beta}_1 x$.
+        \begin{itemize}
+            \item Pour $x = 188$ cm : $\hat{y} \approx -291.63 + 2.185 \times 188 \approx 119.1$ kg.
+            \item Pour $x = 200$ cm : $\hat{y} \approx -291.63 + 2.185 \times 200 \approx 145.3$ kg.
+        \end{itemize}
+    \end{enumerate}
+\end{solution}
+
+\begin{exercice}
 Un ballon sonde a effectué des mesures de température et de pression dans l'atmosphère. Les résultats de l'expérience sont consignés dans la table ci-dessous:
-	
+
 \begin{center}
 	\begin{tabular}{|c|c|c|}
 		\hline
@@ -82,16 +157,63 @@ Pour ce problème, on donne la matrice suivante:
 
 \begin{enumerate}
 	\item La matrice $\tilde{X}^T \tilde{X}$ est-elle inversible ? Que peut-on en déduire ?
-	\item Calculer la matrice $(2 \times 2)$ de corrélation de Pearson de l'altitude et de la pression. On rappelle que pour deux variables aléatoires $X_i$ et $X_j$, le coefficient de corrélation de Pearson $\rho$ est donné par $\rho(X_i, X_j) = \displaystyle \frac{\text{Cov}[X_i, X_j]}{\sqrt{\text{Var}[X_i] \, \text{Var}[X_j]}}$
+	\item Calculer la matrice $(2 \times 2)$ de corrélation de Pearson de l'altitude et de la pression. On rappelle que pour deux variables aléatoires $X_i$ et $X_j$, le coefficient de corrélation de Pearson $\rho$ est donné par $\rho(X_i, X_j) = \frac{\Cov[X_i, X_j]}{\sqrt{\Var[X_i] \, \Var[X_j]}}$
 	\item Que conclure de cette matrice de corrélation ?
 	\item Quelle alternative proposer pour un modèle linéaire de prédiction de la température ?
 	\item En utilisant la méthode des moindres carrés, quel serait ce modèle ?
 	\item D'après ce modèle quelle serait la température dans la couche haute de la troposphère (11000 mètres d'altitude) ?
-	
+
 \end{enumerate}
+\end{exercice}
 
-\section*{Exercice 3}
+\begin{solution}
+    \begin{enumerate}
+        \item Calculons le déterminant de la matrice $\tilde{X}^T \tilde{X}$ donnée (règle de Sarrus ou développement par ligne) :
+        \[
+            \det(\tilde{X}^T \tilde{X}) = 3 \begin{vmatrix} 140 & 8154 \\ 8154 & 1178571 \end{vmatrix} - 18 \begin{vmatrix} 18 & 8154 \\ 1743 & 1178571 \end{vmatrix} + 1743 \begin{vmatrix} 18 & 140 \\ 1743 & 8154 \end{vmatrix} = 0
+        \]
+        Le déterminant est nul, la matrice n'est pas inversible. Le système admet une infinité de solutions. Cela indique un problème de multicolinéarité parfaite entre les variables.
 
+        \item Calculons les statistiques pour l'altitude ($A$) et la pression ($P$) :
+        \begin{itemize}
+            \item Moyennes : $\bar{A} = 6$, $\bar{P} = 581$.
+            \item Variances :
+            $\Var(A) = \frac{1}{3} [(2-6)^2 + (6-6)^2 + (10-6)^2] = \frac{32}{3}$.
+            $\Var(P) = \frac{1}{3} [(869-581)^2 + (581-581)^2 + (293-581)^2] = \frac{165888}{3} = 55296$.
+            \item Covariance :
+            $\Cov(A, P) = \frac{1}{3} [(2-6)(869-581) + 0 + (10-6)(293-581)] = \frac{1}{3} [-1152 - 1152] = -768$.
+        \end{itemize}
+        Coefficient de corrélation :
+        \[
+            \rho(A, P) = \frac{-768}{\sqrt{\frac{32}{3} \times 55296}} = \frac{-768}{\sqrt{589824}} = \frac{-768}{768} = -1
+        \]
+        La matrice de corrélation est $\begin{bmatrix} 1 & -1 \\ -1 & 1 \end{bmatrix}$.
+
+        \item Il y a une corrélation linéaire parfaite (négative) entre l'altitude et la pression. L'une des variables est redondante, ce qui cause le problème d'inversion de matrice lors de la régression.
+
+        \item On peut simplifier le modèle en ne gardant qu'une seule variable explicative. Physiquement, on choisit souvent l'altitude comme variable explicative. Le modèle devient : $\text{Temp} = \beta_0 + \beta_1 \times \text{Alt}$.
+
+        \item Avec le modèle simplifié (données : $(2, 2), (6, -23), (10, -51)$) :
+        \[
+            \tilde{X} = \begin{bmatrix} 1 & 2 \\ 1 & 6 \\ 1 & 10 \end{bmatrix}, \quad Y = \begin{bmatrix} 2 \\ -23 \\ -51 \end{bmatrix}
+        \]
+        \[
+            \tilde{X}^T \tilde{X} = \begin{bmatrix} 3 & 18 \\ 18 & 140 \end{bmatrix}, \quad \tilde{X}^T Y = \begin{bmatrix} -72 \\ -644 \end{bmatrix}
+        \]
+        La résolution donne :
+        \[
+            \hat{\beta} = (\tilde{X}^T \tilde{X})^{-1} (\tilde{X}^T Y) \approx \begin{bmatrix} 15.75 \\ -6.625 \end{bmatrix}
+        \]
+        Le modèle est : $T(^\circ C) \approx 15.75 - 6.625 \times \text{Altitude}(km)$.
+
+        \item Pour une altitude de 11 km :
+        \[
+            \hat{y} = 15.75 - 6.625 \times 11 = 15.75 - 72.875 = -57.125 \,^\circ\text{C}
+        \]
+    \end{enumerate}
+\end{solution}
+
+\begin{exercice}
 Un second ballon sonde a effectué une autre série de mesures de température dans l'atmosphère. Voici les relevés de ce ballon:
 
 \begin{center}
@@ -104,13 +226,13 @@ Un second ballon sonde a effectué une autre série de mesures de température d
 	\end{tabular}
 \end{center}
 
-Nous cherchons à obtenir un modèle linéaire permettant de prédire la température à partir de l'altitude de la forme suivante:  $\text{température}^{(i)} = \beta_0 + \beta_1 \times \text{altitude}^{(i)} + \epsilon^{(i)}$. On suppose que les observations sont indépendantes. Les $\epsilon^{(i)}$ sont des variables aléatoires indépendantes toutes issues de la loi normale centrée et de variance $\sigma_{\epsilon}^2$. \\
+Nous cherchons à obtenir un modèle linéaire permettant de prédire la température à partir de l'altitude de la forme suivante:  $\text{température}^{(i)} = \beta_0 + \beta_1 \times \text{altitude}^{(i)} + \epsilon^{(i)}$. On suppose que les observations sont indépendantes. Les $\epsilon^{(i)}$ sont des variables aléatoires indépendantes toutes issues de la loi normale centrée et de variance $\sigma_{\epsilon}^2$.
 
-La résolution numérique d'un problème de régression linéaire avec la méthode des moindres carrés évite d'inverser la matrice $\tilde{X}^T \tilde{X}$. Une approche classique est de passer par une décomposition QR de la matrice de design $\tilde{X}$ avec $Q$ une matrice orthogonale (i.e $Q^T Q = I$) et $R$ une matrice triangulaire supérieure. \\
+La résolution numérique d'un problème de régression linéaire avec la méthode des moindres carrés évite d'inverser la matrice $\tilde{X}^T \tilde{X}$. Une approche classique est de passer par une décomposition QR de la matrice de design $\tilde{X}$ avec $Q$ une matrice orthogonale (i.e $Q^T Q = I$) et $R$ une matrice triangulaire supérieure.
 
 Il n'existe pas une décomposition unique. La méthode de Gram-Schmidt permet d'en obtenir une. Afin d'obtenir $Q$, on peut ré-écrire la matrice $\tilde{X} \in \mathcal{M}_{(2,2)}(\mathbb{R})$ sous une forme qui fait apparaitre les vecteurs colonnes $\tilde{X}_1 \in \mathcal{M}_{2,1}(\mathbb{R})$ et $\tilde{X}_2 \in \mathcal{M}_{2,1}(\mathbb{R})$. La méthode peut se résumer de la façon suivante:
 \begin{itemize}
-	\item La première colonne de $Q$ que l'on notera $Q_1$ peut être obtenue en normalisant le premier vecteur $\tilde{X}_1$: $Q_1 = \displaystyle \frac{\tilde{X}_1}{\|\tilde{X}_1\|_2}$
+	\item La première colonne de $Q$ que l'on notera $Q_1$ peut être obtenue en normalisant le premier vecteur $\tilde{X}_1$: $Q_1 = \tilde{X}_1 / \|\tilde{X}_1\|_2$
 	\item Pour la deuxième colonne de $Q$ que l'on notera $Q_2$, on retire au vecteur $\tilde{X}_2$ sa projection sur $Q_1$ pour rendre $Q_2$ orthogonale à $Q_1$: $\tilde{X}_2 - (\tilde{X}_2 \cdot Q_1) Q_1$. En normalisant ce vecteur, nous obtenons $Q_2$.
 \end{itemize}
 
@@ -121,5 +243,74 @@ Il n'existe pas une décomposition unique. La méthode de Gram-Schmidt permet d'
 	\item Avec les données du ballon sonde, calculer les matrices $Q$ et $R$.
 	\item En déduire la valeur de $\hat{\beta}$ en utilisant la méthode des moindres carrés. Obtient-on bien la même estimation $\hat{\beta}$ que la solution triviale ?
 \end{enumerate}
+\end{exercice}
+
+\begin{solution}
+    \begin{enumerate}
+        \item Puisque nous n'avons que 2 points $(0, 15)$ et $(11, -56.5)$, la droite de régression passe exactement par ces deux points.
+        \begin{itemize}
+            \item Ordonnée à l'origine (pour $x=0$) : $\beta_0 = 15$.
+            \item Pente : $\beta_1 = \frac{\Delta y}{\Delta x} = \frac{-56.5 - 15}{11 - 0} = \frac{-71.5}{11} = -6.5$.
+        \end{itemize}
+        Le modèle est : $\text{Temp} = 15 - 6.5 \times \text{Altitude}$.
+
+        \item Partons de l'équation normale : $\tilde{X}^T \tilde{X} \hat{\beta} = \tilde{X}^T Y$.
+        En remplaçant $\tilde{X}$ par $QR$ :
+        \[ (QR)^T (QR) \hat{\beta} = (QR)^T Y \]
+        \[ R^T Q^T Q R \hat{\beta} = R^T Q^T Y \]
+        Comme $Q$ est orthogonale, $Q^T Q = I$, donc :
+        \[ R^T R \hat{\beta} = R^T Q^T Y \]
+        En multipliant à gauche par $(R^T)^{-1}$ (possible car $R$ est triangulaire supérieure inversible si les colonnes de $\tilde{X}$ sont linéairement indépendantes) :
+        \[ R \hat{\beta} = Q^T Y \]
+        Ainsi $A = Q^T Y$. Le système $R \hat{\beta} = A$ est triangulaire et se résout par substitution arrière.
+
+        \item Montrons que $Q_1$ et $Q_2$ sont orthogonaux par construction.
+        Soit $v_1 = \tilde{X}_1$ et $v_2 = \tilde{X}_2 - (\tilde{X}_2 \cdot Q_1) Q_1$.
+        On a $Q_1 = \frac{v_1}{\|v_1\|}$ et $Q_2 = \frac{v_2}{\|v_2\|}$.
+        Le produit scalaire $Q_1 \cdot Q_2$ est proportionnel à $Q_1 \cdot v_2$ :
+        \begin{align*}
+            Q_1 \cdot v_2 &= Q_1 \cdot (\tilde{X}_2 - (\tilde{X}_2 \cdot Q_1) Q_1) \\
+            &= Q_1 \cdot \tilde{X}_2 - (\tilde{X}_2 \cdot Q_1) (Q_1 \cdot Q_1)
+        \end{align*}
+        Comme $Q_1$ est un vecteur unitaire, $Q_1 \cdot Q_1 = 1$.
+        \[ Q_1 \cdot v_2 = (\tilde{X}_2 \cdot Q_1) - (\tilde{X}_2 \cdot Q_1) = 0 \]
+        Les vecteurs sont bien orthogonaux.
+
+        \item Données : $\tilde{X} = \begin{bmatrix} 1 & 0 \\ 1 & 11 \end{bmatrix}$.
+        \begin{itemize}
+            \item \textbf{Calcul de $Q_1$} : $\tilde{X}_1 = \begin{bmatrix} 1 \\ 1 \end{bmatrix}$. $\|\tilde{X}_1\|_2 = \sqrt{2}$.
+            \[ Q_1 = \begin{bmatrix} 1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix} \]
+            \item \textbf{Calcul de $Q_2$} : $\tilde{X}_2 = \begin{bmatrix} 0 \\ 11 \end{bmatrix}$.
+            Projection : $\tilde{X}_2 \cdot Q_1 = 0 + \frac{11}{\sqrt{2}} = \frac{11}{\sqrt{2}}$.
+            \[ v_2 = \tilde{X}_2 - \frac{11}{\sqrt{2}} Q_1 = \begin{bmatrix} 0 \\ 11 \end{bmatrix} - \begin{bmatrix} 5.5 \\ 5.5 \end{bmatrix} = \begin{bmatrix} -5.5 \\ 5.5 \end{bmatrix} \]
+            $\|v_2\|_2 = \sqrt{(-5.5)^2 + (5.5)^2} = 5.5\sqrt{2} = \frac{11}{\sqrt{2}}$.
+            \[ Q_2 = \frac{v_2}{\|v_2\|} = \frac{\sqrt{2}}{11} \begin{bmatrix} -5.5 \\ 5.5 \end{bmatrix} = \begin{bmatrix} -1/\sqrt{2} \\ 1/\sqrt{2} \end{bmatrix} \]
+        \end{itemize}
+        Matrices finales :
+        \[
+            Q = \begin{bmatrix} \frac{1}{\sqrt{2}} & -\frac{1}{\sqrt{2}} \\ \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} \end{bmatrix}, \quad
+            R = Q^T \tilde{X} = \begin{bmatrix} \sqrt{2} & \frac{11}{\sqrt{2}} \\ 0 & \frac{11}{\sqrt{2}} \end{bmatrix}
+        \]
+
+        \item Résolution de $R \hat{\beta} = Q^T Y$ avec $Y = \begin{bmatrix} 15 \\ -56.5 \end{bmatrix}$.
+        Calcul de $A = Q^T Y$ :
+        \[
+            A = \begin{bmatrix} \frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} \\ -\frac{1}{\sqrt{2}} & \frac{1}{\sqrt{2}} \end{bmatrix} \begin{bmatrix} 15 \\ -56.5 \end{bmatrix}
+            = \frac{1}{\sqrt{2}} \begin{bmatrix} 15 - 56.5 \\ -15 - 56.5 \end{bmatrix}
+            = \begin{bmatrix} -41.5/\sqrt{2} \\ -71.5/\sqrt{2} \end{bmatrix}
+        \]
+        Système à résoudre (remontée) :
+        \[
+        \begin{cases}
+            \sqrt{2} \beta_0 + \frac{11}{\sqrt{2}} \beta_1 = -\frac{41.5}{\sqrt{2}} \\
+            \frac{11}{\sqrt{2}} \beta_1 = -\frac{71.5}{\sqrt{2}}
+        \end{cases}
+        \]
+        De la deuxième ligne : $11 \beta_1 = -71.5 \implies \beta_1 = -6.5$.
+        De la première ligne : $2 \beta_0 + 11(-6.5) = -41.5 \implies 2 \beta_0 = 30 \implies \beta_0 = 15$.
+
+        On retrouve bien $\hat{\beta} = [15, -6.5]^T$, identique à la solution triviale.
+    \end{enumerate}
+\end{solution}
 
 \end{document}
