@@ -30,7 +30,7 @@ L'objectif est d'évaluer le travail individuel régulier.
 *   **Méthode :** Via un lien **PigeonFiles** (généré par l'enseignant en séance) ou par email selon l'instruction.
 *   **Barème par notebook (0 à 3) :**
     *   0 : Non rendu ou généré par IA sans appropriation (plagiat).
-    *   1 : Rendu mais incomplet/insiffisant.
+    *   1 : Rendu mais incomplet/insuffisant.
     *   2 : Complet (code correct, questions traitées).
     *   3 : Excellence (code propre, interprétation pertinente, approfondissement).
 *   **Calcul de la note :** La somme des notes brutes (max 21) est divisée par 3:
@@ -39,7 +39,7 @@ L'objectif est d'évaluer le travail individuel régulier.
 #### 2. Projet Final (8 points)
 L'évaluation porte sur la capacité à collaborer et synthétiser une problématique ML.
 *   **Groupes :** Binômes ou trinômes (formés spontanément, idéalement au sein du même groupe de TP).
-*   **Calendrier :** Les 3 dernières séances de TP sont dédiées au projet. La soutenance a lieu lors de la 10ème et dernière séance.
+*   **Calendrier :** Les 3 dernières séances de TP sont dédiées au projet. La soutenance a lieu lors de la dernière (10ème) séance.
 *   **Évaluation :** Note de groupe (commune à tous les membres).
     *   La note prend en compte la qualité technique (code, résultats) et la clarté de la présentation/défense.
 
