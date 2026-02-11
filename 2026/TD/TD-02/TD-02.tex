@@ -1,35 +1,11 @@
-\documentclass[11pt,a4paper]{article}
-
-% --- Packages de base ---
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage[french]{babel}
-\usepackage{geometry}
-\geometry{margin=2.5cm}
-
-% --- Mathématiques avancées ---
-\usepackage{amsmath, amssymb, amsthm} % Fondamentaux pour le ML
-\usepackage{bm} % Pour les vecteurs en gras : \bm{x}
-
-% --- Graphiques et Algorithmes ---
-\usepackage{graphicx}
-\usepackage{booktabs} % Tableaux de qualité professionnelle
-\usepackage{listings} % Pour l'insertion de code Python
-\usepackage{xcolor}
-
-% --- Mise en page spécifique TD ---
-\usepackage{tcolorbox} % Pour encadrer les exercices ou notes
-
-\title{Travaux Dirigés n°2 \\ Régression Logistique}
-\author{KMAXPP05}
-\date{2025-2026}
+\documentclass[solutions]{../exercices}
 
 \begin{document}
-	
-\maketitle
 
-\section*{Exercice 1}
+\makeheader{2025}{2026}
+\tdtitle{2}{Régression Logistique}
 
+\begin{exercice}
 On considère la fonction logistique: 
 
 \begin{equation}
@@ -51,9 +27,49 @@ La fonction logistique est une fonction \textit{sigmoïde}. Littéralement, c'es
 	\item Déduire de la propriété précédente que $\sigma(0) = \frac{1}{2}$ et que $\sigma(t) \ge \frac{1}{2} \Longleftrightarrow t \ge 0$.
 	\item Tracer approximativement la courbe de $\sigma$ sur $\mathbb{R}$.
 \end{enumerate}
+\end{exercice}
 
-\section*{Exercice 2}
+\begin{solution}
+    \begin{enumerate}
+        \item La fonction sigmoïde est définie par $\sigma(t) = (1 + e^{-t})^{-1}$. Calculons sa dérivée :
+        \begin{align*}
+            \sigma'(t) &= -1 \times (1 + e^{-t})^{-2} \times (-e^{-t}) \\
+                       &= \frac{e^{-t}}{(1 + e^{-t})^2} \\
+                       &= \frac{1}{1 + e^{-t}} \times \frac{e^{-t}}{1 + e^{-t}} \\
+                       &= \sigma(t) \left( \frac{1 + e^{-t} - 1}{1 + e^{-t}} \right) \\
+                       &= \sigma(t) (1 - \sigma(t))
+        \end{align*}
 
+        \item On sait que $\sigma(t) \in ]0, 1[$, donc $\sigma(t) > 0$ et $1 - \sigma(t) > 0$.
+        Par conséquent, $\sigma'(t) > 0$ pour tout $t \in \mathbb{R}$. La fonction est donc strictement croissante.
+
+        \item Limites :
+        \begin{itemize}
+            \item Quand $t \to +\infty$, $e^{-t} \to 0$, donc $\sigma(t) \to \frac{1}{1+0} = 1$.
+            \item Quand $t \to -\infty$, $e^{-t} \to +\infty$, donc le dénominateur tend vers l'infini et $\sigma(t) \to 0$.
+        \end{itemize}
+
+        \item La fonction tangente hyperbolique ($\tanh$) est également une sigmoïde (elle prend ses valeurs dans $]-1, 1[$).
+
+        \item Calculons $1 - \sigma(-t)$ :
+        \[
+            1 - \frac{1}{1 + e^{t}} = \frac{1 + e^t - 1}{1 + e^t} = \frac{e^t}{1 + e^t}
+        \]
+        En multipliant numérateur et dénominateur par $e^{-t}$ :
+        \[
+            \frac{e^t e^{-t}}{(1 + e^t)e^{-t}} = \frac{1}{e^{-t} + 1} = \sigma(t)
+        \]
+        La propriété est vérifiée.
+
+        \item En utilisant la propriété précédente avec $t=0$ :
+        \[ \sigma(0) = 1 - \sigma(-0) \implies 2\sigma(0) = 1 \implies \sigma(0) = \frac{1}{2} \]
+        Comme la fonction est strictement croissante, $\sigma(t) \ge \frac{1}{2} \iff t \ge 0$.
+
+        \item \textit{(Le tracé doit montrer une courbe en S passant par $(0, 0.5)$, tendant vers 0 en $-\infty$ et 1 en $+\infty$)}.
+    \end{enumerate}
+\end{solution}
+
+\begin{exercice}
 On cherche à construire un classifieur $C$, basé sur une régression logistique, qui prend en entrée $x \in \mathbb{R}$ et qui le classifie en la classe $0$ ou la classe $1$. Ce classifieur va être paramétré par un vecteur $\beta \in \mathcal{M}_{2,1}(\mathbb{R})$ de composantes $\beta_0$ et $\beta_1$. La classe associée sera $1$ si $C_{\beta}(x) \ge 1/2$ et $0$ sinon. Le classifieur $C$ est défini comme suit:
 
 \begin{equation}
@@ -71,9 +87,41 @@ Les réponses de l'exercice 1 peuvent être utilisées pour les questions de cet
 	\item Même question pour $\beta = \begin{pmatrix}1 \\ -1\end{pmatrix}$
 	\item Pour un $x \ne 0$ et $\beta_0$ fixés, lorsque $\beta_1$ devient assez grand ($\beta_1 \to + \infty$), comment est classé $x$ ? Même question lorsque $\beta_1 \to -\infty$.
 \end{enumerate}
+\end{exercice}
 
-\section*{Exercice 3}
+\begin{solution}
+    \begin{enumerate}
+        \item Pour $\beta = \begin{pmatrix}0 \\ 1\end{pmatrix}$, on a $C_{\beta}(x) = \sigma(0 + 1 \cdot x) = \sigma(x)$.
+        La condition $C_{\beta}(x) \ge 1/2$ équivaut à $\sigma(x) \ge 1/2$, c'est-à-dire $x \ge 0$ (d'après l'exercice 1).
+        \begin{itemize}
+            \item Les $x \ge 0$ sont classés en $1$.
+            \item Les $x < 0$ sont classés en $0$.
+        \end{itemize}
 
+        \item Pour $\beta = \begin{pmatrix}1 \\ -1\end{pmatrix}$, on a $C_{\beta}(x) = \sigma(1 - x)$.
+        La condition $C_{\beta}(x) \ge 1/2$ équivaut à $1 - x \ge 0$, soit $x \le 1$.
+        \begin{itemize}
+            \item Les $x \le 1$ sont classés en $1$.
+            \item Les $x > 1$ sont classés en $0$.
+        \end{itemize}
+
+        \item Analysons le comportement limite pour $x \ne 0$ :
+        \begin{itemize}
+            \item Si $\beta_1 \to +\infty$ :
+                \begin{itemize}
+                    \item Si $x > 0$, $\beta_0 + \beta_1 x \to +\infty \implies \sigma(\dots) \to 1$. Classé $1$.
+                    \item Si $x < 0$, $\beta_0 + \beta_1 x \to -\infty \implies \sigma(\dots) \to 0$. Classé $0$.
+                \end{itemize}
+            \item Si $\beta_1 \to -\infty$ :
+                \begin{itemize}
+                    \item Si $x > 0$, $\beta_0 + \beta_1 x \to -\infty \implies \sigma(\dots) \to 0$. Classé $0$.
+                    \item Si $x < 0$, $\beta_0 + \beta_1 x \to +\infty \implies \sigma(\dots) \to 1$. Classé $1$.
+                \end{itemize}
+        \end{itemize}
+    \end{enumerate}
+\end{solution}
+
+\begin{exercice}
 Nous disposons des données $\mathcal{D}$ suivantes pour des joueurs de rugby. L'espace des caractéristiques d'entrée est défini par le poids $x$ et noté $\mathcal{X} \subseteq \mathbb{R}$. L'espace des caractéristiques de sortie est défini par la position $y$ noté $\mathcal{Y} = \{0, 1\}$:
 
 \begin{center}
@@ -138,5 +186,86 @@ Les réponses de l'exercice 1 peuvent être utilisées pour les questions de cet
 		\includegraphics[width=0.7\textwidth]{gradient.png}
 	\end{center}
 \end{enumerate}
-	
+\end{exercice}
+
+\begin{solution}
+    \begin{enumerate}
+        \item L'application est $\Phi(x) = (1, x)$. La matrice de design $\tilde{X}$ est obtenue en empilant les vecteurs lignes augmentés :
+        \[
+            \tilde{X} = \begin{pmatrix}
+                1 & 112 \\
+                1 & 85 \\
+                1 & 135 \\
+                1 & 92
+            \end{pmatrix}
+        \]
+
+        \item Vérifions les deux cas possibles pour $y^{(i)} \in \{0, 1\}$ :
+        \begin{itemize}
+            \item Si $y^{(i)} = 1$, la formule donne $(p^{(i)})^1 (1-p^{(i)})^0 = p^{(i)}$, ce qui est bien $P(Y^{(i)}=1)$.
+            \item Si $y^{(i)} = 0$, la formule donne $(p^{(i)})^0 (1-p^{(i)})^1 = 1-p^{(i)}$, ce qui est bien $P(Y^{(i)}=0)$.
+        \end{itemize}
+
+        \item Les observations étant indépendantes, la vraisemblance $\mathcal{L}(\beta)$ est le produit des probabilités individuelles :
+        \[
+            \mathcal{L}(\beta) = \prod_{i=1}^n P(Y^{(i)} = y^{(i)}) = \prod_{i=1}^n \left( p^{(i)} \right)^{y^{(i)}} \left(1 - p^{(i)}\right)^{\left(1 - y^{(i)}\right)}
+        \]
+
+        \item La log-vraisemblance négative moyenne est :
+        \[
+            J(\beta) = - \frac{1}{n} \ln(\mathcal{L}(\beta)) = - \frac{1}{n} \sum_{i=1}^n \left[ y^{(i)} \ln(p^{(i)}) + (1 - y^{(i)}) \ln(1 - p^{(i)}) \right]
+        \]
+        Cette quantité est usuellement appelée l'\textbf{Entropie Croisée} (Cross-Entropy) ou Log-Loss.
+
+        \item Pour obtenir la meilleure estimation, il faut maximiser la vraisemblance, ce qui revient à minimiser la log-vraisemblance négative $J(\beta)$. La condition nécessaire est que le gradient de $J(\beta)$ par rapport à $\beta$ soit nul : $\nabla_\beta J(\beta) = 0$.
+
+        \item On a $t^{(i)} = \tilde{x}^{(i)} \beta$. Puisque la dépendance est linéaire, le gradient par rapport à $\beta$ est le vecteur des coefficients, c'est-à-dire le vecteur $\tilde{x}^{(i)}$ transposé (pour respecter les dimensions d'un vecteur colonne) :
+        \[ \frac{d t^{(i)}}{d\beta} = \tilde{x}^{(i)T} \]
+
+        \item Utilisons la dérivée composée et le résultat de l'exercice 1 ($\sigma' = \sigma(1-\sigma)$) :
+        \[
+            \frac{d}{d t} \ln(\sigma(t)) = \frac{\sigma'(t)}{\sigma(t)} = \frac{\sigma(t)(1-\sigma(t))}{\sigma(t)} = 1 - \sigma(t)
+        \]
+
+        \item Par composition (règle de la chaîne) :
+        \[
+            \frac{d}{d \beta} \ln(\sigma(\tilde{x}^{(i)} \beta)) = \frac{d \ln \sigma}{d t^{(i)}} \times \frac{d t^{(i)}}{d \beta} = (1 - \sigma(t^{(i)})) \tilde{x}^{(i)T}
+        \]
+
+        \item De même :
+        \[
+            \frac{d}{d t} \ln(1-\sigma(t)) = \frac{-\sigma'(t)}{1-\sigma(t)} = \frac{-\sigma(t)(1-\sigma(t))}{1-\sigma(t)} = -\sigma(t)
+        \]
+
+        \item Par composition :
+        \[
+            \frac{d}{d \beta} \ln(1-\sigma(\tilde{x}^{(i)} \beta)) = -\sigma(t^{(i)}) \tilde{x}^{(i)T}
+        \]
+
+        \item Calculons le gradient de $J(\beta)$ terme à terme :
+        \begin{align*}
+            \nabla_\beta J(\beta) &= - \frac{1}{n} \sum_{i=1}^n \left[ y^{(i)} \nabla_\beta \ln(p^{(i)}) + (1 - y^{(i)}) \nabla_\beta \ln(1 - p^{(i)}) \right] \\
+            &= - \frac{1}{n} \sum_{i=1}^n \left[ y^{(i)} (1 - p^{(i)})\tilde{x}^{(i)T} - (1 - y^{(i)}) p^{(i)}\tilde{x}^{(i)T} \right] \\
+            &= - \frac{1}{n} \sum_{i=1}^n \left[ (y^{(i)} - y^{(i)}p^{(i)} - p^{(i)} + y^{(i)}p^{(i)}) \tilde{x}^{(i)T} \right] \\
+            &= - \frac{1}{n} \sum_{i=1}^n \left( y^{(i)} - p^{(i)} \right) \tilde{x}^{(i)T}
+        \end{align*}
+        Avec $p^{(i)} = \sigma(\tilde{x}^{(i)} \beta)$, on retrouve la formule demandée.
+
+        \item Sous forme matricielle, le vecteur résidu est $(Y - \sigma(\tilde{X}\beta))$. La somme des produits par $\tilde{x}^{(i)T}$ correspond au produit matriciel $\tilde{X}^T$ par ce vecteur résidu.
+        \[ \nabla_\beta J(\beta) = -\frac{1}{n} \tilde{X}^T \left( Y - \sigma(\tilde{X} \beta)\right) \]
+
+        \item Le gradient n'est pas nul (sa norme est significative). Cela signifie que le vecteur $\beta$ actuel n'est pas l'optimum de la fonction de coût : on peut encore améliorer le classifieur.
+
+        \item Frontière de décision : $\beta_0 + \beta_1 x = 0 \iff -90 + 1 \cdot x = 0 \iff x = 90$ kg.
+        \begin{itemize}
+            \item Le classifieur prédit 1 si $x \ge 90$.
+            \item Dans les données, le joueur de 92 kg est un "trois-quart" (classe 0), mais est classé 1 (car $92 > 90$). C'est une erreur.
+            \item Pour corriger cela, la frontière doit se situer entre le plus lourd des 0 (92 kg) et le plus léger des 1 (112 kg). Une bonne alternative est le milieu : $\frac{92 + 112}{2} = 102$ kg.
+            \item Pour avoir une frontière à 102 avec $\beta_1 = 1$, il faut $x + \beta_0 = 0 \iff 102 + \beta_0 = 0 \iff \beta_0 = -102$.
+        \end{itemize}
+
+        \item La visualisation montre la magnitude du gradient. La zone la plus sombre (gradient faible) correspond aux meilleures valeurs de paramètres. Pour $\beta_1 = 1$, on voit que le minimum (vallée) se situe aux alentours de $\beta_0 \approx -100$ ou $-102$, ce qui confirme notre déduction précédente.
+    \end{enumerate}
+\end{solution}
+
 \end{document}
