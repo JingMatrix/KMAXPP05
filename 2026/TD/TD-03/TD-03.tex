@@ -1,7 +1,7 @@
 \documentclass[solutions]{../exercices}
 
 \begin{document}
-	
+
 \makeheader{2025}{2026}
 \tdtitle{3}{Régularisation Ridge et métriques de performance}
 
@@ -12,12 +12,11 @@ La régression linéaire cherche une approximation à la fonction vraie $f(x)$ q
 \begin{equation}
 	\begin{aligned}
 		f: &\mathcal{X} \subseteq \mathbb{R}^d \to \mathcal{Y} \subseteq \mathbb{R} \\
-		&Y = f(X) + \epsilon
+		&Y = f(X) + \epsilon,
 	\end{aligned}
 	\label{eqn:problematique}
 \end{equation}
-
-Où $\epsilon \in \mathcal{M}_{n,1}(\mathbb{R})$ représente une incertitude liée au bruit de mesure sur les variables observées et/ou des variables explicatives non observées, $X \in \mathcal{M}_{n,d}(\mathbb{R})$ et $Y \in \mathcal{M}_{n,1}(\mathbb{R})$.
+où $\epsilon \in \mathcal{M}_{n,1}(\mathbb{R})$ représente une incertitude liée au bruit de mesure sur les variables observées et/ou des variables explicatives non observées, $X \in \mathcal{M}_{n,d}(\mathbb{R})$ et $Y \in \mathcal{M}_{n,1}(\mathbb{R})$.
 
 On suppose que les conditions d'exogénéité ($\mathbb{E}[\epsilon \mid X] = 0$), d'homoscédasticité ($\Var{[\epsilon \mid X]} = \sigma_{\epsilon}^2$) et d'indépendance ($\Cov{[\epsilon^{(i)}, \epsilon^{(j)}]} = 0 \quad \forall i \ne j, i = \{1, 2, \cdots, n\}, j = \{1, 2, \cdots, n\}$) sont réunies.
 
@@ -33,10 +32,9 @@ Avec $\tilde{X} = \Phi(X)$ la matrice de design et $\Phi: \mathcal{X} \subseteq 
 La régression linéaire Ridge propose d'estimer $\hat{\beta}$ par:
 
 \begin{equation}
-	\hat{\beta} = \underset{\beta \in \mathcal{M}_{p,1}(\mathbb{R})}{\text{arg min}} \left(Y - \tilde{X}\beta\right)^T \left(Y - \tilde{X}\beta\right) + \lambda \| \beta \|_2^2
+	\hat{\beta} = \underset{\beta \in \mathcal{M}_{p,1}(\mathbb{R})}{\text{arg min}} \left(Y - \tilde{X}\beta\right)^T \left(Y - \tilde{X}\beta\right) + \lambda \| \beta \|_2^2,
 	\label{eqn:ridge-1}
 \end{equation}
-
 où $\lambda \in \mathbb{R}^{+*}$ est la pénalité de régularisation dite L2. Tout comme l'application $\Phi$, $\lambda$ est un \textbf{hyper-paramètre} du problème de régression.
 
 Résoudre un problème de régression par les méthodes des moindres carrés avec régularisation Ridge revient à chercher un $\beta$ minimisant la somme des erreurs quadratiques pénalisée de la norme euclidienne au carré de $\beta$.
@@ -71,6 +69,78 @@ On admet la propriété suivante avec $A \in \mathcal{M}_{k,1}(\mathbb{R})$ et $
 \end{enumerate}
 
 \end{exercice}
+
+\begin{solution}
+	Cet exercice vise à retrouver l'expression analytique de l'estimateur Ridge en minimisant la fonction de coût régularisée.
+
+	\begin{enumerate}
+		\item \textbf{Vérification de la norme L2 :}
+		La norme euclidienne (L2) d'un vecteur $\beta \in \mathbb{R}^p$ est définie par $\|\beta\|_2 = \sqrt{\sum_{i=1}^p \beta_i^2}$.
+		Ainsi, le carré de la norme est :
+		\[ \|\beta\|_2^2 = \sum_{i=1}^p \beta_i^2 = \beta_1^2 + \dots + \beta_p^2 \]
+		D'autre part, le produit matriciel $\beta^T \beta$ s'écrit :
+		\[ \beta^T \beta = \begin{pmatrix} \beta_1 & \dots & \beta_p \end{pmatrix} \begin{pmatrix} \beta_1 \\ \vdots \\ \beta_p \end{pmatrix} = \sum_{i=1}^p \beta_i^2 \]
+		On a donc bien $\lambda \|\beta\|_2^2 = \lambda \beta^T \beta$.
+
+		\item \textbf{Développement de $J$ :}
+		On développe l'expression quadratique :
+		\[
+		\begin{aligned}
+			J &= (Y - \tilde{X}\beta)^T (Y - \tilde{X}\beta) + \lambda \beta^T \beta \\
+			  &= (Y^T - \beta^T \tilde{X}^T) (Y - \tilde{X}\beta) + \lambda \beta^T \beta \\
+			  &= Y^T Y - Y^T \tilde{X} \beta - \beta^T \tilde{X}^T Y + \beta^T \tilde{X}^T \tilde{X} \beta + \lambda \beta^T \beta
+		\end{aligned}
+		\]
+		\textbf{Analyse dimensionnelle :} Tous les termes de cette somme sont des scalaires (dimension $1 \times 1$). Par exemple, pour $Y^T \tilde{X} \beta$ : $(1 \times n) \times (n \times p) \times (p \times 1) \rightarrow (1 \times 1)$.
+
+		\item \textbf{Simplification :}
+		Le terme $Y^T \tilde{X} \beta$ est un scalaire. Or, la transposée d'un scalaire est lui-même.
+		\[ (Y^T \tilde{X} \beta)^T = \beta^T \tilde{X}^T (Y^T)^T = \beta^T \tilde{X}^T Y \]
+		Les deux termes centraux sont donc identiques. On peut écrire :
+		\[ J = Y^T Y - 2 \beta^T \tilde{X}^T Y + \beta^T \tilde{X}^T \tilde{X} \beta + \lambda \beta^T \beta \]
+
+		\item \textbf{Dérivée de $Y^T Y$ :}
+		Le terme $Y^T Y$ ne dépend pas de $\beta$. Sa dérivée par rapport à $\beta$ est donc nulle.
+		\[ \frac{d}{d\beta} Y^T Y = 0_p \quad (\text{vecteur nul de dimension } p) \]
+
+		\item \textbf{Dérivée de $\beta^T \tilde{X}^T Y$ :}
+		On utilise la propriété de dérivation $\frac{d}{d\beta} (\beta^T A) = A$ (où $A$ est un vecteur constant). Ici, $A = \tilde{X}^T Y$.
+		\[ \frac{d}{d\beta} \beta^T \tilde{X}^T Y = \tilde{X}^T Y \]
+
+		\item \textbf{Dérivée de $\beta^T \beta$ :}
+		On utilise la propriété fournie dans l'énoncé : $\frac{d}{dA} A^T B A = 2BA$ avec ici $A = \beta$ et $B = I_p$ (la matrice identité, qui est symétrique).
+		\[ \frac{d}{d\beta} \beta^T I_p \beta = 2 I_p \beta = 2 \beta \]
+
+		\item \textbf{Dérivée de $\beta^T \tilde{X}^T \tilde{X} \beta$ :}
+		On applique la même propriété avec $A = \beta$ et $B = \tilde{X}^T \tilde{X}$. La matrice $\tilde{X}^T \tilde{X}$ est symétrique (car $(\tilde{X}^T \tilde{X})^T = \tilde{X}^T (\tilde{X}^T)^T = \tilde{X}^T \tilde{X}$).
+		\[ \frac{d}{d\beta} \beta^T (\tilde{X}^T \tilde{X}) \beta = 2 \tilde{X}^T \tilde{X} \beta \]
+
+		\item \textbf{Calcul de $\frac{dJ}{d\beta}$ :}
+		En regroupant les résultats précédents (attention au signe moins du terme simplifié en question 3) :
+		\[
+		\begin{aligned}
+			\frac{dJ}{d\beta} &= 0 - 2 \tilde{X}^T Y + 2 \tilde{X}^T \tilde{X} \beta + \lambda (2 \beta) \\
+			&= - 2 \tilde{X}^T Y + 2 (\tilde{X}^T \tilde{X} + \lambda I_p) \beta
+		\end{aligned}
+		\]
+
+		\item \textbf{Condition de minimisation :}
+		Pour minimiser $J$, on cherche $\beta$ tel que le gradient s'annule :
+		\[
+		\begin{aligned}
+			\frac{dJ}{d\beta} = 0 &\iff 2 (\tilde{X}^T \tilde{X} + \lambda I_p) \beta = 2 \tilde{X}^T Y \\
+			&\iff (\tilde{X}^T \tilde{X} + \lambda I_p) \beta = \tilde{X}^T Y
+		\end{aligned}
+		\]
+		Si la matrice $(\tilde{X}^T \tilde{X} + \lambda I_p)$ est inversible, alors :
+		\[ \hat{\beta} = (\tilde{X}^T \tilde{X} + \lambda I_p)^{-1} \tilde{X}^T Y \]
+
+		\item \textbf{Cas $\lambda = 0$ :}
+		Si $\lambda = 0$, on retrouve l'estimateur des Moindres Carrés Ordinaires (MCO) :
+		\[ \hat{\beta}_{MCO} = (\tilde{X}^T \tilde{X})^{-1} \tilde{X}^T Y \]
+		La régression Ridge est donc une généralisation des MCO.
+	\end{enumerate}
+\end{solution}
 
 \begin{exercice}
 Dans la pratique, la régression Ridge utilise une variante pour estimer $\beta$:
@@ -109,8 +179,43 @@ On donne la matrice $\tilde{X}^T \tilde{X}$ suivante:
 	\item Quel est l'effet de la régularisation Ridge dans cet exemple ?
 	\item Pourquoi, selon vous, ne régularise-t-on pas le coefficient $\beta_0$ ?
 \end{enumerate}
-	
+
 \end{exercice}
+
+\begin{solution}
+	Cet exercice illustre l'intérêt numérique de la régularisation Ridge face à la multicollinéarité.
+
+	\begin{enumerate}
+		\item \textbf{Résolution sans régularisation ($\lambda = 0$) :}
+		Pour utiliser la méthode des MCO, la matrice $\tilde{X}^T \tilde{X}$ doit être inversible. Calculons son déterminant.
+		\[ \tilde{X}^T \tilde{X} = \begin{pmatrix} 2 & 3 & 3 \\ 3 & 5 & 5 \\ 3 & 5 & 5 \end{pmatrix} \]
+		On remarque immédiatement que les colonnes 2 et 3 (ainsi que les lignes 2 et 3) sont identiques. Cela signifie qu'il y a une collinéarité parfaite entre deux variables explicatives.
+		Le déterminant d'une matrice ayant deux colonnes identiques est nul.
+		\[ \text{det}(\tilde{X}^T \tilde{X}) = 0 \]
+		La matrice n'est pas inversible (elle est singulière). \textbf{On ne peut donc pas résoudre ce problème par la méthode des moindres carrés ordinaires}, car elle n'admet pas de solution unique.
+
+		\item \textbf{Résolution avec Ridge ($\lambda = 1$) :}
+		On construit la matrice régularisée $A = \tilde{X}^T \tilde{X} + \lambda I_p^*$.
+		D'après la définition de $I_p^*$, on ajoute $\lambda$ sur la diagonale sauf pour le premier terme (le biais).
+		\[ I_3^* = \begin{pmatrix} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix} \implies A = \begin{pmatrix} 2 & 3 & 3 \\ 3 & 5 & 5 \\ 3 & 5 & 5 \end{pmatrix} + \begin{pmatrix} 0 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 1 \end{pmatrix} = \begin{pmatrix} 2 & 3 & 3 \\ 3 & 6 & 5 \\ 3 & 5 & 6 \end{pmatrix} \]
+		Calculons le déterminant de cette nouvelle matrice $A$ (par développement selon la première ligne par exemple) :
+		\[
+		\begin{aligned}
+			\text{det}(A) &= 2 \begin{vmatrix} 6 & 5 \\ 5 & 6 \end{vmatrix} - 3 \begin{vmatrix} 3 & 5 \\ 3 & 6 \end{vmatrix} + 3 \begin{vmatrix} 3 & 6 \\ 3 & 5 \end{vmatrix} \\
+			&= 2(36 - 25) - 3(18 - 15) + 3(15 - 18) \\
+			&= 2(11) - 3(3) + 3(-3) \\
+			&= 22 - 9 - 9 = 4
+		\end{aligned}
+		\]
+		Puisque $\text{det}(A) = 4 \neq 0$, la matrice est inversible. \textbf{Le problème admet une solution unique avec la régularisation Ridge.}
+
+		\item \textbf{Effet de la régularisation :}
+		La régularisation Ridge a permis de rendre la matrice inversible en ``brisant" la collinéarité parfaite via l'ajout de termes sur la diagonale. Elle stabilise la solution numérique (on parle de conditionnement de matrice) au prix de l'introduction d'un biais.
+
+		\item \textbf{Non-régularisation du biais $\beta_0$ :}
+		Le coefficient $\beta_0$ (l'ordonnée à l'origine ou \textit{intercept}) sert à caler le ``niveau" moyen de la prédiction par rapport aux données ($Y$). Si l'on pénalise $\beta_0$, on force la droite de régression à passer artificiellement près de l'origine $(0,0)$, ce qui n'a pas de sens physique si les variables $Y$ ne sont pas centrées. On ne veut contraindre que les pentes ($\beta_1, \dots, \beta_p$) pour contrôler la complexité du modèle, pas sa position moyenne.
+	\end{enumerate}
+\end{solution}
 
 \begin{exercice}
 
@@ -142,7 +247,187 @@ On dispose des données suivantes pour des joueurs de rugby:
 	\item Comparer le coefficient de détermination $R^2$ au carré des corrélations calculées aux questions 7 et 11.
 	\item En utilisant la régression Ridge, on trouve un coefficient de détermination $R^2 = 0.8847$. Qu'en concluez-vous ?
 \end{enumerate}
-	
+
 \end{exercice}
-	
+
+\begin{solution}
+	\begin{enumerate}
+		\item \textbf{Application $\Phi$ :}
+		Pour obtenir un modèle affine de la forme $y = \beta_0 + \beta_1 x$, l'application $\Phi$ doit ajouter une constante 1 aux données d'entrée.
+		\[ \Phi(x) = \begin{pmatrix} 1 \\ x \end{pmatrix} \quad \text{donnant la matrice de design } \tilde{X} = \begin{pmatrix} 1 & x_1 \\ \vdots & \vdots \\ 1 & x_n \end{pmatrix} \]
+
+		\item \textbf{Standardisation et calcul matriciel :}
+		Soient $X = (175, 181, 183, 189)^T$ et $Y = (95, 103, 101, 109)^T$.
+
+		Calcul des moyennes et écarts-types (population, diviseur $n=4$) :
+		$\bar{X} = 182$, $\bar{Y} = 102$.
+		$\Var(X) = \frac{1}{4} [(-7)^2 + (-1)^2 + 1^2 + 7^2] = \frac{100}{4} = 25 \implies \sigma_X = 5$.
+		$\Var(Y) = \frac{1}{4} [(-7)^2 + 1^2 + (-1)^2 + 7^2] = \frac{100}{4} = 25 \implies \sigma_Y = 5$.
+
+		Données standardisées ($x_s = \frac{x - \bar{x}}{\sigma_x}$) :
+		$X_s = \begin{pmatrix} -1.4 \\ -0.2 \\ 0.2 \\ 1.4 \end{pmatrix}, \quad Y_s = \begin{pmatrix} -1.4 \\ 0.2 \\ -0.2 \\ 1.4 \end{pmatrix}$
+
+		La matrice de design $\tilde{X}_s$ contient une colonne de 1 (biais) et le vecteur $X_s$.
+		Calcul de $\tilde{X}_s^T \tilde{X}_s$ :
+		\[ \tilde{X}_s^T \tilde{X}_s = \begin{pmatrix} 1 & 1 & 1 & 1 \\ -1.4 & -0.2 & 0.2 & 1.4 \end{pmatrix} \begin{pmatrix} 1 & -1.4 \\ 1 & -0.2 \\ 1 & 0.2 \\ 1 & 1.4 \end{pmatrix} = \begin{pmatrix} 4 & 0 \\ 0 & 4 \end{pmatrix} \]
+		\textit{Note :} Le terme diagonal (2,2) vaut 4 car $\sum x_{s_i}^2 = n \times \Var(X_s) = 4 \times 1 = 4$. Le terme croisé est nul car les données sont centrées.
+
+		\item \textbf{Résolution MCO ($\lambda=0$) :}
+		\[ \hat{\beta}_{MCO} = (\tilde{X}_s^T \tilde{X}_s)^{-1} \tilde{X}_s^T Y_s \]
+		\[ (\tilde{X}_s^T \tilde{X}_s)^{-1} = \begin{pmatrix} 1/4 & 0 \\ 0 & 1/4 \end{pmatrix} \]
+		Calcul de $\tilde{X}_s^T Y_s$ :
+		\[ \tilde{X}_s^T Y_s = \begin{pmatrix} \sum y_{s_i} \\ \sum x_{s_i} y_{s_i} \end{pmatrix} = \begin{pmatrix} 0 \\ (-1.4)(-1.4) + (-0.2)(0.2) + (0.2)(-0.2) + (1.4)(1.4) \end{pmatrix} \]
+		\[ \tilde{X}_s^T Y_s = \begin{pmatrix} 0 \\ 1.96 - 0.04 - 0.04 + 1.96 \end{pmatrix} = \begin{pmatrix} 0 \\ 3.84 \end{pmatrix} \]
+		D'où :
+		\[ \hat{\beta}_{MCO} = \begin{pmatrix} 0.25 & 0 \\ 0 & 0.25 \end{pmatrix} \begin{pmatrix} 0 \\ 3.84 \end{pmatrix} = \begin{pmatrix} 0 \\ 0.96 \end{pmatrix} \]
+
+		\item \textbf{Résolution Ridge ($\lambda=1$) :}
+		On utilise $I_p^* = \text{diag}(0, 1)$ (on ne régularise pas le biais).
+		\[ \tilde{X}_s^T \tilde{X}_s + \lambda I_p^* = \begin{pmatrix} 4 & 0 \\ 0 & 4 \end{pmatrix} + \begin{pmatrix} 0 & 0 \\ 0 & 1 \end{pmatrix} = \begin{pmatrix} 4 & 0 \\ 0 & 5 \end{pmatrix} \]
+		L'inverse est $\text{diag}(1/4, 1/5)$. Le terme $\tilde{X}_s^T Y_s$ reste inchangé $(0, 3.84)^T$.
+		\[ \hat{\beta}_{Ridge} = \begin{pmatrix} 1/4 & 0 \\ 0 & 1/5 \end{pmatrix} \begin{pmatrix} 0 \\ 3.84 \end{pmatrix} = \begin{pmatrix} 0 \\ 0.768 \end{pmatrix} \]
+
+		\item \textbf{Centre de masse :}
+		Le modèle s'écrit $\hat{y}_s = \hat{\beta}_0 + \hat{\beta}_1 x_s$.
+		Dans les deux cas (MCO et Ridge), nous avons trouvé $\hat{\beta}_0 = 0$.
+		Au centre de masse $(\bar{x}_s, \bar{y}_s) = (0, 0)$, l'équation devient $0 = 0 + \hat{\beta}_1 \times 0$, ce qui est toujours vérifié. La propriété est respectée.
+
+		\item \textbf{Comparaison MCO vs Ridge :}
+		On constate que $|\hat{\beta}_{1, Ridge}| (0.768) < |\hat{\beta}_{1, MCO}| (0.96)$.
+		L'effet de la régularisation Ridge est de \textbf{contraindre} (rétrécir ou ``shrinkage") la valeur des coefficients vers 0. Cela réduit la sensibilité du modèle aux données d'apprentissage (réduction de la variance) mais introduit un biais (sous-estimation de la pente ``vraie" si celle-ci était élevée).
+
+		\item \textbf{Corrélation de Pearson $(X_s, Y_s)$ :}
+		Puisque les variables sont standardisées :
+		\[ \rho_{XY} = \frac{1}{n} \sum x_{s_i} y_{s_i} = \frac{1}{4} (3.84) = 0.96 \]
+		On remarque que $\rho_{XY} = \hat{\beta}_{1, MCO}$. C'est une propriété connue de la régression linéaire simple sur données standardisées.
+
+		\item \textbf{Prédictions MCO ($\hat{Y}_s$) :}
+		Modèle : $\hat{y}_s = 0.96 x_s$.
+		\begin{itemize}
+			\item $x_1 = -1.4 \to \hat{y}_1 = -1.344$
+			\item $x_2 = -0.2 \to \hat{y}_2 = -0.192$
+			\item $x_3 = +0.2 \to \hat{y}_3 = +0.192$
+			\item $x_4 = +1.4 \to \hat{y}_4 = +1.344$
+		\end{itemize}
+		$\hat{Y}_s = (-1.344, -0.192, 0.192, 1.344)^T$.
+
+		\item \textbf{Calcul des résidus ($\epsilon = Y_s - \hat{Y}_s$) :}
+		\begin{itemize}
+			\item $\epsilon_1 = -1.4 - (-1.344) = -0.056$
+			\item $\epsilon_2 = 0.2 - (-0.192) = 0.392$
+			\item $\epsilon_3 = -0.2 - (0.192) = -0.392$
+			\item $\epsilon_4 = 1.4 - (1.344) = 0.056$
+		\end{itemize}
+
+		\item \textbf{Coefficient de détermination $R^2$ :}
+
+		Avant de procéder au calcul numérique, rappelons la définition et l'interprétation de cette métrique fondamentale en régression.
+		Une mesure interprétable de la qualité d'ajustement est le coefficient de détermination, noté $R^2$. Il est défini par :
+		\begin{equation}
+			R^2 \triangleq 1 - \frac{SCR}{SCT} = 1 - \frac{\sum_{i=1}^n (y_i - \hat{y}_i)^2}{\sum_{i=1}^n (y_i - \bar{y})^2}
+		\end{equation}
+		où :
+		\begin{itemize}
+			\item $\bar{y} = \frac{1}{n} \sum_{i=1}^n y_i$ est la moyenne empirique de la réponse.
+			\item $\mathbf{SCR}$ (Somme des Carrés Résiduelle) correspond à la somme des carrés des erreurs de prédiction ($\sum \epsilon_i^2$). C'est la part de variance \textbf{non expliquée} par le modèle.
+			\item $\mathbf{SCT}$ (Somme des Carrés Totale) correspond à la variance totale des données par rapport à leur moyenne.
+		\end{itemize}
+		Ainsi, le $R^2$ mesure la réduction de variance apportée par le modèle par rapport à une prédiction ``naïve" qui serait simplement la moyenne $\bar{y}$. 
+		\begin{itemize}
+			\item Si le modèle n'est pas meilleur que la simple moyenne, $SCR \approx SCT$ et $R^2 = 0$.
+			\item Si le modèle ajuste parfaitement les données, $SCR = 0$ et $R^2 = 1$.
+		\end{itemize}
+
+		\textbf{Application numérique :}
+		\begin{itemize}
+			\item \textbf{Calcul de la SCT :}
+			Les données $Y_s$ étant standardisées, leur moyenne est nulle ($\bar{y}_s = 0$) et leur variance est égale à 1.
+			\[ SCT = \sum_{i=1}^4 (y_{s,i} - 0)^2 = \sum_{i=1}^4 y_{s,i}^2 = n \times \Var(Y_s) = 4 \times 1 = 4 \]
+
+			\item \textbf{Calcul de la SCR :}
+			Nous utilisons les résidus $\epsilon_i$ calculés à la question précédente : $\epsilon = (-0.056, 0.392, -0.392, 0.056)$.
+			\[
+			\begin{aligned}
+				SCR &= \sum_{i=1}^4 \epsilon_i^2 \\
+				&= (-0.056)^2 + (0.392)^2 + (-0.392)^2 + (0.056)^2 \\
+				&= 2 \times (0.056)^2 + 2 \times (0.392)^2 \\
+				&= 2 \times (0.003136) + 2 \times (0.153664) \\
+				&= 0.006272 + 0.307328 \\
+				&= 0.3136
+			\end{aligned}
+			\]
+
+			\item \textbf{Calcul du $R^2$ :}
+			\[ R^2 = 1 - \frac{0.3136}{4} = 1 - 0.0784 = 0.9216 \]
+		\end{itemize}
+
+		\item \textbf{Corrélation $(\hat{Y}_s, Y_s)$ :}
+		Calculons d'abord la covariance entre les prédictions et les valeurs réelles :
+		\[
+		\begin{aligned}
+			\Cov(\hat{Y}_s, Y_s) &= \frac{1}{4} \sum_{i=1}^4 (\hat{y}_{s,i} - \bar{\hat{y}}_s)(y_{s,i} - \bar{y}_s) \\
+			&= \frac{1}{4} [ (-1.344)(-1.4) + (-0.192)(-0.2) + (0.192)(0.2) + (1.344)(1.4) ] \\
+			&= \frac{1}{4} [ 1.8816 + 0.0384 + 0.0384 + 1.8816 ] \\
+			&= \frac{1}{4} [ 3.84 ] = 0.96
+		\end{aligned}
+		\]
+		(Note : $\bar{\hat{y}}_s = 0$ et $\bar{y}_s = 0$).
+
+		Calculons ensuite les écarts-types. Nous savons que $\sigma_{Y_s} = 1$ (données standardisées).
+		Pour les prédictions $\hat{Y}_s$ :
+		\[
+		\begin{aligned}
+			\Var(\hat{Y}_s) &= \frac{1}{4} \sum \hat{y}_{s,i}^2 = \frac{1}{4} [ (-1.344)^2 + (-0.192)^2 + (0.192)^2 + (1.344)^2 ] \\
+			&= \frac{1}{4} [ 1.806336 + 0.036864 + 0.036864 + 1.806336 ] \\
+			&= \frac{1}{4} [ 3.6864 ] = 0.9216
+		\end{aligned}
+		\]
+		D'où $\sigma_{\hat{Y}_s} = \sqrt{0.9216} = 0.96$.
+
+		Le coefficient de corrélation de Pearson est donc :
+		\[ \rho(\hat{Y}_s, Y_s) = \frac{\Cov(\hat{Y}_s, Y_s)}{\sigma_{\hat{Y}_s} \sigma_{Y_s}} = \frac{0.96}{0.96 \times 1} = 1 \]
+		\textit{Attention :} Dans le cas d'une régression linéaire simple MCO, $\hat{Y}$ est colinéaire à $Y$ projeté, donc la corrélation est maximale si on considère l'alignement, mais ici calculons $R^2$.
+
+		Reprenons le calcul plus simplement avec les propriétés théoriques :
+		\[ \rho(\hat{Y}_s, Y_s) = \frac{\Cov(X_s \hat{\beta}, Y_s)}{\sqrt{\Var(X_s \hat{\beta})} \sqrt{\Var(Y_s)}} = \frac{\hat{\beta} \Cov(X_s, Y_s)}{|\hat{\beta}| \sigma_{X_s} \times 1} \]
+		Avec $\hat{\beta} > 0$ et $\sigma_{X_s}=1$, on trouve $\rho = \frac{\Cov(X_s, Y_s)}{1} = \rho(X_s, Y_s) = 0.96$.
+
+		\item \textbf{Comparaison des $R^2$ et corrélations :}
+		Nous avons trouvé :
+		\begin{itemize}
+			\item $R^2 = 0.9216$
+			\item $(\rho(X_s, Y_s))^2 = (0.96)^2 = 0.9216$
+			\item $(\rho(\hat{Y}_s, Y_s))^2 = (0.96)^2 = 0.9216$
+		\end{itemize}
+
+		Ces égalités ne sont pas toujours vraies selon la méthode (MCO vs Ridge) et le nombre de variables. Voici un tableau récapitulatif des propriétés :
+
+		\begin{center}
+			\begin{tabular}{|c|c|c|c|l|}
+				\hline
+				\textbf{Variables} & \textbf{Modèle} & $\mathbf{R^2 = \rho(X,Y)^2}$ & $\mathbf{R^2 = \rho(Y,\hat{Y})^2}$ & \textbf{Remarques} \\
+				\hline
+				1 variable & MCO & Vrai & Vrai & Théorie classique MCO \\
+				\hline
+				1 variable & Ridge & Faux & Faux & Pénalité $\lambda$ modifie l'échelle \\
+				\hline
+				$n$ variables & MCO & Faux & Vrai & $R^2$ représente la corrélation multiple \\
+				\hline
+				$n$ variables & Ridge & Faux & Faux & La pénalité $\lambda$ fausse l'égalité \\
+				\hline
+			\end{tabular}
+		\end{center}
+
+		\item \textbf{Conclusion sur la performance Ridge :}
+		Nous observons que $R^2_{\text{Ridge}} (0.8847) < R^2_{\text{MCO}} (0.9216)$.
+
+		La régression Ridge régularise la régression linéaire, ce qui a pour effet de :
+		\begin{itemize}
+			\item Réduire la variance des estimateurs (moins de sensibilité aux données aberrantes).
+			\item Augmenter le biais (les coefficients sont ``tassés" vers zéro).
+		\end{itemize}
+		Comme le biais augmente, l'erreur sur les données d'apprentissage augmente légèrement, ce qui fait diminuer le $R^2$ calculé sur ces mêmes données. C'est un comportement attendu : on sacrifie un peu de performance sur l'apprentissage pour gagner en robustesse (généralisation).
+	\end{enumerate}
+\end{solution}
+
 \end{document}
