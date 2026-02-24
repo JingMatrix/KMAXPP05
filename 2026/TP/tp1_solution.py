@@ -110,7 +110,13 @@ def partie1_penguins_visu_encodage(df):
         "[Correction] Violinplot : Distribution de la masse (Comparaison Mâle/Femelle)")
     plt.show()
 
-    # 3. Visualisation : Pairplot (La vue d'ensemble ultime)
+    # 3. Replot: facettes
+    # Il permet de diviser le graphique en plusieurs sous-graphiques selon une variable catégorielle (ici l'île) grâce à l'argument `col`.
+    sns.relplot(data=df, x='culmen_length_mm',
+                y='culmen_depth_mm', hue='species', col='island')
+    plt.show()
+
+    # 4. Visualisation : Pairplot (La vue d'ensemble ultime)
     print("Génération du Pairplot (peut prendre quelques secondes)...")
     sns.pairplot(df, hue='species', vars=['culmen_length_mm', 'culmen_depth_mm',
                  'flipper_length_mm', 'body_mass_g'], markers=["o", "s", "D"], corner=True)
@@ -123,6 +129,7 @@ def partie1_penguins_visu_encodage(df):
     df_final['sex_encoded'] = df_final['sex'].map({'FEMALE': 0, 'MALE': 1})
     # Dummies Island
     df_ml_ready = pd.get_dummies(df_final, columns=['island'], drop_first=True)
+    print(df_ml_ready.head())
 
     print("Colonnes finales pour le ML :", df_ml_ready.columns.tolist())
     return df_ml_ready
@@ -156,7 +163,7 @@ def partie2_titanic_solution():
         {'male': 0, 'female': 1}).astype(int)
 
     df_titanic_ml = pd.get_dummies(df_titanic_clean, columns=[
-                                   'embarked'], drop_first=True)
+        'embarked'], drop_first=True)
 
     # --- VISUALISATION AMELIOREE ---
     print("\n[Visualisation] Génération des graphes Titanic...")
