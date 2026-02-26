@@ -495,7 +495,7 @@
 \end{frame}
 
 \begin{frame}{Intervalle de confiance sur la probabilité}
-	En appliquant la fonction logistique $\sigma$ à l'intervalle précédent on obtient l'intervalle de confiance au niveau $1 - \alpha$ de la probabilité $\hat{p}^{(i)}$:
+	En appliquant la fonction logistique $\sigma$ à l'intervalle précédent on obtient l'intervalle de confiance au niveau $1 - \alpha$ de la probabilité $\hat{p}(x^{(n+1)})$:
 	\begin{equation}
 		\begin{aligned}
 			&\hat{p}_{\text{inf}} = \sigma\left(\logit{\hat{p}\left(x^{(n+1)}\right)} - \varphi^{-1}(1 - \alpha/2) \sqrt{\Var{\logit{\hat{p}\left(x^{(n+1)}\right)}}}\right) \\
@@ -537,7 +537,7 @@
 		\item Ce n'est malheureusement pas le cas de tous les algorithmes d'apprentissage que l'on étudiera dans ce cours.
 		\pause
 		\item Dans cette section on verra comment on peut obtenir ces intervalles et régions de manière \textbf{empirique} et on comparera les résultats empiriques et théoriques obtenus précédemment.
-		\item On utilisera l'algorithme du \textbf{bootstrapping} pour générer de \textbf{multiples} apprentissage et ainsi dériver ces intervalles et régions.
+		\item On utilisera l'algorithme du \textbf{bootstrapping} pour générer de \textbf{multiples} apprentissages et ainsi dériver ces intervalles et régions.
 	\end{itemize}
 \end{frame}
 
@@ -560,7 +560,7 @@
 				\item Calculer $\hat{\beta}^{(b)}$ par la méthode des moindres carrés sur $\mathcal{D}^{(b)}$.
 				\item Calculer $\hat{Y}_i^{(b)}$ à partir des données d'inférence $X_i$: $\hat{Y}_i^{(b)} = \Phi(X_i) \hat{\beta}^{(b)}$.
 			\end{itemize}
-		\item Pour chaque entrée $k$ de $X_i$, calculer les quantiles $\alpha / 2$ et $1 - \alpha / 2$ sur $\{\left(\hat{y}_i^{(k)}\right)^{(1)}, \left(\hat{y}_i^{(k)}\right)^{(2)}, \cdots, \left(\hat{y}_i^{(k)}\right)^{(B)}\}$. Cela donne l'intervalle de confiance au niveau $1 - \alpha$ pour $Xi^{(k)}$.
+		\item Pour chaque entrée $k$ de $X_i$, calculer les quantiles $\alpha / 2$ et $1 - \alpha / 2$ sur $\{\left(\hat{y}_i^{(k)}\right)^{(1)}, \left(\hat{y}_i^{(k)}\right)^{(2)}, \cdots, \left(\hat{y}_i^{(k)}\right)^{(B)}\}$. Cela donne l'intervalle de confiance au niveau $1 - \alpha$ pour $X_i^{(k)}$.
 		\item Pour chaque entrée $k$ de $X_i$ et pour chaque bootstrap $b$, associer aléatoirement un résidu aux prédictions: $\left(\hat{y}_i^{*(k)}\right)^{(b)} = \left(\hat{y}_i^{(k)}\right)^{(b)} + a(R)$.
 		\item Pour chaque entrée $k$ de $X_i$, calculer les quantiles $\alpha / 2$ et $1 - \alpha / 2$ sur $\{\left(\hat{y}_i^{*(k)}\right)^{(1)}, \left(\hat{y}_i^{*(k)}\right)^{(2)}, \cdots, \left(\hat{y}_i^{*(k)}\right)^{(B)}\}$. Cela donne l'intervalle de prédiction au niveau $1 - \alpha$ pour $X_i^{(k)}$.
 	\end{enumerate}
