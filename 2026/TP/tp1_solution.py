@@ -35,6 +35,7 @@ def partie1_penguins_data_prep():
     mediane_masse = df['body_mass_g'].median()
     df['body_mass_g'] = df['body_mass_g'].fillna(mediane_masse)
 
+    df['sex'] = df['sex'].where(df['sex'].isin(['MALE', 'FEMALE']))
     # On drop le reste
     df_clean = df.dropna()
     print(f"Dimensions après nettoyage : {df_clean.shape}")
