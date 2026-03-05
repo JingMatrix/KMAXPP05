@@ -139,15 +139,11 @@ Nous disposons des données $\mathcal{D}$ suivantes pour des joueurs de rugby. L
 On suppose que les $n = 4$ observations sont indépendantes. Nous cherchons à établir un classifieur basé sur un modèle de régression logistique de la forme suivante, avec $\beta_0 \in \mathbb{R}$ et $\beta_1 \in \mathbb{R}$:
 
 \begin{equation}
-	C_{\beta}(x) = 
-	\begin{cases}
-		0 \quad \forall x \quad  \displaystyle \frac{1}{1 + \exp{\left(- \beta_0 - \beta_1 \, x\right)}} < \frac{1}{2} \\[10pt]
-		1 \quad \forall x \quad  \displaystyle \frac{1}{1 + \exp{\left(- \beta_0 - \beta_1 \, x\right)}} \ge \frac{1}{2}
-	\end{cases}
+	C_{\beta}(x) = \frac{1}{1 + \exp{\left(- \beta_0 - \beta_1 \, x\right)}}
 	\nonumber
 \end{equation}
 
-On note $\beta \in \mathcal{M}_{2,1}(\mathbb{R})$ le vecteur:
+La classe associée sera 1 si $C_{\beta}(x) \ge 1/2$ et 0 sinon. On note $\beta \in \mathcal{M}_{2,1}(\mathbb{R})$ le vecteur:
 
 \begin{equation}
 	\beta = \begin{pmatrix}\beta_0 \\ \beta_1\end{pmatrix}
