@@ -1,0 +1,206 @@
+\documentclass[solutions]{../cc}
+
+\usepackage{tasks}
+%\settasks{
+%	label=\Alph*., % Labels will be A., B., C...
+%	label-width=15pt,
+%	column-sep=10pt,
+%	after-item-skip=2pt
+%}
+
+\settasks{
+	label=$\square$,       % Sets the default label to a box (or \Alph* $\square$)
+	label-width=1.5em,     % Adds enough space for the box
+	column-sep=20pt        % Space between columns
+}
+
+\usepackage{enumitem}
+
+\begin{document}
+	
+	\makeheader{2025}{2026}
+	\cctitle{1}{Bases de l'apprentissage automatique}
+	\student
+		
+	\noindent \textbf{Consignes du QCM - Durée 20 minutes}:
+	\begin{itemize}[nosep]
+		\item Notes de cours et TD autorisés.
+		\item Réponses multiples: Plusieurs réponses peuvent être correctes par question.
+		\item Barème:
+		\begin{itemize}[nosep]
+			\item 2 points si toutes les bonnes réponses (et uniquement elles) sont cochées.
+			\item 1 point si une partie des bonnes réponses est cochée, à condition qu'aucune mauvaise réponse ne soit sélectionnée.
+			\item 0 point dès qu'une réponse fausse est cochée ou si la question est vide.
+		\end{itemize}
+		\item Notation: Le contrôle comporte 12 questions. Seuls vos 10 meilleurs scores seront retenus pour le calcul de la note finale sur 20.
+	\end{itemize}
+
+%   QUESTION 9
+%	\noindent \begin{minipage}{\textwidth}
+	%		\vspace{0.2cm}
+	\begin{question}
+		La méthode de bootstrapping:
+		\begin{tasks}(1)
+			\task Permet d'effectuer un estimation du risque vrai grâce aux données out-of-bag.
+			\task Est une méthode de validation croisée.
+			\task Divise les données d'apprentissage en plusieurs blocs disjoints.
+			\task Ré-échantillonne les données d'apprentissage avec remise.
+		\end{tasks}
+	\end{question}
+%	\end{minipage}
+
+%   QUESTION 6
+%	\noindent \begin{minipage}{\textwidth}
+	%		\vspace{0.2cm}
+	\begin{question}
+		Pour un problème de régression $y = f(x) + \epsilon$, le coefficient de détermination $R^2$:
+		\begin{tasks}(1)
+			\task Mesure la fraction de la variance expliquée par le modèle.
+			\task Est toujours supérieur à 1 si le modèle est bon.
+			\task Vaut 1 si la corrélation linéaire entre les prédictions $\hat{y}$ et les valeurs observées $y$ est égale à 1. 
+			\task Vaut 0 si le modèle prédit la moyenne de $y$ pour tout $x$.
+		\end{tasks}
+	\end{question}
+%	\end{minipage}
+
+%   QUESTION 2
+%	\noindent \begin{minipage}{\textwidth}
+	%		\vspace{0.2cm}
+	\begin{question}
+		Cocher les affirmations vraies à propos des régression linéaires et logistiques.
+		\begin{tasks}(1)
+			\task La régression linéaire dispose d'une solution analytique.
+			\task La régression logistique cherche à maximiser la log-vraisemblance.
+			\task La régression logistique peut être résolue avec une méthode directe.
+			\task La méthodes des moindres carrés cherche à maximiser la somme des écarts quadratiques.
+		\end{tasks}
+	\end{question}
+%	\end{minipage}
+	
+%   QUESTION 8
+%	\noindent \begin{minipage}{\textwidth}
+	%		\vspace{0.2cm}
+	\begin{question}
+		La solution du problème de régression linéaire est donnée par $\hat{\beta} = (\tilde{X}^T \tilde{X})^{-1} \tilde{X}^T Y$ avec $\tilde{X} \in \mathcal{M}_{n,d} \in \mathbb{R}$ et $n > d$. Cette solution existe si:
+		\begin{tasks}(1)
+			\task Les lignes de $\tilde{X}$ sont linéairement indépendantes.
+			\task La matrice $(\tilde{X}^T \tilde{X})$ est inversible.
+			\task La première colonne de la matrice $\tilde{X}$ est un vecteur de $1$.
+			\task La matrice $\tilde{X}$ est de plein rang.
+		\end{tasks}
+	\end{question}
+%	\end{minipage}
+
+%   QUESTION 3
+%	\noindent \begin{minipage}{\textwidth}
+	%		\vspace{0.2cm}
+	\begin{question}
+		La fonction logistique $\sigma$ possède les propriétés suivantes:
+		\begin{tasks}(2)
+			\task $\sigma(t) = 1 - \sigma(-t)$.
+			\task Elle prend ses valeurs dans $]-1, 1[$.
+			\task $\sigma(t) = -\sigma(-t)$.
+			\task Elle est dérivable sur $\mathbb{R}$.
+		\end{tasks}
+	\end{question}
+	%	\end{minipage}
+	
+%   QUESTION 12
+%	\noindent \begin{minipage}{\textwidth}
+	%		\vspace{0.2cm}
+	\begin{question}
+		Quelles sont les raisons d'une erreur d'approximation importante ?
+		\begin{tasks}(1)
+			\task Un mauvais choix d'espace d'hypothèses.
+			\task L'absence de données de validation.
+			\task Un manque de données d'apprentissage.
+			\task Un bruit de mesure important.
+		\end{tasks}
+	\end{question}
+%	\end{minipage}
+
+%   QUESTION 11
+%	\noindent \begin{minipage}{\textwidth}
+	%		\vspace{0.2cm}
+	\begin{question}
+		En apprentissage automatique:
+		\begin{tasks}(1)
+			\task On choisit le modèle le plus complexe. Qui peut le plus, peut le moins.
+			\task On choisit le modèle avec les meilleures métriques de performance sur les données d'apprentissage.
+			\task On choisit un espace des hypothèses qui donne une explication plausible au problème avec une performance acceptable.
+			\task On choisit un modèle avec une variance faible et un biais faible.
+		\end{tasks}
+	\end{question}
+%	\end{minipage}
+
+%   QUESTION 5
+%	\noindent \begin{minipage}{\textwidth}
+	%		\vspace{0.2cm}
+	\begin{question}
+		Que représente $\epsilon$ dans la relation $y = f(x) + \epsilon$ ?
+		\begin{tasks}(2)
+			\task Un biais d'approximation.
+			\task Un bruit sur les caractéristiques observées.
+			\task L'erreur de Bayes.
+			\task Des variables explicatives non-observées.
+		\end{tasks}
+	\end{question}
+%	\end{minipage}
+
+%   QUESTION 1
+%	\noindent \begin{minipage}{\textwidth}
+%		\vspace{0.2cm}
+		\begin{question}
+			Dans la décomposition biais-variance de l'erreur quadratique d'un problème de régression, quels termes composent le risque vrai ponctuel ?
+			\begin{tasks}(2)
+				\task Le biais du modèle au carré.
+				\task L'erreur de Bayes.
+				\task La variance du modèle.
+				\task L'écart de généralisation.
+			\end{tasks}
+		\end{question}
+%	\end{minipage}
+
+%   QUESTION 7
+%	\noindent \begin{minipage}{\textwidth}
+	%		\vspace{0.2cm}
+	\begin{question}
+		Le phénomène de sur-apprentissage est associé à:
+		\begin{tasks}(1)
+			\task Un écart de généralisation positif.
+			\task Un manque relatif de données par rapport à la complexité du modèle.
+			\task Un mauvais choix de métrique de performance.
+			\task Un risque vrai qui devient faible par rapport au risque empirique.
+		\end{tasks}
+	\end{question}
+%	\end{minipage}
+
+%   QUESTION 4
+%	\noindent \begin{minipage}{\textwidth}
+%		\vspace{0.2cm}
+		\begin{question}
+			Qu'est-ce que le risque empirique ?
+			\begin{tasks}(1)
+				\task Une estimation de l'erreur de Bayes.
+				\task La moyenne de la fonction de perte sur les données de test.
+				\task La moyenne de la fonction de perte sur les données d'apprentissage.
+				\task La performance d'une hypothèse sur l'ensemble complet des observations possibles.
+			\end{tasks}
+		\end{question}
+%	\end{minipage}
+
+%   QUESTION 10
+%	\noindent \begin{minipage}{\textwidth}
+	%		\vspace{0.2cm}
+	\begin{question}
+		En classification binaire, la courbe ROC:
+		\begin{tasks}(1)
+			\task Permet de visualiser la relation entre le taux de faux positifs et le taux de vrais positifs.
+			\task Se calcule à partir des probabilités prédites, des classes vraies et du seuil de décision.
+			\task Permet de visualiser l'influence du seuil de décision de l'algorithme de classification sur le compromis précision / rappel.
+			\task Est révélatrice d'un bon apprentissage si la surface en dessous de la courbe tend vers 0.
+		\end{tasks}
+	\end{question}
+	%	\end{minipage}
+	
+\end{document}
