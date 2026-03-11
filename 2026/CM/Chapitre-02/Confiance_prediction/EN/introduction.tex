@@ -1,0 +1,33 @@
+\section[Introduction]{Introduction}
+
+\begin{frame}{Problem Statement}
+	\begin{itemize}
+		\item So far, we have seen how models can make predictions for inputs $X$. We have also looked at how models behave globally through various metrics, and how to locally decompose error on test data. 
+		\pause
+		\item But for a specific model prediction where the true result is unknown, what is the error incurred?
+		\pause
+		\item In all application domains, a prediction error carries a \textbf{cost}.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Problem Statement}
+	\begin{block}{Problem Statement}
+		All models are approximations. Essentially, all models are wrong, but some are useful. However, the approximate nature of the model should never be lost from sight. \\
+		\vspace{0.5cm}
+		\hfill
+		\textit{--- George E. P. Box (2007)}
+	\end{block}
+	\vfill 
+	\tiny \textcolor{gray}{Source: Response Surfaces, Mixtures, and Ridge Analyses - George E. P. Box, Norman R. Draper - 2007 - p.414, John Wiley \& Sons}
+\end{frame}
+
+\begin{frame}{Prediction Regions and Confidence Intervals}
+	In this course, we will introduce the concepts of prediction regions and confidence intervals for both classification and regression problems.
+	\begin{itemize}
+		\item First, we will develop an intuition for these intervals before providing a formal definition.
+		\pause
+		\item Next, we will see that linear models (regression and classification) provide theoretical estimates for these regions and intervals.
+		\pause
+		\item Finally, we will see how these regions and intervals can be empirically established for a wide variety of models.
+	\end{itemize}
+\end{frame}

@@ -1,5 +1,5 @@
-\documentclass[10pt]{beamer}  % pour la présentation
-%\documentclass[10pt,handout]{beamer}  % pour les notes de cours
+%\documentclass[10pt]{beamer}  % pour la présentation
+\documentclass[10pt,handout]{beamer}  % pour les notes de cours
 
 
 \usetheme{Antibes}
@@ -29,14 +29,14 @@
 \newcommand{\Var}[1]{\operatorname{\mathbb{V}ar}\left[#1\right]}
 \newcommand{\Cov}[1]{\operatorname{\mathbb{C}ov}\left[#1\right]}
 \newcommand{\sigeps}{\sigma_{\epsilon}^2}
-\newcommand{\ET}[1][]{\operatorname{ET}\ifx&#1&\else\left[#1\right]\fi}
+\newcommand{\ET}[1][]{\operatorname{SE}\ifx&#1&\else\left[#1\right]\fi}
 \newcommand{\diag}{\operatorname{diag}}
-\newcommand{\cote}{\operatorname{cote}}
+\newcommand{\cote}{\operatorname{odds}}
 \newcommand{\score}[1]{\operatorname{score}\left(#1\right)}
 \newcommand{\logit}[1]{\operatorname{logit}\left(#1\right)}
 
-\title{Apprentissage Automatique - L3 - KMAXPP05}
-\subtitle{Chapitre 2 : Régions de prédiction et intervalles de confiance}
+\title{Machine Learning - L3 - KMAXPP05}
+\subtitle{Chapter 2 : Prediction regions and confidence intervals}
 \author{Cédric Campguilhem}
 \institute[]{
 	Airbus Operations \\
@@ -50,11 +50,11 @@
 	\titlepage
 \end{frame}
 	
-\include{FR/introduction}
-\include{FR/intuition}
-\include{FR/definitions}
-\include{FR/modeles_lineaires}
-\include{FR/empirique}
-\include{FR/conclusions}
+\include{EN/introduction}
+\include{EN/intuition}
+\include{EN/definitions}
+\include{EN/modeles_lineaires}
+\include{EN/empirique}
+\include{EN/conclusions}
 
 \end{document}

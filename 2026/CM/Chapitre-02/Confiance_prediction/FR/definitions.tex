@@ -1,0 +1,31 @@
+\subsection[Définitions]{Définitions}
+
+\begin{frame}{Application à l'apprentissage automatique}
+	\begin{itemize}
+		\item Dans l'exemple précédent, nous nous sommes intéressés à une variable aléatoire $Y$ (taille des étudiants) et à un paramètre $\theta$ associé à cette variable aléatoire: la taille moyenne.
+		\pause
+		\item Dans le cas général de l'apprentissage automatique, nous nous intéresserons à une loi conditionnelle $Y \mid X$. L'objectif étant d'obtenir un modèle $\hat{f}$ de l'espérance conditionnelle $\E{Y \mid X}$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Région de prédiction}
+	\begin{block}{Définition: Région de prédiction}
+		Soit un échantillon d'apprentissage $\mathcal{D} = \{\left(x^{(1)}, y^{(1)}\right), \cdots, \left(x^{(n)}, y^{(n)}\right)\}$ et une nouvelle observation $\left(x^{(n+1)}, y^{(n+1)}\right)$ issue de la même distribution. Une \textbf{région de prédiction} de niveau $1 - \alpha$ est une fonction $C$ qui, pour toute valeur $x^{(n+1)}$ produit un ensemble $C(x^{(n+1)})$ tel que:
+		\begin{equation}
+			P\left(y^{(n+1)} \in C\left(x^{(n+1)}\right)\right) \ge 1 - \alpha
+			\nonumber
+		\end{equation}
+		Si $Y$ est une variable aléatoire continue (régression), alors $C$ est un \textbf{intervalle}. Si $Y$ est une variable aléatoire discrète (classification) alors $C$ est un \textbf{ensemble} de classes. 
+	\end{block}
+\end{frame}
+
+\begin{frame}{Intervalle de confiance}
+	\begin{block}{Définition: Intervalle de confiance}
+		Un intervalle de confiance de niveau $1 - \alpha$ pour la fonction vraie $f$ est un intervalle $\left[L(x), U(x)\right]$ tel que:
+		\begin{equation}
+			P\left(L(x) \le f(x) \le U(x)\right) \ge 1 - \alpha
+			\nonumber
+		\end{equation}
+		Si $Y$ est une variable aléatoire continue (régression), $f(x): \mathcal{X} \to \mathcal{Y}$ représente l'\textbf{espérance conditionnelle} $\E{Y \mid X}$. Si $Y$ est une variable aléatoire discrète (classification), $f(x): \mathcal{X} \to ]0, 1[$ représente la \textbf{probabilité} d'appartenir à une classe $K$: $P(Y = K \mid X)$.
+	\end{block}
+\end{frame}

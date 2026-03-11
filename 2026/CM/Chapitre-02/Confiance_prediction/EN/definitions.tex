@@ -1,0 +1,32 @@
+\subsection[Definitions]{Definitions}
+
+\begin{frame}{Application to Machine Learning}
+	\begin{itemize}
+		\item In the previous example, we focused on a random variable $Y$ (student height) and a parameter $\theta$ associated with this random variable: the mean height.
+		\pause
+		\item In the general case of machine learning, we are interested in a conditional distribution $Y \mid X$. The objective is to obtain a model $\hat{f}$ of the conditional expectation $\mathbb{E}[Y \mid X]$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Prediction Region}
+	\begin{block}{Definition: Prediction Region}
+		Let $\mathcal{D} = \{(x^{(1)}, y^{(1)}), \dots, (x^{(n)}, y^{(n)})\}$ be a training sample and $(x^{(n+1)}, y^{(n+1)})$ be a new observation from the same distribution. A \textbf{prediction region} of level $1 - \alpha$ is a function $C$ which, for any value $x^{(n+1)}$, produces a set $C(x^{(n+1)})$ such that:
+		\begin{equation}
+			P\left(y^{(n+1)} \in C\left(x^{(n+1)}\right)\right) \ge 1 - \alpha
+			\nonumber
+		\end{equation}
+		If $Y$ is a continuous random variable (regression), then $C$ is an \textbf{interval}. If $Y$ is a discrete random variable (classification), then $C$ is a \textbf{set} of classes. 
+	\end{block}
+\end{frame}
+
+\begin{frame}{Confidence Interval}
+	\begin{block}{Definition: Confidence Interval}
+		A confidence interval of level $1 - \alpha$ for the true function $f$ is an interval $[L(x), U(x)]$ such that:
+		\begin{equation}
+			P\left(L(x) \le f(x) \le U(x)\right) \ge 1 - \alpha
+			\text{.}
+			\nonumber
+		\end{equation}
+		If $Y$ is a continuous random variable (regression), $f(x): \mathcal{X} \to \mathcal{Y}$ represents the \textbf{conditional expectation} $\mathbb{E}[Y \mid X]$. If $Y$ is a discrete random variable (classification), $f(x): \mathcal{X} \to ]0, 1[$ represents the \textbf{probability} of belonging to a class $K$: $P(Y = K \mid X)$.
+	\end{block}
+\end{frame}
