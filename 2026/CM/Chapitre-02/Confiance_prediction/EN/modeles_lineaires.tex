@@ -38,7 +38,7 @@
 		\nonumber
 	\end{equation}
 	\pause
-	The standard deviation (standard error) $\ET[\hat{\beta}] \in \mathcal{M}_{d+1, 1}(\mathbb{R}^+)$ can then be easily deduced:
+	The standard error $\ET[\hat{\beta}] \in \mathcal{M}_{d+1, 1}(\mathbb{R}^+)$ can then be easily deduced:
 	\begin{equation}
 		\ET[\hat{\beta}] = \sqrt{\Var{\hat{\beta}}}
 		\nonumber
@@ -46,7 +46,7 @@
 \end{frame}
 
 \begin{frame}{Connection to One-Dimensional Estimation}
-	In the previous section, we saw that we could estimate the standard error from the standard deviation of an observation:
+	In the previous section, we saw that we could estimate the standard error from the standard deviation of a sample:
 	\begin{equation}
 		\ET = \frac{\sigma}{\sqrt{n}}
 		\nonumber
@@ -281,9 +281,9 @@
 	\end{equation}
 \end{frame}
 
-\begin{frame}{Prediction Space for the Class}
+\begin{frame}{Prediction Region for the Class}
 	In a binary classification problem, $\hat{p}(x^{(n+1)})$ represents $P(y^{(n+1)} = 1 \mid x^{(n+1)})$. \\
-	Based on the values of $\hat{p}_{\text{lower}}$ and $\hat{p}_{\text{upper}}$, we can define the prediction space at level $1 - \alpha$ as follows:
+	Based on the values of $\hat{p}_{\text{lower}}$ and $\hat{p}_{\text{upper}}$, we can define the prediction region at level $1 - \alpha$ as follows:
 	\begin{equation}
 		C(x^{(n+1)}) = 
 		\begin{cases}

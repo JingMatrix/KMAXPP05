@@ -38,7 +38,7 @@
 		\nonumber
 	\end{equation}
 	\pause
-	L'écart type $\ET[\hat{\beta}] \in \mathcal{M}_{d+1, 1}\left(\mathbb{R+}\right)$ peut alors se déduire facilement:
+	L'erreur type $\ET[\hat{\beta}] \in \mathcal{M}_{d+1, 1}\left(\mathbb{R+}\right)$ peut alors se déduire facilement:
 	\begin{equation}
 		\ET[\hat{\beta}] = \sqrt{\Var{\hat{\beta}}}
 		\nonumber
@@ -46,7 +46,7 @@
 \end{frame}
 
 \begin{frame}{Connexion à l'estimation mono-dimensionnelle}
-	Dans la section précédente, nous avons vu que nous pouvions estimer l'erreur type à partir de l'écart type d'une observation:
+	Dans la section précédente, nous avons vu que nous pouvions estimer l'erreur type à partir de l'écart type d'un échantillon:
 	\begin{equation}
 		\ET = \frac{\sigma}{\sqrt{n}}
 		\nonumber
@@ -85,7 +85,7 @@
 \end{frame}
 
 \begin{frame}{Intervalles de confiance}
-	Notons $\varphi$ la fonction de densité de probabilité cumulée d'une loi normale standard $\mathcal{N}(0, 1)$. L'intervalle de confiance d'un niveau $1-\alpha$, noté $\text{IC}_{1-\alpha}$ pour $\hat{\beta}$ est donc:
+	Notons $\varphi$ la fonction de répartition d'une loi normale standard $\mathcal{N}(0, 1)$. L'intervalle de confiance d'un niveau $1-\alpha$, noté $\text{IC}_{1-\alpha}$ pour $\hat{\beta}$ est donc:
 	\begin{equation}
 		\text{IC}_{1-\alpha}\left(\hat{\beta}\right) = \left[\hat{\beta} \pm \varphi^{-1}(1-\alpha / 2) \sqrt{\Var{\hat{\beta}}}\right]
 		\nonumber
@@ -127,8 +127,8 @@
 	\end{block}
 	\pause
 	\begin{itemize}
-		\item Si $p=0.5$, la cote est de $1$ (une chance sur deux).
-		\item Si $p=0.8$, la cote est de $4$ (quatre contre un).
+		\item Si $p=0.5$, la cote est de $1:1$ (une chance sur deux).
+		\item Si $p=0.8$, la cote est de $4:1$ (quatre contre un).
 	\end{itemize}	
 \end{frame}
 
@@ -142,8 +142,8 @@
 	\end{block}
 	\pause
 	\begin{itemize}
-		\item Si $p=0.5$, la cote est de $1$ et le logit est de $0$.
-		\item Si $p=0.8$, la cote est de $4$ et le logit est approximativement $1.387$.
+		\item Si $p=0.5$, la cote est de $1:1$ et le logit est de $0$.
+		\item Si $p=0.8$, la cote est de $4:1$ et le logit est approximativement $1.387$.
 	\end{itemize}	
 \end{frame}
 
@@ -281,9 +281,9 @@
 	\end{equation}
 \end{frame}
 
-\begin{frame}{Espace de prédiction sur la classe}
+\begin{frame}{Région de prédiction sur la classe}
 	Dans un problème de classification binaire, $\hat{p}\left(x^{(n+1)}\right)$ représente en fait $P(y^{(n+1)} = 1 \mid x^{(n+1)})$. \\
-	En fonction de la valeur de $\hat{p}_{\text{inf}}$ et de $\hat{p}_{\text{sup}}$ on peut alors définir l'espace de prédiction au niveau $1 - \alpha$ comme suit:
+	En fonction de la valeur de $\hat{p}_{\text{inf}}$ et de $\hat{p}_{\text{sup}}$ on peut alors définir la région de prédiction au niveau $1 - \alpha$ comme suit:
 	\begin{equation}
 		C\left(x^{(n+1)}\right) = 
 		\begin{cases}

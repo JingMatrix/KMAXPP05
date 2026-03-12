@@ -62,7 +62,7 @@
 		\item Répéter les étapes suivantes pour chaque bootstrap $b$:
 		\begin{itemize}
 			\item Déterminer les données d'apprentissage $\mathcal{D}^{(b)}$.
-			\item Calculer $\hat{\beta}^{(b)}$ par la méthode des moindres carrés sur $\mathcal{D}^{(b)}$.
+			\item Calculer $\hat{\beta}^{(b)}$ sur $\mathcal{D}^{(b)}$ avec une régression logistique.
 			\item Calculer $\hat{p}_i^{(b)}$ à partir des données d'inférence $X_i$: $\hat{p}_i^{(b)} = \sigma\left(\Phi(X_i) \hat{\beta}^{(b)}\right)$.
 		\end{itemize}
 		\item Pour chaque entrée $k$ de $X_i$, calculer les quantiles $\alpha / 2$ et $1 - (\alpha / 2)$ sur $\{\left(\hat{p}_i^{(k)}\right)^{(1)}, \left(\hat{p}_i^{(k)}\right)^{(2)}, \cdots, \left(\hat{p}_i^{(k)}\right)^{(B)}\}$. Cela donne l'intervalle de confiance au niveau $1 - \alpha$ pour $X_i^{(k)}$.
@@ -104,8 +104,8 @@
 		\begin{column}{0.5\textwidth}
 			\begin{figure}
 				\centering
-				\includegraphics[width=0.95\linewidth]{Images/espace_prediction_theorique}
-				\label{fig:espace_prediction_theorique}
+				\includegraphics[width=0.95\linewidth]{Images/region_prediction_theorique}
+				\label{fig:region_prediction_theorique}
 			\end{figure}
 		\end{column}
 		\begin{column}{0.5\textwidth}
@@ -116,5 +116,5 @@
 			\end{figure}
 		\end{column}
 	\end{columns}
-	Même si la courbe ROC montre que notre algorithme capture bien les tendances, l'espace de prédiction est beaucoup plus exigeant et ne montre que quelques (5) joueurs classés avec confiance comme des avants. Pour tous les autres joueurs, la régression logistique est beaucoup moins catégorique.
+	Même si la courbe ROC montre que notre algorithme capture bien les tendances, la region de prédiction est beaucoup plus exigeante et ne montre que quelques (5) joueurs classés avec confiance comme des avants. Pour tous les autres joueurs, la régression logistique est beaucoup moins catégorique.
 \end{frame}

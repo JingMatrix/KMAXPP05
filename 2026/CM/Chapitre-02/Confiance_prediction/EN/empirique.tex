@@ -62,7 +62,7 @@
 		\item Repeat the following steps for each bootstrap $b$:
 		\begin{itemize}
 			\item Determine the training data $\mathcal{D}^{(b)}$.
-			\item Calculate $\hat{\beta}^{(b)}$ by the least squares method on $\mathcal{D}^{(b)}$.
+			\item Calculate $\hat{\beta}^{(b)}$ on $\mathcal{D}^{(b)}$ with logistic regression.
 			\item Calculate $\hat{p}_i^{(b)}$ from the inference data $X_i$: $\hat{p}_i^{(b)} = \sigma(\Phi(X_i) \hat{\beta}^{(b)})$.
 		\end{itemize}
 		\item For each input $k$ of $X_i$, calculate the $\alpha / 2$ and $1 - (\alpha / 2)$ quantiles on $\{(\hat{p}_i^{(k)})^{(1)}, (\hat{p}_i^{(k)})^{(2)}, \dots, (\hat{p}_i^{(k)})^{(B)}\}$. This yields the $1 - \alpha$ level confidence interval for $X_i^{(k)}$.
@@ -104,8 +104,8 @@
 		\begin{column}{0.5\textwidth}
 			\begin{figure}
 				\centering
-				\includegraphics[width=0.95\linewidth]{Images/espace_prediction_theorique}
-				\label{fig:prediction_space_theory}
+				\includegraphics[width=0.95\linewidth]{Images/region_prediction_theorique}
+				\label{fig:prediction_region_theory}
 			\end{figure}
 		\end{column}
 		\begin{column}{0.5\textwidth}
@@ -116,5 +116,5 @@
 			\end{figure}
 		\end{column}
 	\end{columns}
-	Even if the ROC curve shows that our algorithm captures trends well, the prediction space is much more demanding and only shows a few (5) players confidently classified as forwards. For all other players, logistic regression is much less categorical.
+	Even if the ROC curve shows that our algorithm captures trends well, the prediction region is much more demanding and only shows a few (5) players confidently classified as forwards. For all other players, logistic regression is much less categorical.
 \end{frame}
