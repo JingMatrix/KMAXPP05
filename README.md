@@ -44,11 +44,11 @@ L'évaluation porte sur la capacité à collaborer et synthétiser une probléma
     *   La note prend en compte la qualité technique (code, résultats) et la clarté de la présentation/défense.
 
 #### 3. Assiduité (5 points)
-La présence est obligatoire à toutes les séances (8 TD + 10 TP).
+La présence est obligatoire à toutes les séances (8 TD + 9 TP).
 *   **Validation :** Signature de la feuille de présence (Nom, Prénom, N° Étudiant).
 *   **Absences :** Une absence justifiée (email à l'enseignant avant ou juste après la séance) est comptabilisée comme présence valide.
-*   **Calcul :** Prorata des 18 séances:
-    $$\frac{\text{Séances Validées}}{18} \times 5$$
+*   **Calcul :** Prorata des 17 séances:
+    $$\frac{\text{Séances Validées}}{17} \times 5$$
 
 ### Évaluation de CC3 (Examen écrit)
 *   **Format :** 1h30 en conditions d'examen.

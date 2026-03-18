@@ -1,0 +1,35 @@
+\section[Conclusions]{Conclusions}
+
+\begin{frame}{Conclusions}
+	\begin{itemize}
+		\item Nous avons vu comment déterminer, par la théorie des régressions linéaire et logistique, les intervalles de confiance et les régions de prédiction.
+		\pause
+		\item Nous avons montré que pour les régressions linéaire et logistique, le cœur du calcul des intervalles et des régions est la matrice de covariance de $\hat{\beta}$ qui est déterminée à partir de toutes les données d'apprentissage. Elle est utilisée quelles que soient les entrées $X_i$ fournies ensuite au modèle.
+		\pause
+		\item Nous avons aussi estimé ces mêmes intervalles et régions en utilisant un algorithme de bootstrapping.
+		\pause
+		\item Nous avons vu que l'on obtient une bonne adéquation entre la théorie et la méthode du bootstrapping.
+		\pause
+		\item Nous avons aussi vu que la région de prédiction est une métrique bien plus contraignante que ne peut l'être la courbe ROC pour la classification.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusions}
+	\begin{itemize}
+		\item Même si l'algorithme de bootstrapping a été utilisé pour les régressions linéaire et logistique, cet algorithme reste applicable \textbf{à tout} modèle de régression et de classification.
+		\pause
+		\item Pour une majorité de modèles, nous ne disposons pas d'éléments théoriques pour déterminer ces intervalles et régions et les méthodes empiriques sont les seules disponibles. Mais elles nécessitent d'entrainer plusieurs modèles, ce qui peut se révéler \textbf{coûteux}.
+		\pause
+		\item L'intervalle de confiance fournit une estimation de la \textbf{variance} du modèle.
+		\pause
+		\item La région de prédiction englobe l'\textbf{ensemble des erreurs} (Bayes, erreur d'approximation ou biais, erreur d'estimation ou variance) mais ne permet pas de discriminer l'erreur d'approximation de l'erreur de Bayes.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusions}
+	\begin{itemize}
+		\item Les régions de prédictions sont des outils \textbf{majeurs} de la validation de modèles d'apprentissage automatique utilisés dans des systèmes \textbf{critiques} pour la sécurité.
+		\pause
+		\item Des méthodes de \textbf{prédiction conforme} ont été développées plus récemment pour \textbf{garantir} statistiquement une couverture pour les régions de prédiction et s'appliquent à tous les modèles de régression et de classification.
+	\end{itemize}
+\end{frame}

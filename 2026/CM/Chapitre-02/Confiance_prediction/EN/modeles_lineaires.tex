@@ -1,0 +1,302 @@
+\section[Linear Models]{Linear Models}
+
+\begin{frame}{Theoretical Approach}
+	Linear models possess a \textbf{theoretical} framework that allows for the derivation of these intervals or sets. This is what we will cover in this section.
+\end{frame}
+
+\subsection[Linear Regression]{Linear Regression}
+
+\begin{frame}{Assumptions for Linear Regression}
+	For linear regression, the assumptions previously considered remain valid and are even more relevant here:
+	\begin{itemize}
+		\item \textbf{Exogeneity}: $\mathbb{E}[\epsilon^{(i)} \mid X^{(i)}] = 0$
+		\item \textbf{Homoscedasticity}: $\Var{\epsilon^{(i)} \mid X^{(i)}} = \sigma_{\epsilon}^2$
+		\item \textbf{Independence}: $\Cov{\epsilon^{(i)}, \epsilon^{(j)}} = 0 \quad \forall i \ne j$
+	\end{itemize}
+	These are known as the \textbf{Gauss-Markov} assumptions.
+\end{frame}
+
+\begin{frame}{Covariance of $\hat{\beta}$}
+	Under the Gauss-Markov assumptions (exogeneity, homoscedasticity, and independence), Ordinary Least Squares (OLS) regression theory, for an augmentation mapping $\Phi: \mathcal{X} \to \tilde{\mathcal{X}}$, leads to the following covariance matrix for $\hat{\beta}$ in $\mathcal{M}_{d+1, d+1}(\mathbb{R})$:
+	\begin{equation}
+		\Cov{\hat{\beta}} = \sigma_{\epsilon}^2 \left(\Phi(X)^T \Phi(X)\right)^{-1}
+		\nonumber
+	\end{equation}
+	\pause
+	Generally, $\sigma_{\epsilon}^2$ is unknown. It can be estimated from the variance of the residuals $r = y - \hat{y}$:
+	\begin{equation}
+		s^2 = \frac{\text{SS}_{\text{res}}}{n - p} = \frac{\sum_{i=1}^n (y^{(i)} - \hat{y}^{(i)})^2}{n - p}
+		\nonumber
+	\end{equation}
+	Where $n$ is the number of observations and $p = d + 1$ is the number of model parameters. $n - p$ represents the degrees of freedom of the residuals. Dividing by this quantity provides an unbiased variance estimator $s^2$.
+\end{frame}
+
+\begin{frame}{Variance of $\hat{\beta}$}
+	The variance of $\hat{\beta}$, denoted $\Var{\hat{\beta}} \in \mathcal{M}_{d+1, 1}(\mathbb{R}^+)$, can be derived by taking the diagonal elements of $\Cov{\hat{\beta}}$:
+	\begin{equation}
+		\Var{\hat{\beta}} = \diag\left(\Cov{\hat{\beta}}\right)
+		\nonumber
+	\end{equation}
+	\pause
+	The standard error $\ET[\hat{\beta}] \in \mathcal{M}_{d+1, 1}(\mathbb{R}^+)$ can then be easily deduced:
+	\begin{equation}
+		\ET[\hat{\beta}] = \sqrt{\Var{\hat{\beta}}}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Connection to One-Dimensional Estimation}
+	In the previous section, we saw that we could estimate the standard error from the standard deviation of a sample:
+	\begin{equation}
+		\ET = \frac{\sigma}{\sqrt{n}}
+		\nonumber
+	\end{equation}
+	In the linear regression model, if we use the augmentation mapping $\Phi: x \mapsto 1$, then $\beta$ becomes a scalar:
+	\begin{equation}
+		\begin{aligned}
+			\Var{\hat{\beta}} &= \sigma_{\epsilon}^2 \left(\Phi(X)^T \Phi(X)\right)^{-1} \\
+			&= \sigma_{\epsilon}^2 \left(\begin{pmatrix}
+				1 & 1 & \cdots & 1
+			\end{pmatrix}\begin{pmatrix}
+				1 \\ 1 \\ \vdots \\ 1
+			\end{pmatrix}
+			\right)^{-1} \\
+			&= \sigma_{\epsilon}^2 (n)^{-1}
+		\end{aligned}
+		\nonumber
+	\end{equation}
+	This leads to a standard error similar to the one seen before: $\ET = \frac{\sigma_{\epsilon}}{\sqrt{n}}$	
+\end{frame}
+
+\begin{frame}{Variance of $\hat{Y}$}
+	The variance of $\hat{Y} \mid X$, denoted $\Var{\hat{Y} \mid X} \in \mathcal{M}_{n,1}(\mathbb{R})$, can then be calculated as follows:
+	\begin{equation}
+		\Var{\hat{Y} \mid X} = \diag\left(\Phi(X) \Cov{\hat{\beta}} \Phi(X)^T\right)
+		\nonumber
+	\end{equation}
+	\pause
+	Consequently, we have the following standard error:
+	\begin{equation}
+		\ET[\hat{Y} \mid X] = \sqrt{\Var{\hat{Y} \mid X}}
+		\nonumber
+	\end{equation}	
+	\pause
+	Assuming that the errors $\epsilon^{(i)}$ follow a normal distribution $\mathcal{N}(0, \sigma_{\epsilon}^2)$, we can then determine a confidence interval for either $\hat{\beta}$ or $\hat{Y}$.
+\end{frame}
+
+\begin{frame}{Confidence Intervals}
+	Let $\varphi$ be the cumulative distribution function (CDF) of a standard normal distribution $\mathcal{N}(0, 1)$. The confidence interval at level $1-\alpha$, denoted $\text{CI}_{1-\alpha}$, for $\hat{\beta}$ is:
+	\begin{equation}
+		\text{CI}_{1-\alpha}(\hat{\beta}) = \left[\hat{\beta} \pm \varphi^{-1}(1-\alpha / 2) \sqrt{\Var{\hat{\beta}}}\right]
+		\nonumber
+	\end{equation}
+	\pause
+	For the prediction $\hat{Y} \mid X$, the confidence interval at level $1-\alpha$ is:
+	\begin{equation}
+		\begin{split}
+			\text{CI}_{1-\alpha}(\hat{Y} \mid X) = \Biggl[ \hat{Y} \pm \varphi^{-1}(1-\alpha / 2) \sqrt{\Var{\hat{Y} \mid X}} \Biggr]
+		\end{split}
+		\nonumber
+	\end{equation}
+	\pause
+	Note: Since $\sigma_{\epsilon}^2$ is usually unknown, it is standard practice to use a Student's t-distribution with $n - p$ degrees of freedom $\mathcal{T}(n - p)$ instead of the standard normal distribution.
+\end{frame}
+
+\begin{frame}{Prediction Interval}
+	The prediction interval at level $1-\alpha$, denoted $\text{PI}_{1-\alpha}$, for the prediction $\hat{Y} \mid X$ is:
+	\begin{equation}
+		\begin{split}
+			\text{PI}_{1-\alpha}(\hat{Y} \mid X) = \Biggl[ \hat{Y} \pm \varphi^{-1}(1-\alpha / 2) \sqrt{\sigma_{\epsilon}^2 + \Var{\hat{Y} \mid X}} \Biggr]
+		\end{split}
+		\nonumber
+	\end{equation}
+	\pause
+	Note that adding $\sigma_{\epsilon}^2$ to the variance of $\hat{Y} \mid X$ is all that is required to move from the confidence interval to the prediction interval.
+\end{frame}
+
+\subsection[Logistic Regression]{Logistic Regression}
+
+\begin{frame}{Additional Definitions}
+	We will need some complementary definitions associated with classification problems.
+	\begin{block}{Definition: Odds}
+		The \textbf{odds} is a real number in $[0, +\infty[$ representing the ratio between the probability of an event and the complementary probability of that same event:
+		\begin{equation}
+			\cote = \frac{p}{1 - p}
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	\begin{itemize}
+		\item If $p=0.5$, the odds are $1:1$.
+		\item If $p=0.8$, the odds are $4:1$.
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}{Additional Definitions}
+	\begin{block}{Definition: Logit}
+		The \textbf{logit} is a real number in $]-\infty, +\infty[$ representing the logarithm of the odds:
+		\begin{equation}
+			\logit{p} = \ln\left(\frac{p}{1 - p}\right)
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	\begin{itemize}
+		\item If $p=0.5$, the odds are $1:1$ and the logit is $0$.
+		\item If $p=0.8$, the odds are $4:1$ and the logit is approximately $1.387$.
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}{Additional Definitions}
+	\begin{block}{Definition: Predicted Score}
+		In a logistic regression problem, the \textbf{score} is defined as a real number in $]-\infty, +\infty[$, representing the prediction made by the linear model:
+		\begin{equation}
+			\score{x} = \Phi(x) \hat{\beta}
+			\nonumber
+		\end{equation}
+	\end{block}
+\end{frame}
+
+\begin{frame}{Additional Definitions}
+	\begin{block}{Definition: Predicted Probability}
+		In a logistic regression problem, the \textbf{probability}, denoted $\hat{p} \in ]0, 1[$, is defined as the prediction made by the linear model transformed by the logistic function $\sigma$:
+		\begin{equation}
+			\hat{p}(x) = \sigma(\score{x}) = \sigma(\Phi(x) \hat{\beta})
+			\nonumber
+		\end{equation}
+	\end{block}
+\end{frame}
+
+\begin{frame}{Derivation}
+	Calculating the logit of the predicted probability involves the following steps:
+	\begin{equation}
+		\begin{aligned}
+			\text{logit}(\hat{p}(x))
+			&= \ln\left(\frac{\hat{p}(x)}{1 - \hat{p}(x)}\right)
+			= \ln\left(\frac{\sigma(\score{x})}{1 - \sigma(\score{x})}\right) \\
+			&= \ln\left(\frac{1}{1 + \exp(-\score{x})} \frac{1}{1 - \frac{1}{1 + \exp(-\score{x})}}\right) \\
+			&= \ln\left(\frac{1}{1 + \exp(-\score{x})} \frac{1}{\frac{\exp(-\score{x})}{1 + \exp(-\score{x})}}\right) \\
+			&= \ln\left(\frac{1}{\exp(-\score{x})}\right) = \score{x}
+		\end{aligned}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Derivation}
+	In a logistic regression problem, the score and the logit represent the \textit{same} quantity. This reflects the linear nature of logistic regression: it is a linear regression on the score, \textit{wrapped} in a logistic function to calculate probabilities!
+\end{frame}
+
+\begin{frame}{Uncertainty in Linear Regression Revisited}
+	In linear regression, we assumed the variance $\sigma_{\epsilon}^2$ is constant (homoscedasticity). We wrote the covariance matrix as:
+	\begin{equation}
+		\Cov{\hat{\beta}} = \sigma_{\epsilon}^2 \left(\Phi(X)^T \Phi(X)\right)^{-1}
+		\nonumber
+	\end{equation}
+	By introducing a diagonal weight matrix $W \in \mathcal{M}_{n,n}(\mathbb{R})$:
+	\begin{equation}
+		W = \frac{1}{\sigma_{\epsilon}^2} I_n
+		\nonumber
+	\end{equation}
+	We can derive an equivalent formulation for the covariance of the $\beta$ estimates:
+	\begin{equation}
+		\Cov{\hat{\beta}} = \sigma_{\epsilon}^2 \left(\Phi(X)^T \Phi(X)\right)^{-1} = \left(\Phi(X)^T W \Phi(X)\right)^{-1}
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Uncertainty in Logistic Regression}
+	\begin{itemize}
+		\item Since logistic regression solves a linear regression problem on the logit (or score), it is natural to define a weight matrix $W$ based on the variance of the logit.
+		\pause
+		\item Recall that each observation is associated with a Bernoulli distribution. However, since each parameter of the Bernoulli distribution is different, we must use a different variance for each observation.
+		\pause
+		\item The variance of a random variable $Y^{(i)}$ following a Bernoulli distribution with parameter $p^{(i)}$ is given by $p^{(i)}(1 - p^{(i)})$.
+		\pause
+		\item It can be shown that the variance of $\logit{p^{(i)}}$ is: 
+		\begin{equation}
+			\Var{\logit{p^{(i)}}} = \frac{1}{p^{(i)}(1 - p^{(i)})}
+			\nonumber
+		\end{equation}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Uncertainty in Logistic Regression}
+	We can therefore define a new weight matrix $W$ for logistic regression such that:
+	\begin{equation}
+		W_{ij} = \begin{cases}
+			0 & \text{if} \, i \ne j \\
+			\hat{p}^{(i)}(1 - \hat{p}^{(i)}) & \text{otherwise}
+		\end{cases}
+		\nonumber
+	\end{equation}
+	\pause
+	From this, we deduce the covariance matrix of $\hat{\beta}$ for logistic regression:
+	\begin{equation}
+		\Cov{\hat{\beta}} = \left(\Phi(X)^T W \Phi(X)\right)^{-1}
+		\nonumber
+	\end{equation}
+	\pause
+	And the variance of $\hat{\beta}$:
+	\begin{equation}
+		\Var{\hat{\beta}} = \text{diag}\left(\Cov{\hat{\beta}}\right)
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Confidence Interval for $\hat{\beta}$}
+	Since this involves the linear portion of the model used to calculate the score, we can make the same assumption as in the linear regression model: namely, that the uncertainties on the score are Gaussian. The confidence interval at level $1 - \alpha$ for $\hat{\beta}$ is then:
+	\begin{equation}
+		\text{CI}_{1-\alpha}(\hat{\beta}) = \left[\hat{\beta} \pm \varphi^{-1}(1 - \alpha/2) \sqrt{\Var{\hat{\beta}}}\right]
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Confidence Interval for the Logit or Score}
+	For a new observation $x^{(n+1)}$, we first obtain the variance of the linear score (the logit):
+	\begin{equation}
+		\Var{\logit{\hat{p}(x^{(n+1)})}} = \diag\left(\Phi(x^{(n+1)}) \Cov{\hat{\beta}} \Phi(x^{(n+1)})^T\right)
+		\nonumber
+	\end{equation}
+	\pause
+	Then, the confidence interval at level $1-\alpha$ for the score (or logit) is defined as:
+	\begin{equation}
+		\begin{split}
+			\text{CI}_{1-\alpha}(\logit{\hat{p}(x^{(n+1)})}) = \bigg[
+			&\logit{\hat{p}(x^{(n+1)})} \\
+			&\pm \varphi^{-1}(1 - \alpha/2) \sqrt{\Var{\logit{\hat{p}(x^{(n+1)})}}}\bigg]			
+		\end{split}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Confidence Interval for the Probability}
+	By applying the logistic function $\sigma$ to the previous interval, we obtain the confidence interval at level $1 - \alpha$ for the probability $\hat{p}(x^{(n+1)})$:
+	\begin{equation}
+		\begin{aligned}
+			&\hat{p}_{\text{lower}} = \sigma\left(\logit{\hat{p}(x^{(n+1)})} - \varphi^{-1}(1 - \alpha/2) \sqrt{\Var{\logit{\hat{p}(x^{(n+1)})}}}\right) \\
+			&\hat{p}_{\text{upper}} = \sigma\left(\logit{\hat{p}(x^{(n+1)})} + \varphi^{-1}(1 - \alpha/2) \sqrt{\Var{\logit{\hat{p}(x^{(n+1)})}}}\right) \\
+			&\text{CI}_{1-\alpha}(\hat{p}(x^{(n+1)})) = [\hat{p}_{\text{lower}}, \hat{p}_{\text{upper}}]
+		\end{aligned}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Prediction Region for the Class}
+	In a binary classification problem, $\hat{p}(x^{(n+1)})$ represents $P(y^{(n+1)} = 1 \mid x^{(n+1)})$. \\
+	Based on the values of $\hat{p}_{\text{lower}}$ and $\hat{p}_{\text{upper}}$, we can define the prediction region at level $1 - \alpha$ as follows:
+	\begin{equation}
+		C(x^{(n+1)}) = 
+		\begin{cases}
+			\{0\} & \text{if} \, \hat{p}_{\text{upper}} \le \alpha \\
+			\{1\} & \text{if} \, \hat{p}_{\text{lower}} \ge 1 - \alpha \\
+			\{0, 1\} & \text{otherwise}
+		\end{cases}
+		\nonumber
+	\end{equation}
+	\pause
+	\begin{itemize}
+		\item If $\text{CI}_{95\%}(\hat{p}(x^{(n+1)})) = [0.92, 0.98]$, then $C(x^{(n+1)}) = \{0, 1\}$.
+		\item If $\text{CI}_{95\%}(\hat{p}(x^{(n+1)})) = [0.01, 0.03]$, then $C(x^{(n+1)}) = \{0\}$.
+		\item If $\text{CI}_{95\%}(\hat{p}(x^{(n+1)})) = [0.98, 0.99]$, then $C(x^{(n+1)}) = \{1\}$.
+	\end{itemize}
+\end{frame}

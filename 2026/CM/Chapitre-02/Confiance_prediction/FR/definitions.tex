@@ -1,0 +1,40 @@
+\subsection[Définitions]{Définitions}
+
+\begin{frame}{Application à l'apprentissage automatique}
+	\begin{itemize}
+		\item Dans l'exemple précédent, nous nous sommes intéressés à une variable aléatoire $Y$ (taille des étudiants) et à un paramètre $\theta$ associé à cette variable aléatoire: la taille moyenne.
+		\pause
+		\item Dans le cas général de l'apprentissage automatique, nous nous intéresserons à une loi conditionnelle $Y \mid X$. L'objectif étant d'obtenir un modèle $\hat{f}$ de l'espérance conditionnelle $\E{Y \mid X}$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Région de prédiction}
+	\begin{block}{Définition: Région de prédiction}
+		Soit un échantillon d'apprentissage $\mathcal{D} = \{\left(x^{(1)}, y^{(1)}\right), \cdots, \left(x^{(n)}, y^{(n)}\right)\}$ et une nouvelle observation $\left(x^{(n+1)}, y^{(n+1)}\right)$ issue de la même distribution. Une \textbf{région de prédiction} de niveau $1 - \alpha$ est une fonction $C$ qui, pour toute valeur $x^{(n+1)}$ produit un ensemble $C(x^{(n+1)})$ tel que:
+		\begin{equation}
+			P\left(y^{(n+1)} \in C\left(x^{(n+1)}\right)\right) \ge 1 - \alpha
+			\nonumber
+		\end{equation}
+		Si $Y$ est une variable aléatoire continue (régression), alors $C$ est un \textbf{intervalle}. Si $Y$ est une variable aléatoire discrète (classification) alors $C$ est un \textbf{ensemble} de classes. 
+	\end{block}
+\end{frame}
+
+\begin{frame}{Intervalle de confiance}
+	\begin{block}{Définition: Intervalle de confiance}
+		Un intervalle de confiance de niveau $1 - \alpha$ pour l'espérance conditionnelle $\E{Y \mid X}$ est un intervalle $\left[L(x), U(x)\right]$ tel que:
+		\begin{equation}
+			P\left(L(x) \le \E{Y \mid X} \le U(x)\right) \ge 1 - \alpha
+			\nonumber
+		\end{equation}
+		\begin{itemize}
+			\item Si $Y$ est une variable aléatoire continue (régression), l'\textbf{espérance conditionnelle} $\E{Y \mid X}$ représente la fonction vraie $f(x): \mathcal{X} \to \mathcal{Y}$.
+			\item Si $Y$ est une variable aléatoire discrète (classification), $\E{Y \mid X}$ représente la \textbf{probabilité} d'appartenir à une classe $K$: $P(Y = K \mid X) \in ]0, 1[$.
+		\end{itemize}
+	\end{block}
+	\pause
+	En classification binaire ($Y \in \{0, 1\}$), l'espérance d'une loi de Bernoulli est exactement égale à sa probabilité de succès:
+	\begin{equation}
+		\E{Y \mid X} = 1 P(Y=1 | X) + 0 P(Y=0 | X) = P(Y = 1 | X)
+		\nonumber
+	\end{equation}
+\end{frame}

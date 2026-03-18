@@ -1,0 +1,33 @@
+\section[Introduction]{Introduction}
+
+\begin{frame}{Problématique}
+	\begin{itemize}
+		\item Jusqu'à présent nous avons vu comment les modèles peuvent faire une prédiction pour des entrées $X$. Et globalement comment les modèles se comportent grâce à différentes métriques. Ou même comment localement on peut décomposer l'erreur sur des données de test. 
+		\pause
+		\item Mais pour une prédiction du modèle, dont nous ne connaissons pas le résultat vrai, quelle est l'erreur commise ?
+		\pause
+		\item Dans tous les domaines d'application, une erreur de prédiction a un \textbf{coût}.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Problématique}
+	\begin{block}{Problématique}
+		Tous les modèles sont des approximations. Essentiellement, tous les modèles sont faux, mais certains sont utiles. Cependant, il ne faut jamais perdre de vue le caractère approximatif du modèle. \\
+		\vspace{0.5cm}
+		\hfill
+		\textit{--- Georges E. P. Box (2007)}
+	\end{block}
+	\vfill 
+	\tiny \textcolor{gray}{Source: Response Surfaces, Mixtures, and Ridge Analyses - George E. P. Box, Norman R. Draper  - 2007 - p.414, John Wiley \& Sons}
+\end{frame}
+
+\begin{frame}{Régions de prédiction et intervalles de confiance}
+	Dans ce cours nous introduirons les notions de régions de prédiction et d'intervalles de confiance, à la fois pour des problèmes de classification et pour des problèmes de régression.
+	\begin{itemize}
+		\item Dans un premier temps on développera l'intuition sur ces intervalles avant d'en donner une définition.
+		\pause
+		\item Ensuite nous verrons que les modèles linéaires (régression et classification) proposent des estimations théoriques de ces régions et intervalles.
+		\pause
+		\item Enfin, nous verrons comment, empiriquement, on peut établir ces régions et intervalles pour une grande variété de modèles.
+	\end{itemize}
+\end{frame}

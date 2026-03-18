@@ -1,0 +1,302 @@
+\section[Modèles linéaires]{Modèles linéaires}
+
+\begin{frame}{Approche théorique}
+	Les modèles linéaires disposent d'un cadre \textbf{théorique} permettant de dériver ces intervalles ou ensembles. C'est ce que nous couvrirons dans cette section.
+\end{frame}
+
+\subsection[Régression linéaire]{Régression linéaire}
+
+\begin{frame}{Hypothèses pour la régression linéaire}
+	Pour la régression linéaire, les hypothèses déjà considérées sont encore d'actualité et même encore plus pertinentes:
+	\begin{itemize}
+		\item \textbf{Exogénéité}: $\E{\epsilon^{(i)} \mid X^{(i)}} = 0$
+		\item \textbf{Homoscédasticité}: $\Var{\epsilon^{(i)} \mid X^{(i)}} = \sigeps$
+		\item \textbf{Indépendance}: $\Cov{\epsilon^{(i)}, \epsilon^{(j)}} = 0 \quad \forall i \ne j$
+	\end{itemize}
+	Ces hypothèses sont appelées hypothèses de \textbf{Gauss-Markov}.
+\end{frame}
+
+\begin{frame}{Covariance de $\hat{\beta}$}
+	Dans le cadre des hypothèses de Gauss-Markov (exogénéité, homoscédasticité et indépendance), la théorie de la régression des moindres carrés ordinaires, pour une application d'augmentation $\Phi: \mathcal{X} \to \tilde{\mathcal{X}}$, conduit à la matrice de covariance suivante pour $\hat{\beta}$ dans $\mathcal{M}_{d+1, d+1}\left(\mathbb{R}\right)$:
+	\begin{equation}
+		\Cov{\hat{\beta}} = \sigeps \left(\Phi(X)^T \Phi(X)\right)^{-1}
+		\nonumber
+	\end{equation}
+	\pause
+	En général, $\sigeps$ est inconnu. Il peut être estimé à partir de la variance des résidus $r = y - \hat{y}$:
+	\begin{equation}
+		s^2 = \frac{\text{SS}_{\text{res}}}{n - p} = \frac{\sum_{i=1}^n \left(y^{(i)} - \hat{y}^{(i)}\right)^2}{n - p}
+		\nonumber
+	\end{equation}
+	Où $n$ est le nombre d'observations et $p = d + 1$ est le nombre de paramètres du modèle. $n - p$ est le nombre de degrés de liberté des résidus. Diviser par cette quantité permet d'obtenir un estimateur de variance $s^2$ non biaisé.
+\end{frame}
+
+\begin{frame}{Variance de $\hat{\beta}$}
+	On peut déduire de la matrice de covariance la variance de $\hat{\beta}$ $\Var{\hat{\beta}} \in \mathcal{M}_{d+1, 1}\left(\mathbb{R^+}\right)$ en prenant les termes diagonaux de $\Cov{\hat{\beta}}$:
+	\begin{equation}
+		\Var{\hat{\beta}} = \diag \left(\Cov{\hat{\beta}}\right)
+		\nonumber
+	\end{equation}
+	\pause
+	L'erreur type $\ET[\hat{\beta}] \in \mathcal{M}_{d+1, 1}\left(\mathbb{R+}\right)$ peut alors se déduire facilement:
+	\begin{equation}
+		\ET[\hat{\beta}] = \sqrt{\Var{\hat{\beta}}}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Connexion à l'estimation mono-dimensionnelle}
+	Dans la section précédente, nous avons vu que nous pouvions estimer l'erreur type à partir de l'écart type d'un échantillon:
+	\begin{equation}
+		\ET = \frac{\sigma}{\sqrt{n}}
+		\nonumber
+	\end{equation}
+	Dans le modèle de régression linéaire, si nous prenons l'application d'augmentation $\Phi: x \mapsto 1$ alors $\beta$ est maintenant un scalaire:
+	\begin{equation}
+		\begin{aligned}
+			\Var{\hat{\beta}} &= \sigeps \left(\Phi(X)^T \Phi(X)\right)^{-1} \\
+			&= \sigeps \left(\begin{pmatrix}
+				1 & 1 & \cdots & 1
+			\end{pmatrix}\begin{pmatrix}
+				1 \\ 1 \\ \vdots \\ 1
+			\end{pmatrix}
+			\right)^{-1} \\
+			&= \sigeps \left(n\right)^{-1}
+		\end{aligned}
+		\nonumber
+	\end{equation}
+	Ce qui conduit à une erreur type semblable à celle vue auparavant $ET = \frac{\sigma_{\epsilon}}{\sqrt{n}}$	
+\end{frame}
+
+\begin{frame}{Variance de $\hat{Y}$}
+	La variance de $\hat{Y} \mid X$, notée $\Var{\hat{Y} \mid X} \in \mathcal{M}_{n,1}(\mathbb{R})$ peut alors se calculer comme suit:
+	\begin{equation}
+		\Var{\hat{Y} \mid X} = \diag \left(\Phi(X) \Cov{\hat{\beta}} \Phi(X)^T\right)
+		\nonumber
+	\end{equation}
+	\pause
+	Et par conséquent, on a l'erreur type suivante:
+	\begin{equation}
+		\ET[\hat{Y} \mid X] = \sqrt{\Var{\hat{Y} \mid X}}
+		\nonumber
+	\end{equation}	
+	\pause
+	En supposant que les $\epsilon^{(i)}$ suivent une loi normale $\mathcal{N}(0, \sigeps)$ on peut alors déterminer un intervalle de confiance, soit sur $\hat{\beta}$, soit sur $\hat{Y}$.
+\end{frame}
+
+\begin{frame}{Intervalles de confiance}
+	Notons $\varphi$ la fonction de répartition d'une loi normale standard $\mathcal{N}(0, 1)$. L'intervalle de confiance d'un niveau $1-\alpha$, noté $\text{IC}_{1-\alpha}$ pour $\hat{\beta}$ est donc:
+	\begin{equation}
+		\text{IC}_{1-\alpha}\left(\hat{\beta}\right) = \left[\hat{\beta} \pm \varphi^{-1}(1-\alpha / 2) \sqrt{\Var{\hat{\beta}}}\right]
+		\nonumber
+	\end{equation}
+	\pause
+	Pour la prédiction $\hat{Y} \mid X$, l'intervalle de confiance d'un niveau $1-\alpha$ est:
+	\begin{equation}
+		\begin{split}
+			\text{IC}_{1-\alpha}\left(\hat{Y} \mid X\right) = \Biggl[ \hat{Y} \pm \varphi^{-1}(1-\alpha / 2) \sqrt{\Var{\hat{Y} \mid X}} \Biggr]
+		\end{split}
+		\nonumber
+	\end{equation}
+	\pause
+	Note: Comme $\sigeps$ est généralement inconnue, il est classique d'utiliser une loi de Student avec $n - p$ degrés de liberté $\mathcal{T}(n - p)$ à la place de la loi normale standard.
+\end{frame}
+
+\begin{frame}{Intervalle de prédiction}
+	L'intervalle de prédiction d'un niveau $1-\alpha$, noté $\text{IP}_{1-\alpha}$, pour la prédiction $\hat{Y} \mid X$ est:
+	\begin{equation}
+		\begin{split}
+			\text{IP}_{1-\alpha}\left(\hat{Y} \mid X\right) = \Biggl[ \hat{Y} \pm \varphi^{-1}(1-\alpha / 2) \sqrt{\sigeps + \Var{\hat{Y} \mid X}} \Biggr]
+		\end{split}
+		\nonumber
+	\end{equation}
+	\pause
+	Noter qu'il suffit d'ajouter $\sigeps$ à la variance de $\hat{Y} \mid X$ pour passer de l'intervalle de confiance à l'intervalle de prédiction.
+\end{frame}
+
+\subsection[Régression logistique]{Régression logistique}
+
+\begin{frame}{Définitions supplémentaires}
+	Nous aurons besoin de quelques définitions complémentaires associées à des problèmes de classification.
+	\begin{block}{Définition: cote}
+		La \textbf{cote} est un nombre réel dans $[0, +\infty[$ qui représente le rapport entre une probabilité d'un événement et la probabilité complémentaire de ce même événement:
+		\begin{equation}
+			\cote = \frac{p}{1 - p}
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	\begin{itemize}
+		\item Si $p=0.5$, la cote est de $1:1$ (une chance sur deux).
+		\item Si $p=0.8$, la cote est de $4:1$ (quatre contre un).
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}{Définitions supplémentaires}
+	\begin{block}{Définition: logit}
+		Le \textbf{logit} est un nombre réel dans $]-\infty, +\infty[$ qui représente le logarithme d'une cote:
+		\begin{equation}
+			\logit{p} = \ln{\left(\frac{p}{1 - p}\right)}
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	\begin{itemize}
+		\item Si $p=0.5$, la cote est de $1:1$ et le logit est de $0$.
+		\item Si $p=0.8$, la cote est de $4:1$ et le logit est approximativement $1.387$.
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}{Définitions supplémentaires}
+	\begin{block}{Définition: score prédit}
+		Dans un problème de régression logistique, on définit le \textbf{score}, un nombre réel dans $]-\infty, +\infty[$, comme la prédiction réalisée par le modèle linéaire:
+		\begin{equation}
+			\score{x} = \Phi(x) \hat{\beta}
+			\nonumber
+		\end{equation}
+	\end{block}
+\end{frame}
+
+\begin{frame}{Définitions supplémentaires}
+	\begin{block}{Définition: probabilité prédite}
+		Dans un problème de régression logistique, on définit la \textbf{probabilité}, notée $\hat{p} \in ]0, 1[$, comme la prédiction réalisée par le modèle linéaire transformée par la fonction logistique $\sigma$:
+		\begin{equation}
+			\hat{p}(x) = \sigma\left(\score{x}\right) = \sigma\left(\Phi(x) \hat{\beta}\right)
+			\nonumber
+		\end{equation}
+	\end{block}
+\end{frame}
+
+\begin{frame}{Dérivation}
+	Calculer le logit de la probabilité prédite revient à effectuer le calcul suivant:
+	\begin{equation}
+		\begin{aligned}
+			\logit{\hat{p}(x)}
+			&= \ln{\left(\frac{\hat{p}(x)}{1 - \hat{p}(x)}\right)}
+			= \ln{\left(\frac{\sigma(\score{x})}{1 - \sigma(\score{x})}\right)} \\
+			&= \ln{\left(\frac{1}{1 + \exp{(-\score{x})}} \frac{1}{1 - \frac{1}{1 + \exp{(-\score{x})}}}\right)} \\
+			&= \ln{\left(\frac{1}{1 + \exp{(-\score{x})}} \frac{1}{\frac{\exp{(-\score{x})}}{1 + \exp{(-\score{x})}}}\right)} \\
+			&= \ln{\left(\frac{1}{\exp{(-\score{x})}}\right)} = \score{x}
+		\end{aligned}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Dérivation}
+	Dans un problème de régression logistique, le score et le logit représentent la \textit{même} quantité. Cela traduit la nature linéaire de la régression logistique: c'est une régression linéaire sur le score, \textit{enrobée} dans une fonction logistique pour calculer des probabilités !
+\end{frame}
+
+\begin{frame}{Revisite de l'incertitude en régression linéaire}
+	En régression linéaire, nous avons pris l'hypothèse que la variance $\sigeps$ est constante (c'est notre hypothèse d'homoscédasticité). Nous avons écrit que la matrice de covariance est:
+	\begin{equation}
+		\Cov{\hat{\beta}} = \sigeps \left(\Phi(X)^T \Phi(X)\right)^{-1}
+		\nonumber
+	\end{equation}
+	En introduisant une matrice diagonale $W \in \mathcal{M}_{n,n}(\mathbb{R})$:
+	\begin{equation}
+		W = \frac{1}{\sigeps} I_n
+		\nonumber
+	\end{equation}
+	On peut dériver une formulation équivalente de la covariance des estimations $\beta$:
+	\begin{equation}
+		\Cov{\hat{\beta}} = \sigeps \left(\Phi(X)^T \Phi(X)\right)^{-1} = \left(\Phi(X)^T W \Phi(X)\right)^{-1}
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Incertitude en régression logistique}
+	\begin{itemize}
+		\item Comme la régression logistique résout un problème de régression linéaire sur le logit (ou le score), il est naturel de définir une matrice de poids $W$ basée sur la variance du logit.
+		\pause
+		\item On rappelle que chaque observation est associée à une loi de Bernoulli. Mais comme chaque paramètre de la loi de Bernoulli est différent, on doit utiliser une variance différente pour chaque observation.
+		\pause
+		\item La variance d'une variable aléatoire $Y^{(i)}$ suivant une loi de Bernoulli de paramètre $p^{(i)}$ est donnée par $p^{(i)} \left(1 - p^{(i)}\right)$.
+		\pause
+		\item On pourrait montrer que la variance de $\logit{p^{(i)}}$ est alors: 
+		\begin{equation}
+			\Var{\logit{p^{(i)}}} = \frac{1}{p^{(i)}\left(1 - p^{(i)}\right)}
+			\nonumber
+		\end{equation}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Incertitude en régression logistique}
+	On peut donc définir, pour la régression logistique, une nouvelle matrice de poids $W$ telle que:
+	\begin{equation}
+		W_{ij} = \begin{cases}
+			0 & \text{si} \, i \ne j \\
+			\hat{p}^{(i)}\left(1 - \hat{p}^{(i)}\right) & \text{sinon}
+		\end{cases}
+		\nonumber
+	\end{equation}
+	\pause
+	Et on en déduit la matrice de covariance de $\hat{\beta}$ pour la régression logistique:
+	\begin{equation}
+		\Cov{\hat{\beta}} = \left(\Phi(X)^T W \Phi(X)\right)^{-1}
+		\nonumber
+	\end{equation}
+	\pause
+	Et la variance de $\hat{\beta}$:
+	\begin{equation}
+		\Var{\hat{\beta}} = \diag \left(\Cov{\hat{\beta}}\right)
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Intervalle de confiance sur $\hat{\beta}$}
+	Comme il s'agit de la partie linéaire du modèle pour calculer le score, on peut faire la même hypothèse que pour le modèle de régression linéaire, c'est à dire supposer que les incertitudes sur le score sont de type Gaussien. L'intervalle de confiance au niveau $1 - \alpha$ sur $\hat{\beta}$ est alors:
+	\begin{equation}
+		\text{IC}_{1-\alpha}\left(\hat{\beta}\right) = \left[\hat{\beta} \pm \varphi^{-1}(1 - \alpha/2) \sqrt{\Var{\hat{\beta}}}\right]
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Intervalle de confiance sur le logit ou le score}
+	Pour une nouvelle observation $x^{(n+1)}$, on obtient d'abord la variance sur le score linéaire (le logit):
+	\begin{equation}
+		\Var{\logit{\hat{p}\left(x^{(n+1)}\right)}} = \diag\left(\Phi(x^{(n+1)}) \Cov{\hat{\beta}} \Phi(x^{(n+1)})^T\right)
+		\nonumber
+	\end{equation}
+	\pause
+	Puis, l'intervalle de confiance au niveau $1-\alpha$ sur le score (ou logit) se définit donc comme:
+	\begin{equation}
+		\begin{split}
+			\text{IC}_{1-\alpha}\left(\logit{\hat{p}\left(x^{(n+1)}\right)}\right) = \bigg[
+			&\logit{\hat{p}\left(x^{(n+1)}\right)} \\
+			&\pm \varphi^{-1}(1 - \alpha/2) \sqrt{\Var{\logit{\hat{p}\left(x^{(n+1)}\right)}}}\bigg]			
+		\end{split}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Intervalle de confiance sur la probabilité}
+	En appliquant la fonction logistique $\sigma$ à l'intervalle précédent on obtient l'intervalle de confiance au niveau $1 - \alpha$ de la probabilité $\hat{p}(x^{(n+1)})$:
+	\begin{equation}
+		\begin{aligned}
+			&\hat{p}_{\text{inf}} = \sigma\left(\logit{\hat{p}\left(x^{(n+1)}\right)} - \varphi^{-1}(1 - \alpha/2) \sqrt{\Var{\logit{\hat{p}\left(x^{(n+1)}\right)}}}\right) \\
+			&\hat{p}_{\text{sup}} = \sigma\left(\logit{\hat{p}\left(x^{(n+1)}\right)} + \varphi^{-1}(1 - \alpha/2) \sqrt{\Var{\logit{\hat{p}\left(x^{(n+1)}\right)}}}\right) \\
+			&\text{IC}_{1-\alpha}\left(\hat{p}\left(x^{(n+1)}\right)\right) = \left[\hat{p}_{\text{inf}}, \hat{p}_{\text{sup}}\right]
+		\end{aligned}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Région de prédiction sur la classe}
+	Dans un problème de classification binaire, $\hat{p}\left(x^{(n+1)}\right)$ représente en fait $P(y^{(n+1)} = 1 \mid x^{(n+1)})$. \\
+	En fonction de la valeur de $\hat{p}_{\text{inf}}$ et de $\hat{p}_{\text{sup}}$ on peut alors définir la région de prédiction au niveau $1 - \alpha$ comme suit:
+	\begin{equation}
+		C\left(x^{(n+1)}\right) = 
+		\begin{cases}
+			\{0\} & \text{si} \, \hat{p}_{\text{sup}} \le \alpha \\
+			\{1\} & \text{si} \, \hat{p}_{\text{inf}} \ge 1 - \alpha \\
+			\{0, 1\} & \text{sinon}
+		\end{cases}
+		\nonumber
+	\end{equation}
+	\pause
+	\begin{itemize}
+		\item Si $\text{IC}_{95\%}\left(\hat{p}\left(x^{(n+1)}\right)\right) = [0.92, 0.98]$ alors $C\left(x^{(n+1)}\right) = \{0, 1\}$.
+		\item Si $\text{IC}_{95\%}\left(\hat{p}\left(x^{(n+1)}\right)\right) = [0.01, 0.03]$ alors $C\left(x^{(n+1)}\right) = \{0\}$.
+		\item Si $\text{IC}_{95\%}\left(\hat{p}\left(x^{(n+1)}\right)\right) = [0.98, 0.99]$ alors $C\left(x^{(n+1)}\right) = \{1\}$.
+	\end{itemize}
+\end{frame}

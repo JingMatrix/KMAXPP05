@@ -1,0 +1,41 @@
+\subsection[Definitions]{Definitions}
+
+\begin{frame}{Application to Machine Learning}
+	\begin{itemize}
+		\item In the previous example, we focused on a random variable $Y$ (student height) and a parameter $\theta$ associated with this random variable: the mean height.
+		\pause
+		\item In the general case of machine learning, we are interested in a conditional distribution $Y \mid X$. The objective is to obtain a model $\hat{f}$ of the conditional expectation $\mathbb{E}[Y \mid X]$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Prediction Region}
+	\begin{block}{Definition: Prediction Region}
+		Let $\mathcal{D} = \{(x^{(1)}, y^{(1)}), \dots, (x^{(n)}, y^{(n)})\}$ be a training sample and $(x^{(n+1)}, y^{(n+1)})$ be a new observation from the same distribution. A \textbf{prediction region} of level $1 - \alpha$ is a function $C$ which, for any value $x^{(n+1)}$, produces a set $C(x^{(n+1)})$ such that:
+		\begin{equation}
+			P\left(y^{(n+1)} \in C\left(x^{(n+1)}\right)\right) \ge 1 - \alpha
+			\nonumber
+		\end{equation}
+		If $Y$ is a continuous random variable (regression), then $C$ is an \textbf{interval}. If $Y$ is a discrete random variable (classification), then $C$ is a \textbf{set} of classes. 
+	\end{block}
+\end{frame}
+
+
+\begin{frame}{Confidence Interval}
+	\begin{block}{Definition: Confidence Interval}
+		A confidence interval of level $1 - \alpha$ for conditional expectation $\E{Y \mid X}$ is an interval $\left[L(x), U(x)\right]$ such that:
+		\begin{equation}
+			P\left(L(x) \le \E{Y \mid X} \le U(x)\right) \ge 1 - \alpha
+			\nonumber
+		\end{equation}
+		\begin{itemize}
+			\item If $Y$ is a continuous random variable (regression), the \textbf{conditional expectation} $\E{Y \mid X}$ represents the true function $f(x): \mathcal{X} \to \mathcal{Y}$.
+			\item If $Y$ is a discrete random variable (classification), $\E{Y \mid X}$ represents represents the \textbf{probability} of belonging to a class $K$: $P(Y = K \mid X) \in ]0, 1[$.
+		\end{itemize}
+	\end{block}
+	\pause
+	In binary classification ($Y \in \{0, 1\}$), the expectation of a Bernoulli distribution exactly is the probability of success:
+	\begin{equation}
+		\E{Y \mid X} = 1 P(Y=1 | X) + 0 P(Y=0 | X) = P(Y = 1 | X)
+		\nonumber
+	\end{equation}
+\end{frame}

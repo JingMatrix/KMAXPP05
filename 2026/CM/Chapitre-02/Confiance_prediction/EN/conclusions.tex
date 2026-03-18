@@ -1,0 +1,35 @@
+\section[Conclusions]{Conclusions}
+
+\begin{frame}{Conclusions}
+	\begin{itemize}
+		\item We have seen how to determine confidence intervals and prediction regions using the theory of linear and logistic regressions.
+		\pause
+		\item We have shown that for linear and logistic regressions, the core of the calculation for intervals and regions is the covariance matrix of $\hat{\beta}$, which is determined from all the training data. This matrix is used regardless of the inputs $X_i$ subsequently provided to the model.
+		\pause
+		\item We also estimated these same intervals and regions using a bootstrapping algorithm.
+		\pause
+		\item We observed a strong agreement between the theoretical results and the bootstrapping method.
+		\pause
+		\item We also saw that the prediction region is a much more demanding metric than the ROC curve for classification.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusions}
+	\begin{itemize}
+		\item Although the bootstrapping algorithm was used here for linear and logistic regressions, it remains applicable \textbf{to any} regression and classification model.
+		\pause
+		\item For the majority of models, we do not have theoretical frameworks to determine these intervals and regions; therefore, empirical methods are the only ones available. However, they require training multiple models, which can be \textbf{computationally expensive}.
+		\pause
+		\item The confidence interval provides an estimate of the model \textbf{variance}.
+		\pause
+		\item The prediction region encompasses the \textbf{sum of all errors} (Bayes error, approximation error or bias, and estimation error or variance) but does not allow for discriminating between approximation error and Bayes error.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Conclusions}
+	\begin{itemize}
+		\item Prediction regions are \textbf{major} tools for validating machine learning models used in \textbf{safety-critical} systems.
+		\pause
+		\item \textbf{Conformal prediction} methods have been developed more recently to statistically \textbf{guarantee} coverage for prediction regions and are applicable to all regression and classification models.
+	\end{itemize}
+\end{frame}

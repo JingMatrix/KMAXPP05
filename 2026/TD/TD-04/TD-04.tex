@@ -1,0 +1,148 @@
+\documentclass[solutions]{../exercices}
+
+\begin{document}
+	
+	\makeheader{2025}{2026}
+	\tdtitle{4}{Algorithme Bayésien Naïf}
+	
+	
+	\begin{exercice}
+		Vous participez à un jeu télévisé. L'animateur vous propose de choisir une porte parmi trois. Chaque porte est numérotée de 1 à 3. Derrière l'une de ces portes se trouve une voiture de sport. Derrière chacune des deux autres portes se trouve une chèvre. Après que vous avez choisi une porte, l'animateur ouvre une des deux autres et vous révèle une chèvre (il ne révèlera jamais la voiture de sport de cette façon). Il vous demande ensuite si vous souhaitez choisir une autre porte, ou rester sur votre choix initial. Que devriez-vous faire pour maximiser vos chances de gagner la voiture de sport ?
+		
+		Pour faciliter les questions et les réponses, on suppose que vous avez choisi la porte numéro 1 et que l'animateur vous révèle la porte numéro 3. On note $V \in \{1, 2, 3\}$ la variable aléatoire discrète représentant la porte cachant la voiture. On note $O \in \{1, 2, 3\}$ la variable aléatoire discrète représentant la porte que l'animateur a ouverte.
+		
+		\vspace{0.3cm}
+		\textit{Note: Il s'agit d'un véritable jeu télévisé, le jeu de Monty Hall. Et le paradoxe de Monty Hall est célèbre chez les statisticiens !}
+		
+		\begin{enumerate}
+			\item Avant que l'animateur ne révèle une porte, quelle est la fonction de masse a priori de la variable $V$ ?
+			\item Quelles sont les vraisemblances $P(O=3 \mid V=1)$,  $P(O=3 \mid V=2)$ et $P(O=3 \mid V=3)$ ?
+			\item Vu que vous avez choisi la porte 1, quelle est la probabilité marginale que l'animateur ouvre la porte 3 $P(O=3)$ ?
+			\item Quelle est la fonction de masse a posteriori de $V \mid O=3$ ?
+			\item Quel choix devriez-vous faire pour maximiser vos chances de gagner la voiture de sport ?
+		\end{enumerate}
+						
+	\end{exercice}
+	
+	\begin{exercice}
+		Des ingénieurs ont développé un algorithme d'apprentissage automatique, noté $\mathcal{A}$, pour résoudre un problème de classification. \`A partir de capteurs de vibration, $\mathcal{A}$ permet d'identifier une défaillance sur une pompe hydraulique. Sur des données de test, $\mathcal{A}$ prédit les probabilités que la pompe soit défaillante $\hat{p}$ suivantes. La variable $y_{\text{test}}$ représente l'état réel de la pompe (1: en panne, 0: fonctionnement nominal):
+		
+		\begin{table}[h]
+			\centering
+			\resizebox{\textwidth}{!}{%
+				\begin{tabular}{@{}|lcccccccccccccccccccc|@{}}
+					\hline
+					Pompe & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 & 17 & 18 & 19 & 20 \\
+					\hline
+					$\hat{p}$  & .98 & .95 & .92 & .89 & .86 & .83 & .78 & .72 & .68 & .62 & .55 & .48 & .42 & .35 & .28 & .22 & .18 & .12 & .08 & .03 \\
+					$y_{\text{test}}$   & 1 & 1 & 1 & 1 & 1 & 1 & 1 & 0 & 1 & 1 & 1 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+					\hline
+				\end{tabular}%
+			}
+		\end{table}
+		
+		On notera $\theta$ le seuil de décision et $\hat{y}$ la classe prédite par cet algorithme de classification $\mathcal{A}$:
+		\begin{equation}
+			\hat{y} = \begin{cases}
+					1 & \hat{p} \ge \theta \\
+					0 & \hat{p} < \theta \\
+				\end{cases}
+			\nonumber
+		\end{equation}
+		
+		Le modèle $\mathcal{A}$ a été entraîné sur un jeu de données équilibré, c'est-à-dire qu'il comprend autant de pompes fonctionnant normalement que de pompes défaillantes. Ses prédictions brutes ne tiennent donc pas compte de la prévalence réelle de la défaillance sur le terrain. Des inspections réalisées dans le passé ont montré qu'une pompe sur mille est défaillante. Une équipe de contrôle qualité a choisi de combiner cet algorithme $\mathcal{A}$ avec une approche Bayésienne pour calculer les probabilités de défaillance a posteriori.
+		
+		\begin{enumerate}
+			\item Déterminer la matrice de confusion pour un seuil de décision $\theta = 0.65$.
+			\item Calculer le taux de vrais positifs et le taux de faux positifs pour les seuils de décisions suivants: $\theta = \{0.15, 0.65, 0.85\}$.
+			\item Calculer les facteurs de Bayes $\text{BF}_{10}(\hat{y} = 1)$ de l'algorithme $\mathcal{A}$ en fonction des seuils de décisions $\theta$ de la question précédente.
+			\item L'équipe de contrôle qualité préfère faire un contrôle approfondi pour une pompe qui n'aurait pas de problème que d'envoyer chez un client une pompe défaillante. Parmi les seuils de décision $\theta$ de la question précédente, quel est celui que l'équipe de contrôle qualité devrait choisir ?
+			\item Lorsqu'une pompe est identifiée comme défaillante par $\mathcal{A}$, l'équipe de contrôle qualité effectue un autre essai sur un banc différent, toujours en utilisant le même algorithme $\mathcal{A}$. On suppose ce second test indépendant du premier. Le facteur de Bayes de $\mathcal{A}$ est le même sur ce second test. Si l'algorithme $\mathcal{A}$ prédit sur ce second test que la pompe est défaillante alors l'équipe qualité demande un contrôle manuel approfondi. Quelle est la probabilité que ce contrôle manuel approfondi ne révèle aucune défaillance sur la pompe ? Pour répondre à cette question on utilisera le seuil de décision trouvé à la question précédente.
+			\item Pensez-vous que le processus de vérification dans cette entreprise est efficace ?
+		\end{enumerate}
+		
+	\end{exercice}
+	
+	\begin{exercice}
+		Le télescope Kepler a pour mission de détecter des exoplanètes. Une des difficultés est de différencier les exoplanètes des naines brunes. Les naines brunes sont des corps célestes trop massifs pour être considérés comme des exoplanètes mais pas assez massifs pour avoir pu initier des réactions de fusion d'hydrogène comme notre soleil. Pour effectuer ces détections les astrophysiciens se reposent sur plusieurs critères clé:
+		
+		\begin{itemize}
+			\item \textbf{L'éclipse secondaire}: lorsque le sujet passe derrière l'étoile on peut observer une baisse de luminosité de l'étoile. Une exoplanète ne cause, en général, qu'une variation minime de la luminosité lorsqu'elle passe derrière son étoile à moins qu'elle ne soit de très grosse taille. Dans le cas d'une naine brune, le télescope mesure une perte importante de luminosité: juste avant son passage derrière l'étoile, le télescope reçoit la lumière de l'étoile et la lumière de l'étoile réfléchie sur la naine brune.
+			\item \textbf{La température}: à partir de l'analyse des longueurs d'ondes, on peut estimer la température du sujet.
+			\item \textbf{Le nombre de pics de bruits}: une naine brune émet des rayonnements beaucoup plus instables qu'une exoplanète.
+		\end{itemize}
+		
+		Le tableau suivant résume les distributions et les paramètres pour ces trois critères en fonction du sujet:
+		
+		\begin{table}[h]
+			\centering
+			\begin{tabular}{|l|l|l|l|}
+				\hline
+				\textbf{Critère}                  & \textbf{Nature de la loi} & \textbf{Exoplanète} $E$        & \textbf{Naine brune} $N$         \\
+				\hline
+				\textbf{\'Eclipse secondaire} $x_1$ & Bernoulli               & $p_E = 0.1$                    & $p_N = 0.9$                      \\
+				\hline
+				\textbf{Pics de bruit} $x_2$      & Poisson                   & $\lambda_E = 1$                & $\lambda_N = 4$                  \\
+				\hline
+				\textbf{Température} $x_3$        & Gaussienne                & $\mu_E = 300 \text{K}, \sigma_E = 50$ & $\mu_N = 900 \text{K}, \sigma_N = 500$ \\
+				\hline
+			\end{tabular}
+		\end{table}
+		
+		Nous utiliserons un algorithme Bayésien Naïf pour déterminer si le sujet de l'étude est une exoplanète ($E$) ou une naine brune ($N$). On considère que parmi les sujets étudiés, nous avons $P(E) = 0.2$ et $P(N) = 0.8$. Ce sont nos probabilités a priori.
+		
+		Le sujet étudié dispose des caractéristiques suivantes:
+		\begin{itemize}
+			\item Il n'y a pas eu de détection d'éclipse secondaire: $x_1 = 0$.
+			\item On a compté 2 pics de bruit: $x_2 = 2$.
+			\item La température estimée du sujet est de 400 kelvins: $x_3 = 400$.
+		\end{itemize}
+		
+		On rappelle que la probabilité d'une loi de Bernoulli de paramètre $p$ pour la variable aléatoire discrète $X \in \{0, 1\}$ est donnée par:
+		\begin{equation}
+			P(X = x) = p^x \left(1 - p\right)^{\left(1 - x\right)}
+			\nonumber
+		\end{equation}
+		
+		On rappelle que la probabilité d'une loi de Poisson de paramètre $\lambda$ pour une variable aléatoire discrète $X \in \mathbb{N}$ est donnée par:
+		\begin{equation}
+			P(X = x) = \frac{\lambda^x e^{-\lambda}}{x!}
+			\nonumber
+		\end{equation}
+		
+		On rappelle que la densité de probabilité d'une loi Gaussienne de paramètres $\mu$ et $\sigma$ pour une variable aléatoire continue $X \in \mathbb{R}$ est donnée par:
+		\begin{equation}
+			f(x) = \frac{1}{\sigma \sqrt{2 \pi}} \exp{\left(-\frac{1}{2} \left(\frac{x - \mu}{\sigma}\right)^2\right)}
+			\nonumber
+		\end{equation}
+		Note: Rigoureusement, une température en Kelvin ne peut pas être négative. Dans la plage des températures observées pour les sujets, on considèrera la loi Gaussienne comme une approximation acceptable.
+		
+		On rappelle la définition de la fonction softmax $\sigma: \mathbb{R}^k \to [0, 1]^k$:
+		\begin{equation}
+			\sigma(z)_i = \frac{e^{z_i}}{\sum_{j=1}^k e^{z_j}}
+			\nonumber
+		\end{equation}
+		
+		Afin de simplifier les calculs, on supposera:
+		\begin{equation}
+			\begin{aligned}
+				1 / \sqrt{2 \pi} &\approx 0.4 \\
+				e^{-1/2} &\approx 0.61 \\
+				e^{-1} &\approx 0.37 \\
+				e^{-2} &\approx 0.14 \\
+				e^{-4} &\approx 0.02
+			\end{aligned}
+			\nonumber
+		\end{equation}
+		
+		\begin{enumerate}
+			\item On considère un premier algorithme Bayésien Naïf $\mathcal{A}_1$ pour l'éclipse secondaire. Calculer les log-vraisemblances pour les deux classes $E$ et $N$.
+			\item On considère un deuxième algorithme Bayésien Naïf $\mathcal{A}_2$ pour les pics de bruits. Calculer les log-vraisemblances pour les deux classes $E$ et $N$.
+			\item On considère un dernier algorithme Bayésien Naïf $\mathcal{A}_3$ pour la température. Calculer les log-vraisemblances pour les deux classes $E$ et $N$.
+			\item Proposez une hypothèse pour calculer la probabilité a posteriori $P(E \mid x_1 = 0, x_2 = 2, x_3 = 400)$ et calculer sa valeur selon votre hypothèse. On utilisera la fonction softmax pour convertir les log-probabilités en probabilités.
+			\item Quel critère observé par les astrophysiciens procure la plus grande conviction pour ce sujet ?
+		\end{enumerate}
+		
+	\end{exercice}
+	
+\end{document}

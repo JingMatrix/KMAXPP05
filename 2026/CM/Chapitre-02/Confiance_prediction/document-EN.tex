@@ -1,0 +1,60 @@
+%\documentclass[10pt]{beamer}  % pour la présentation
+\documentclass[10pt,handout]{beamer}  % pour les notes de cours
+
+
+\usetheme{Antibes}
+\usecolortheme{whale}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{mini frames}{} % Supprime les petits cercles dans le header
+\setbeamertemplate{items}[triangle]
+\setbeamercolor{itemize item}{fg=black}
+\setbeamercolor{itemize subitem}{fg=gray}
+\setbeamertemplate{frametitle continuation}{}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, positioning}
+\usepackage{nicematrix}
+
+%\newcommand{\Var}[1]{\mathbb{V}\mathrm{ar}\left[ #1 \right]}
+%\newcommand{\Cov}[1]{\mathbb{C}\mathrm{ov}\left[ #1 \right]}
+\newcommand{\E}[1]{\operatorname{\mathbb{E}}\left[#1\right]}
+\newcommand{\Var}[1]{\operatorname{\mathbb{V}ar}\left[#1\right]}
+\newcommand{\Cov}[1]{\operatorname{\mathbb{C}ov}\left[#1\right]}
+\newcommand{\sigeps}{\sigma_{\epsilon}^2}
+\newcommand{\ET}[1][]{\operatorname{SE}\ifx&#1&\else\left[#1\right]\fi}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\cote}{\operatorname{odds}}
+\newcommand{\score}[1]{\operatorname{score}\left(#1\right)}
+\newcommand{\logit}[1]{\operatorname{logit}\left(#1\right)}
+
+\title{Machine Learning - L3 - KMAXPP05}
+\subtitle{Chapter 2 : Prediction regions and confidence intervals}
+\author{Cédric Campguilhem}
+\institute[]{
+	Airbus Operations \\
+	\href{mailto:cedric.campguilhem@airbus.com}{\texttt{cedric.campguilhem@airbus.com}}
+}
+\date{2025-2026}
+
+\begin{document}
+	
+\begin{frame}
+	\titlepage
+\end{frame}
+	
+\include{EN/introduction}
+\include{EN/intuition}
+\include{EN/definitions}
+\include{EN/modeles_lineaires}
+\include{EN/empirique}
+\include{EN/conclusions}
+
+\end{document}
