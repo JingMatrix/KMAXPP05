@@ -1,19 +1,19 @@
 \documentclass[solutions]{../exercices}
 
 \begin{document}
-	
+
 	\makeheader{2025}{2026}
 	\tdtitle{4}{Algorithme Bayésien Naïf}
-	
-	
+
+
 	\begin{exercice}
 		Vous participez à un jeu télévisé. L'animateur vous propose de choisir une porte parmi trois. Chaque porte est numérotée de 1 à 3. Derrière l'une de ces portes se trouve une voiture de sport. Derrière chacune des deux autres portes se trouve une chèvre. Après que vous avez choisi une porte, l'animateur ouvre une des deux autres et vous révèle une chèvre (il ne révèlera jamais la voiture de sport de cette façon). Il vous demande ensuite si vous souhaitez choisir une autre porte, ou rester sur votre choix initial. Que devriez-vous faire pour maximiser vos chances de gagner la voiture de sport ?
-		
+
 		Pour faciliter les questions et les réponses, on suppose que vous avez choisi la porte numéro 1 et que l'animateur vous révèle la porte numéro 3. On note $V \in \{1, 2, 3\}$ la variable aléatoire discrète représentant la porte cachant la voiture. On note $O \in \{1, 2, 3\}$ la variable aléatoire discrète représentant la porte que l'animateur a ouverte.
-		
+
 		\vspace{0.3cm}
 		\textit{Note: Il s'agit d'un véritable jeu télévisé, le jeu de Monty Hall. Et le paradoxe de Monty Hall est célèbre chez les statisticiens !}
-		
+
 		\begin{enumerate}
 			\item Avant que l'animateur ne révèle une porte, quelle est la fonction de masse a priori de la variable $V$ ?
 			\item Quelles sont les vraisemblances $P(O=3 \mid V=1)$,  $P(O=3 \mid V=2)$ et $P(O=3 \mid V=3)$ ?
@@ -21,12 +21,44 @@
 			\item Quelle est la fonction de masse a posteriori de $V \mid O=3$ ?
 			\item Quel choix devriez-vous faire pour maximiser vos chances de gagner la voiture de sport ?
 		\end{enumerate}
-						
+
 	\end{exercice}
-	
+
+\begin{solution}
+	\begin{enumerate}
+		\item Avant que l'animateur ne révèle de porte, nous n'avons aucune information privilégiée. La fonction de masse a priori de la variable $V$ est donc uniforme :
+		\[
+		P(V=1) = \frac{1}{3}, \quad P(V=2) = \frac{1}{3}, \quad P(V=3) = \frac{1}{3}
+		\]
+
+		\item Les vraisemblances décrivent la probabilité que l'animateur ouvre la porte 3 sachant la position réelle de la voiture. Rappelons qu'il ne peut ouvrir ni la porte choisie par le joueur (la 1) ni la porte cachant la voiture.
+		\begin{itemize}
+			\item Si $V=1$ (la voiture est derrière la porte 1), l'animateur a le choix entre ouvrir la porte 2 ou la 3. S'il choisit au hasard, alors $P(O=3 \mid V=1) = \frac{1}{2}$.
+			\item Si $V=2$ (la voiture est derrière la porte 2), l'animateur ne peut ouvrir que la porte 3 (puisqu'il ne peut ouvrir ni la 1, ni la 2). Donc $P(O=3 \mid V=2) = 1$.
+			\item Si $V=3$ (la voiture est derrière la porte 3), l'animateur ne peut pas ouvrir la porte 3 car elle cache la voiture. Donc $P(O=3 \mid V=3) = 0$.
+		\end{itemize}
+
+		\item On utilise la formule des probabilités totales pour calculer la probabilité marginale $P(O=3)$ :
+		\begin{align*}
+			P(O=3) &= P(O=3 \mid V=1)P(V=1) + P(O=3 \mid V=2)P(V=2) + P(O=3 \mid V=3)P(V=3) \\
+			&= \left(\frac{1}{2} \times \frac{1}{3}\right) + \left(1 \times \frac{1}{3}\right) + \left(0 \times \frac{1}{3}\right) \\
+			&= \frac{1}{6} + \frac{1}{3} + 0 = \frac{1}{2}
+		\end{align*}
+
+		\item On applique le théorème de Bayes pour obtenir la probabilité a posteriori pour chaque porte :
+		\begin{align*}
+			P(V=1 \mid O=3) &= \frac{P(O=3 \mid V=1)P(V=1)}{P(O=3)} = \frac{1/6}{1/2} = \frac{1}{3} \\
+			P(V=2 \mid O=3) &= \frac{P(O=3 \mid V=2)P(V=2)}{P(O=3)} = \frac{1/3}{1/2} = \frac{2}{3} \\
+			P(V=3 \mid O=3) &= \frac{P(O=3 \mid V=3)P(V=3)}{P(O=3)} = \frac{0}{1/2} = 0
+		\end{align*}
+
+		\item Pour maximiser vos chances de gagner la voiture de sport, vous devriez choisir la porte avec la plus grande probabilité a posteriori. Vous devriez donc \textbf{changer votre choix initial} et ouvrir la porte 2. Cela double vos chances de gagner (passant de $1/3$ à $2/3$).
+	\end{enumerate}
+\end{solution}
+
 	\begin{exercice}
 		Des ingénieurs ont développé un algorithme d'apprentissage automatique, noté $\mathcal{A}$, pour résoudre un problème de classification. \`A partir de capteurs de vibration, $\mathcal{A}$ permet d'identifier une défaillance sur une pompe hydraulique. Sur des données de test, $\mathcal{A}$ prédit les probabilités que la pompe soit défaillante $\hat{p}$ suivantes. La variable $y_{\text{test}}$ représente l'état réel de la pompe (1: en panne, 0: fonctionnement nominal):
-		
+
 		\begin{table}[h]
 			\centering
 			\resizebox{\textwidth}{!}{%
@@ -40,7 +72,7 @@
 				\end{tabular}%
 			}
 		\end{table}
-		
+
 		On notera $\theta$ le seuil de décision et $\hat{y}$ la classe prédite par cet algorithme de classification $\mathcal{A}$:
 		\begin{equation}
 			\hat{y} = \begin{cases}
@@ -49,9 +81,9 @@
 				\end{cases}
 			\nonumber
 		\end{equation}
-		
+
 		Le modèle $\mathcal{A}$ a été entraîné sur un jeu de données équilibré, c'est-à-dire qu'il comprend autant de pompes fonctionnant normalement que de pompes défaillantes. Ses prédictions brutes ne tiennent donc pas compte de la prévalence réelle de la défaillance sur le terrain. Des inspections réalisées dans le passé ont montré qu'une pompe sur mille est défaillante. Une équipe de contrôle qualité a choisi de combiner cet algorithme $\mathcal{A}$ avec une approche Bayésienne pour calculer les probabilités de défaillance a posteriori.
-		
+
 		\begin{enumerate}
 			\item Déterminer la matrice de confusion pour un seuil de décision $\theta = 0.65$.
 			\item Calculer le taux de vrais positifs et le taux de faux positifs pour les seuils de décisions suivants: $\theta = \{0.15, 0.65, 0.85\}$.
@@ -60,20 +92,20 @@
 			\item Lorsqu'une pompe est identifiée comme défaillante par $\mathcal{A}$, l'équipe de contrôle qualité effectue un autre essai sur un banc différent, toujours en utilisant le même algorithme $\mathcal{A}$. On suppose ce second test indépendant du premier. Le facteur de Bayes de $\mathcal{A}$ est le même sur ce second test. Si l'algorithme $\mathcal{A}$ prédit sur ce second test que la pompe est défaillante alors l'équipe qualité demande un contrôle manuel approfondi. Quelle est la probabilité que ce contrôle manuel approfondi ne révèle aucune défaillance sur la pompe ? Pour répondre à cette question on utilisera le seuil de décision trouvé à la question précédente.
 			\item Pensez-vous que le processus de vérification dans cette entreprise est efficace ?
 		\end{enumerate}
-		
+
 	\end{exercice}
-	
+
 	\begin{exercice}
 		Le télescope Kepler a pour mission de détecter des exoplanètes. Une des difficultés est de différencier les exoplanètes des naines brunes. Les naines brunes sont des corps célestes trop massifs pour être considérés comme des exoplanètes mais pas assez massifs pour avoir pu initier des réactions de fusion d'hydrogène comme notre soleil. Pour effectuer ces détections les astrophysiciens se reposent sur plusieurs critères clé:
-		
+
 		\begin{itemize}
 			\item \textbf{L'éclipse secondaire}: lorsque le sujet passe derrière l'étoile on peut observer une baisse de luminosité de l'étoile. Une exoplanète ne cause, en général, qu'une variation minime de la luminosité lorsqu'elle passe derrière son étoile à moins qu'elle ne soit de très grosse taille. Dans le cas d'une naine brune, le télescope mesure une perte importante de luminosité: juste avant son passage derrière l'étoile, le télescope reçoit la lumière de l'étoile et la lumière de l'étoile réfléchie sur la naine brune.
 			\item \textbf{La température}: à partir de l'analyse des longueurs d'ondes, on peut estimer la température du sujet.
 			\item \textbf{Le nombre de pics de bruits}: une naine brune émet des rayonnements beaucoup plus instables qu'une exoplanète.
 		\end{itemize}
-		
+
 		Le tableau suivant résume les distributions et les paramètres pour ces trois critères en fonction du sujet:
-		
+
 		\begin{table}[h]
 			\centering
 			\begin{tabular}{|l|l|l|l|}
@@ -88,41 +120,41 @@
 				\hline
 			\end{tabular}
 		\end{table}
-		
+
 		Nous utiliserons un algorithme Bayésien Naïf pour déterminer si le sujet de l'étude est une exoplanète ($E$) ou une naine brune ($N$). On considère que parmi les sujets étudiés, nous avons $P(E) = 0.2$ et $P(N) = 0.8$. Ce sont nos probabilités a priori.
-		
+
 		Le sujet étudié dispose des caractéristiques suivantes:
 		\begin{itemize}
 			\item Il n'y a pas eu de détection d'éclipse secondaire: $x_1 = 0$.
 			\item On a compté 2 pics de bruit: $x_2 = 2$.
 			\item La température estimée du sujet est de 400 kelvins: $x_3 = 400$.
 		\end{itemize}
-		
+
 		On rappelle que la probabilité d'une loi de Bernoulli de paramètre $p$ pour la variable aléatoire discrète $X \in \{0, 1\}$ est donnée par:
 		\begin{equation}
 			P(X = x) = p^x \left(1 - p\right)^{\left(1 - x\right)}
 			\nonumber
 		\end{equation}
-		
+
 		On rappelle que la probabilité d'une loi de Poisson de paramètre $\lambda$ pour une variable aléatoire discrète $X \in \mathbb{N}$ est donnée par:
 		\begin{equation}
 			P(X = x) = \frac{\lambda^x e^{-\lambda}}{x!}
 			\nonumber
 		\end{equation}
-		
+
 		On rappelle que la densité de probabilité d'une loi Gaussienne de paramètres $\mu$ et $\sigma$ pour une variable aléatoire continue $X \in \mathbb{R}$ est donnée par:
 		\begin{equation}
 			f(x) = \frac{1}{\sigma \sqrt{2 \pi}} \exp{\left(-\frac{1}{2} \left(\frac{x - \mu}{\sigma}\right)^2\right)}
 			\nonumber
 		\end{equation}
 		Note: Rigoureusement, une température en Kelvin ne peut pas être négative. Dans la plage des températures observées pour les sujets, on considèrera la loi Gaussienne comme une approximation acceptable.
-		
+
 		On rappelle la définition de la fonction softmax $\sigma: \mathbb{R}^k \to [0, 1]^k$:
 		\begin{equation}
 			\sigma(z)_i = \frac{e^{z_i}}{\sum_{j=1}^k e^{z_j}}
 			\nonumber
 		\end{equation}
-		
+
 		Afin de simplifier les calculs, on supposera:
 		\begin{equation}
 			\begin{aligned}
@@ -134,7 +166,7 @@
 			\end{aligned}
 			\nonumber
 		\end{equation}
-		
+
 		\begin{enumerate}
 			\item On considère un premier algorithme Bayésien Naïf $\mathcal{A}_1$ pour l'éclipse secondaire. Calculer les log-vraisemblances pour les deux classes $E$ et $N$.
 			\item On considère un deuxième algorithme Bayésien Naïf $\mathcal{A}_2$ pour les pics de bruits. Calculer les log-vraisemblances pour les deux classes $E$ et $N$.
@@ -142,7 +174,61 @@
 			\item Proposez une hypothèse pour calculer la probabilité a posteriori $P(E \mid x_1 = 0, x_2 = 2, x_3 = 400)$ et calculer sa valeur selon votre hypothèse. On utilisera la fonction softmax pour convertir les log-probabilités en probabilités.
 			\item Quel critère observé par les astrophysiciens procure la plus grande conviction pour ce sujet ?
 		\end{enumerate}
-		
+
 	\end{exercice}
-	
+
+\begin{solution}
+	\begin{enumerate}
+		\item L'algorithme $\mathcal{A}_1$ considère la présence d'une éclipse secondaire comme une loi de Bernoulli.
+		Pour $x_1 = 0$ (pas d'éclipse observée) :
+		\begin{align*}
+			P(x_1 = 0 \mid E) &= (1 - p_E) = 1 - 0.1 = 0.9 \implies \ln P(x_1 = 0 \mid E) = \ln(0.9) \approx -0.105 \\
+			P(x_1 = 0 \mid N) &= (1 - p_N) = 1 - 0.9 = 0.1 \implies \ln P(x_1 = 0 \mid N) = \ln(0.1) \approx -2.303
+		\end{align*}
+
+		\item L'algorithme $\mathcal{A}_2$ considère les pics de bruit modélisés par une loi de Poisson.
+		Pour $x_2 = 2$ :
+		\begin{align*}
+			P(x_2 = 2 \mid E) &= \frac{\lambda_E^2 e^{-\lambda_E}}{2!} = \frac{1^2 \cdot e^{-1}}{2} \approx \frac{0.37}{2} = 0.185 \implies \ln P(x_2 = 2 \mid E) = \ln(0.185) \approx -1.687 \\
+			P(x_2 = 2 \mid N) &= \frac{\lambda_N^2 e^{-\lambda_N}}{2!} = \frac{4^2 \cdot e^{-4}}{2} \approx \frac{16 \cdot 0.02}{2} = 0.16 \implies \ln P(x_2 = 2 \mid N) = \ln(0.16) \approx -1.832
+		\end{align*}
+
+		\item L'algorithme $\mathcal{A}_3$ considère la température selon une loi Gaussienne.
+		Pour $x_3 = 400$ :
+		\begin{align*}
+			P(x_3 = 400 \mid E) &= \frac{1}{50 \sqrt{2 \pi}} \exp{\left(-\frac{1}{2} \left(\frac{400 - 300}{50}\right)^2\right)} \approx \frac{0.4}{50} \cdot \exp{\left(-\frac{1}{2} \cdot 4\right)} \\
+			&= \frac{0.4 \cdot e^{-2}}{50} \approx \frac{0.4 \cdot 0.14}{50} = \frac{0.056}{50} = 0.00112 \implies \ln P(x_3 = 400 \mid E) \approx -6.794 \\
+			P(x_3 = 400 \mid N) &= \frac{1}{500 \sqrt{2 \pi}} \exp{\left(-\frac{1}{2} \left(\frac{400 - 900}{500}\right)^2\right)} \approx \frac{0.4}{500} \cdot \exp{\left(-\frac{1}{2} \cdot 1\right)} \\
+			&= \frac{0.4 \cdot e^{-0.5}}{500} \approx \frac{0.4 \cdot 0.61}{500} = \frac{0.244}{500} = 0.000488 \implies \ln P(x_3 = 400 \mid N) \approx -7.625
+		\end{align*}
+
+		\item On s'appuie sur \textbf{l'hypothèse d'indépendance conditionnelle} (Naive Bayes) des variables $x_1, x_2, x_3$ sachant la classe du corps céleste.
+		Cela permet d'additionner les log-probabilités de chaque critère avec la log-probabilité a priori pour obtenir un score non normalisé.
+		Les probabilités a priori sont $P(E) = 0.2 \implies \ln P(E) \approx -1.609$ et $P(N) = 0.8 \implies \ln P(N) \approx -0.223$.
+
+		Calculons les scores log-vraisemblance totaux :
+		\begin{align*}
+			z_E &= \ln P(E) + \ln P(x_1 \mid E) + \ln P(x_2 \mid E) + \ln P(x_3 \mid E) \\
+			&\approx -1.609 - 0.105 - 1.687 - 6.794 = -10.195 \\
+			z_N &= \ln P(N) + \ln P(x_1 \mid N) + \ln P(x_2 \mid N) + \ln P(x_3 \mid N) \\
+			&\approx -0.223 - 2.303 - 1.832 - 7.625 = -11.983
+		\end{align*}
+
+		Nous utilisons ensuite la fonction softmax pour les convertir en probabilités :
+		\[
+		P(E \mid x) = \frac{\exp(z_E)}{\exp(z_E) + \exp(z_N)} = \frac{\exp(-10.195)}{\exp(-10.195) + \exp(-11.983)} \approx 0.857
+		\]
+		Et par complément, $P(N \mid x) = 1 - P(E \mid x) \approx 0.143$.
+		La probabilité que ce soit une exoplanète est d'environ \textbf{85.7\%}.
+
+		\item Pour trouver le critère qui procure la plus grande conviction, comparons le Facteur de Bayes de chaque caractéristique observée :
+		\begin{align*}
+			\text{BF}_{E/N}(x_1=0) &= \frac{P(x_1=0 \mid E)}{P(x_1=0 \mid N)} = \frac{0.9}{0.1} = 9 \\
+			\text{BF}_{E/N}(x_2=2) &= \frac{P(x_2=2 \mid E)}{P(x_2=2 \mid N)} = \frac{0.185}{0.16} \approx 1.16 \\
+			\text{BF}_{E/N}(x_3=400) &= \frac{P(x_3=400 \mid E)}{P(x_3=400 \mid N)} = \frac{0.00112}{0.000488} \approx 2.30
+		\end{align*}
+		Puisque la valeur 9 est la plus élevée, c'est \textbf{l'absence d'éclipse secondaire} ($x_1=0$) qui apporte la plus grande conviction envers l'hypothèse de l'exoplanète.
+	\end{enumerate}
+\end{solution}
+
 \end{document}
