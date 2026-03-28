@@ -31,7 +31,7 @@
 			\item Calculate $\hat{Y}_i^{(b)}$ from the inference data $X_i$: $\hat{Y}_i^{(b)} = \Phi(X_i) \hat{\beta}^{(b)}$.
 		\end{itemize}
 		\item For each input $k$ of $X_i$, calculate the $\alpha / 2$ and $1 - \alpha / 2$ quantiles on $\{(\hat{y}_i^{(k)})^{(1)}, (\hat{y}_i^{(k)})^{(2)}, \dots, (\hat{y}_i^{(k)})^{(B)}\}$. This yields the $1 - \alpha$ level confidence interval for $X_i^{(k)}$.
-		\item For each input $k$ of $X_i$ and for each bootstrap $b$, randomly associate a residual with the predictions: $(\hat{y}_i^{*(k)})^{(b)} = (\hat{y}_i^{(k)})^{(b)} + a(R)$.
+		\item For each bootstrap $b$ and all $X_i$, randomly associate a residual with the predictions: $\left(\hat{y}_i^*\right)^{(b)} = \left(\hat{y}_i\right)^{(b)} + a(R)$.
 		\item For each input $k$ of $X_i$, calculate the $\alpha / 2$ and $1 - \alpha / 2$ quantiles on $\{(\hat{y}_i^{*(k)})^{(1)}, (\hat{y}_i^{*(k)})^{(2)}, \dots, (\hat{y}_i^{*(k)})^{(B)}\}$. This yields the $1 - \alpha$ level prediction interval for $X_i^{(k)}$.
 	\end{enumerate}
 \end{frame}

@@ -1,0 +1,145 @@
+\documentclass[solutions]{../exercices}
+
+\begin{document}
+	
+	\makeheader{2025}{2026}
+	\tdtitle{5}{Métriques de performance}
+		
+	\begin{exercice}
+		Dans cet exercice on considère les données d'apprentissage suivantes pour un problème de régression linéaire $y = f(x) + \epsilon$:
+		
+		\begin{table}[!h]
+			\centering
+			\begin{tabular}{@{}|lccccc|@{}}
+				\hline
+				$X_{\text{train}}$ & -1.4142 & -0.7071 & 0 & 0.7071 & 1.4142 \\
+				\hline
+				$Y_{\text{train}}$ & -0.7071 & -1.4142 & 0 & 1.4142 & 0.7071 \\
+				\hline
+			\end{tabular}%
+		\end{table}
+		
+		Ces données sont standardisées. La moyenne et l'écart type de $X_{\text{train}}$ sont respectivement égaux à 0 et 1. De même, la moyenne et l'écart type de $Y_{\text{train}}$ sont respectivement égaux à 0 et 1. Sur les données d'apprentissage, on donne $\text{SS}_{\text{tot}} = 5$.
+		
+		Soient les données de test suivantes, qui ont été standardisées à partir des moyennes et écarts types calculés sur les données d'apprentissage:
+		
+		\begin{table}[!h]
+			\centering
+			\begin{tabular}{@{}|lccccc|@{}}
+				\hline
+				$X_{\text{test}}$ & -1.5 & -0.75 & 0 & 0.75 & 1.5 \\
+				\hline
+				$Y_{\text{test}}$ & -1.8 & -0.2 & 0.4 & 1.2 & 0.4 \\
+				\hline
+			\end{tabular}%
+		\end{table}
+		
+		Sur les données de test, on donne $\text{SS}_{\text{tot}} = 5.04$.
+		
+		Enfin, les données d'inférence sont les suivantes pour les intervalles de confiance et de prédiction. Elles ont été standardisées comme les données d'apprentissage:
+		
+		\begin{table}[!h]
+			\centering
+			\begin{tabular}{@{}|lccc|@{}}
+				\hline
+				$X_{\text{inf}}$ & -1 & 0 & 1 \\
+				\hline
+			\end{tabular}%
+		\end{table}
+		
+		Dans cet exercice on propose d'estimer la variance $\Var\left[\epsilon\right] = \sigeps$ à partir d'une estimation non biaisée de la variance des résidus $s^2$ sur les données d'apprentissage:
+		
+		\begin{equation}
+			s^2 = \frac{1}{n - p} \text{SS}_{\text{res}}
+			\nonumber
+		\end{equation}
+		
+		Où $n$ est le nombre d'observations dans les données d'apprentissage et $p$ est le nombre de paramètres $\beta$ résultant du choix de la fonction d'augmentation $\Phi$.
+		
+		On rappelle que la solution de la méthode des moindres carrés ordinaire est:
+		
+		\begin{equation}
+			\hat{\beta} = \left(\Phi(X)^T \Phi(X)\right)^{-1} \Phi(X)^T Y
+			\nonumber 
+		\end{equation}
+		
+		La matrice de covariance des estimateurs $\hat{\beta}$ s'écrit:
+		
+		\begin{equation}
+			\Cov \left[\hat{\beta}\right] = s^2 \left(\Phi(X)^T \Phi(X)\right)^{-1}
+			\nonumber
+		\end{equation}
+		
+		La matrice de covariance des prédictions $\hat{Y} \mid X$ s'écrit quant à elle:
+		
+		\begin{equation}
+			\Cov \left[\hat{Y} \mid X \right] = \Phi(X) \Cov \left[\hat{\beta}\right] \Phi(X)^T
+			\nonumber
+		\end{equation}
+		
+		Dans cet exercice, on supposera que les résidus suivent une loi de Student de $n - p$ degrés de liberté. On donne:
+		
+		\begin{equation}
+			t_{n-p, 0.975} \approx 2.776
+			\nonumber
+		\end{equation}
+		
+		\begin{enumerate}
+			\item Proposer une fonction d'augmentation $\Phi$ pour ce problème de régression. Justifier votre choix. En déduire $\tilde{X}$.
+			\item En utilisant la méthode des moindres carrés ordinaire, déterminer $\hat{\beta}$.
+			\item Calculer les résidus sur les données d'apprentissage. En déduire $\text{SS}_{\text{res}}$ et $R^2$ sur ces mêmes données.
+			\item Calculer les résidus sur les données de test. En déduire $\text{SS}_{\text{res}}$ et $R^2$ sur ces mêmes données. Que conclure ?
+			\item Calculer le risque empirique en considérant l'erreur quadratique comme fonction de perte.
+			\item Estimer le risque vrai en considérant la même fonction de perte.
+			\item Comparer le risque empirique et le risque vrai. Discuter le résultat.
+			\item Calculer $\Cov \left[\hat{\beta}\right]$ à partir des données d'apprentissage.
+			\item Calculer la variance de $\hat{Y} \mid X$ sur les données d'inférence $X_{\text{inf}}$.
+			\item Calculer un intervalle de confiance au niveau 95\% de $\hat{Y} \mid X$ sur les données d'inférence $X_{\text{inf}}$. Que conclure sur la variance du modèle en $x = 0$ ? Expliquer ce résultat.
+			\item Calculer un intervalle de prédiction au niveau 95\% de $\hat{Y} \mid X$ sur les données d'inférence $X_{\text{inf}}$. On rappelle que pour construire un intervalle de prédiction, il faut ajouter une estimation de $\sigeps$ à la variance de $\hat{Y} \mid X$.
+			\item Donner une interprétation des intervalles de confiance et de prédiction.
+			\item Ce modèle serait-il pertinent dans un contexte où la précision est cruciale ? Justifier la réponse.
+		\end{enumerate}
+	\end{exercice}
+	
+	\begin{exercice}
+		On suppose que nous avons un algorithme de classification qui produit les résultats suivants:
+		\begin{table}[h]
+			\centering
+			\resizebox{\textwidth}{!}{%
+				\begin{tabular}{@{}|lcccccccccccccccc|@{}}
+					\hline
+					Observation & 1 & 2 & 3 & 4 & 5 & 6 & 7 & 8 & 9 & 10 & 11 & 12 & 13 & 14 & 15 & 16 \\
+					\hline
+					$\hat{p}$ & 0.95 & 0.89 & 0.83 & 0.77 & 0.71 & 0.65 & 0.59 & 0.53 & 0.47 & 0.41 & 0.35 & 0.29 & 0.23 & 0.17 & 0.11 & 0.05 \\
+					$y_{\text{vrai}}$ & 1 & 0 & 1 & 1 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0\\
+					\hline
+				\end{tabular}%
+			}			
+		\end{table}
+		\begin{enumerate}
+			\item Proposer les seuils de décision $\theta$ à considérer pour tracer la courbe ROC.
+			\item Calculer les taux des vrais positifs et des faux positifs pour les $\theta$ de la question précédente.
+			\item Tracer approximativement la courbe ROC.
+			\item Quelle est la métrique AUC pour cette courbe ? On rappelle que AUC (Area Under Curve) est l'intégrale de la courbe ROC quand le taux des faux positifs varie de 0 à 1.
+			\item Comment juger la performance de l'algorithme en se basant sur l'AUC ?
+		\end{enumerate}
+	\end{exercice}
+	
+	\begin{exercice}
+		On considère un test pour une maladie très rare. Un algorithme de classification classe 100 individus par probabilité prédite $\hat{p}$ décroissante. Le seul patient atteint de la maladie est en 10\textsuperscript{ème} position dans ce même classement. On choisit un seuil de décision $\theta = \theta^*$ tel que les 10 patients avec les probabilités prédites les plus élevées sont positifs.
+		\begin{enumerate}
+			\item Calculer le taux de vrais positifs et de faux positifs pour cette valeur de $\theta^*$.
+			\item Tracer approximativement la courbe ROC en choisissant astucieusement les valeurs du seuil $\theta$.
+			\item Calculer l'AUC.
+			\item A partir de la valeur de l'AUC comment juger la performance de l'algorithme ?
+			\item Calculer la précision et le rappel pour les points de la courbe ROC précédemment déterminés. Par convention, quand le nombre de vrais positifs et le nombre de faux positifs sont nuls, on prend une précision égale à 1.
+			\item En considérant les scores de précision et de rappel, comment considérer la performance de l'algorithme ?
+			\item Quelle faiblesse de la courbe ROC cet exercice illustre-t-il ?
+		\end{enumerate}
+	\end{exercice}
+	
+	\begin{exercice}
+		Sur la base des 3 exercices précédents, discuter de la stratégie de validation qu'il faudrait aborder pour un algorithme d'apprentissage automatique.
+	\end{exercice}
+			
+\end{document}

@@ -33,6 +33,7 @@
 \newcommand{\C}{\mathbb{C}}
 \newcommand{\Var}{\mathbb{V}\mathrm{ar}}
 \newcommand{\Cov}{\mathbb{C}\mathrm{ov}}
+\newcommand{\sigeps}{\sigma_{\epsilon}^2}
 
 % Symbol Aliases and Redefinitions
 \renewcommand{\epsilon}{\varepsilon}

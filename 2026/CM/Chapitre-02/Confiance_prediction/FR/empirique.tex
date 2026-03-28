@@ -31,7 +31,7 @@
 			\item Calculer $\hat{Y}_i^{(b)}$ à partir des données d'inférence $X_i$: $\hat{Y}_i^{(b)} = \Phi(X_i) \hat{\beta}^{(b)}$.
 		\end{itemize}
 		\item Pour chaque entrée $k$ de $X_i$, calculer les quantiles $\alpha / 2$ et $1 - \alpha / 2$ sur $\{\left(\hat{y}_i^{(k)}\right)^{(1)}, \left(\hat{y}_i^{(k)}\right)^{(2)}, \cdots, \left(\hat{y}_i^{(k)}\right)^{(B)}\}$. Cela donne l'intervalle de confiance au niveau $1 - \alpha$ pour $X_i^{(k)}$.
-		\item Pour chaque entrée $k$ de $X_i$ et pour chaque bootstrap $b$, associer aléatoirement un résidu aux prédictions: $\left(\hat{y}_i^{*(k)}\right)^{(b)} = \left(\hat{y}_i^{(k)}\right)^{(b)} + a(R)$.
+		\item Pour chaque bootstrap $b$ et tous les $X_i$, associer aléatoirement un résidu aux prédictions: $\left(\hat{y}_i^*\right)^{(b)} = \left(\hat{y}_i\right)^{(b)} + a(R)$.
 		\item Pour chaque entrée $k$ de $X_i$, calculer les quantiles $\alpha / 2$ et $1 - \alpha / 2$ sur $\{\left(\hat{y}_i^{*(k)}\right)^{(1)}, \left(\hat{y}_i^{*(k)}\right)^{(2)}, \cdots, \left(\hat{y}_i^{*(k)}\right)^{(B)}\}$. Cela donne l'intervalle de prédiction au niveau $1 - \alpha$ pour $X_i^{(k)}$.
 	\end{enumerate}
 \end{frame}

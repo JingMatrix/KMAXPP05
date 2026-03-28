@@ -81,7 +81,7 @@
 	\begin{itemize}
 		\item Il repose sur le \textbf{théorème de Bayes}...
 		\pause
-		\item ...avec quelques ajustements qui lui valent son attribut de \textbf{naïf}.
+		\item ...avec quelques ajustements qui lui valent sa qualification de \textbf{naïf}.
 	\end{itemize}
 \end{frame}
 
@@ -90,7 +90,7 @@
 	\begin{itemize}
 		\item Rappels sur le théorème de Bayes
 		\item Algorithme Bayésien Naïf
-		\item Traitement simples de données textuelles
+		\item Traitements simples de données textuelles
 	\end{itemize}
 \end{frame}
 
@@ -180,7 +180,7 @@
 		\nonumber 
 	\end{equation}
 	\pause
-	Ou dans une forme plus générale si $A \in \{0, 1, \cdots, k\}$:
+	Ou dans une forme plus générale si $A \in \{A_0, A_1, \cdots, A_k\}$:
 	\begin{equation}
 		\begin{aligned}
 			P(B) &= \sum_{i=0}^k P(B \mid A=A_i) \, P(A=A_i) \\
@@ -698,18 +698,18 @@
 \begin{frame}{Une critique plus élaborée}
 	Supposons maintenant que la critique est \textit{boring movie, waste of time}:
 	\begin{itemize}
-		\item Les mots \text{of} et \text{time} ne font pas partie du \textbf{vocabulaire}, ou du \textbf{corpus} que nous avons considéré.
+		\item Les mots \text{of} et \text{time} ne font pas partie du \textbf{vocabulaire} que nous avons considéré.
 		\pause
 		\item Nous allons donc ignorer ces termes.
 		\pause
 		\item La ponctuation n'est pas non plus gérée. On va aussi s'en séparer. La critique est donc \textit{boring movie waste}.
 		\pause
-		\item Nous cherchons donc à calculer: $P(C = 1 \mid \text{"boring movie waste"})$ qui nécessite de connaitre de la vraisemblance $P(\text{"boring movie waste"} \mid C = 1)$.
+		\item Nous cherchons donc à calculer: $P(C = 1 \mid \text{"boring movie waste"})$ qui nécessite de connaitre la vraisemblance $P(\text{"boring movie waste"} \mid C = 1)$.
 		\pause
 		\item Mais nous ne connaissons pas la probabilité jointe de ces mots ! Ils sont forcément liés. Une phrase n'est pas juste un empilement de mots pris au hasard.
 	\end{itemize}
 	\pause
-	C'est là que la nature \textbf{naïve} de l'algorithme intervient. Pour simplifier, on va considérer que les mots au sein d'une même phrase sont indépendant. C'est \textbf{faux} mais cela simplifie grandement les calculs !
+	C'est là que la nature \textbf{naïve} de l'algorithme intervient. Pour simplifier, on va considérer que les mots au sein d'une même phrase sont indépendants. C'est \textbf{faux} mais cela simplifie grandement les calculs !
 \end{frame}
 
 \begin{frame}{Nature naïve de l'algorithme}
@@ -729,7 +729,7 @@
 	\begin{itemize}
 		\item Rappel, notre critique simplifiée est: \textit{boring movie waste}.
 		\pause
-		\item On considère chaque mot comme indépendant. Donc Il s'agit de faire 3 mise à jours avec le théorème de Bayes, ou multiplier 3 facteurs de Bayes.
+		\item On considère chaque mot comme indépendant. Donc Il s'agit de faire 3 mises à jour avec le théorème de Bayes, ou multiplier 3 facteurs de Bayes.
 		\pause
 		\item La différence avec nos exemples précédents c'est que chaque mot apporte une conviction \textbf{différente}: les facteurs de Bayes sont différents pour chaque mots, c'est la nouveauté.
 		\pause
@@ -829,7 +829,7 @@
 		\end{equation}
 	\end{block}
 	\pause
-	Note: L'hypothèse naïve \textit{biaise} la probabilité a posteriori, mais comme nous ne recherchons que le maximum a posteriori, l'impact de cette hypothèse simpliste est limitée sur les cas d'application.
+	Note: L'hypothèse naïve \textit{biaise} la probabilité a posteriori, mais comme nous ne recherchons que le maximum a posteriori, l'impact de cette hypothèse simpliste est limité sur les cas d'application.
 \end{frame}
 
 \begin{frame}{Passage au Logarithme}
