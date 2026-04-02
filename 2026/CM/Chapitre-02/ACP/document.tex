@@ -1,0 +1,50 @@
+\documentclass[10pt]{beamer}  % pour la présentation
+%\documentclass[10pt,handout]{beamer}  % pour les notes de cours
+
+
+\usetheme{Antibes}
+\usecolortheme{whale}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{mini frames}{} % Supprime les petits cercles dans le header
+\setbeamertemplate{items}[triangle]
+\setbeamercolor{itemize item}{fg=black}
+\setbeamercolor{itemize subitem}{fg=gray}
+\setbeamertemplate{frametitle continuation}{}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, positioning}
+\usepackage{nicematrix}
+
+\include{commandes}
+
+\title{Apprentissage Automatique - L3 - KMAXPP05}
+\subtitle{Chapitre 2 : Analyse en Composantes Principales}
+\author{Cédric Campguilhem}
+\institute[]{
+	Airbus Operations \\
+	\href{mailto:cedric.campguilhem@airbus.com}{\texttt{cedric.campguilhem@airbus.com}}
+}
+\date{2025-2026}
+
+\begin{document}
+	
+	\begin{frame}
+		\titlepage
+	\end{frame}
+	
+	\include{FR/introduction}
+	\include{FR/lagrange}
+	\include{FR/problematique}
+	\include{FR/algebre}
+	\include{FR/images}
+	\include{FR/conclusions}
+	
+\end{document}
