@@ -72,6 +72,7 @@ def load_and_prep_kepler(filepath="cumulative.csv"):
 
     # Nettoyage final
     df_clean = df[['x1_eclipse', 'x2_duree', 'x3_temp', 'target']].copy()
+    print(df_clean.info())
 
     return df_clean
 
@@ -394,6 +395,79 @@ def performance_incertitude(preds_boot, y_test):
     fig.tight_layout()
     plt.show()
 
+
+def plot_conformal_prediction_analysis(model, X_cal, y_cal, X_test, y_test):
+    """
+    Computes Split Conformal Prediction and plots Accuracy/Hesitation vs Coverage.
+    """
+    # 1. Calculate Conformity Scores on Calibration Set
+    # Score = 1 - P(Y_true | X)
+    probs_cal = model.predict_proba(X_cal)
+    # Get the probability assigned to the actual correct class
+    true_class_probs = probs_cal[np.arange(len(y_cal)), y_cal]
+    scores = 1 - true_class_probs
+
+    # 2. Test Set Probabilities
+    probs_test = model.predict_proba(X_test)
+
+    # 3. Iterate through different coverage levels (1 - alpha)
+    coverages = np.linspace(0.70, 0.99, 30)
+    empirical_accuracies = []
+    hesitation_rates = []
+
+    for target_cov in coverages:
+        alpha = 1 - target_cov
+        n = len(y_cal)
+        # Quantile calculation (with finite sample correction)
+        q_level = np.ceil((n + 1) * (1 - alpha)) / n
+        qhat = np.quantile(scores, q_level, method='higher')
+
+        # Construct Prediction Sets
+        # Class is in set if P(class|x) >= 1 - qhat
+        set_0 = probs_test[:, 0] >= (1 - qhat)
+        set_1 = probs_test[:, 1] >= (1 - qhat)
+
+        # A prediction is "Correct" if the true label's class is in the set
+        is_correct = []
+        for i in range(len(y_test)):
+            label = y_test[i]
+            in_set = (label == 0 and set_0[i]) or (label == 1 and set_1[i])
+            is_correct.append(in_set)
+
+        # Accuracy = how often the TRUE label is inside the predicted SET
+        empirical_accuracies.append(np.mean(is_correct))
+
+        # Hesitation = how often the set contains BOTH {0, 1}
+        hesitation = set_0 & set_1
+        hesitation_rates.append(np.mean(hesitation))
+
+    # 4. Plotting
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+
+    # Plot Empirical Accuracy (should follow the diagonal 1:1)
+    ax1.plot(coverages * 100, empirical_accuracies, 'b-',
+             lw=3, label='Précision réelle (Couverture)')
+    ax1.plot([70, 100], [0.7, 1.0], 'k--', alpha=0.5,
+             label='Ligne idéale (Garantie)')
+    ax1.set_xlabel('Couverture Nominale Ciblée (1 - alpha) %')
+    ax1.set_ylabel('Précision (La vérité est dans l\'ensemble)', color='b')
+    ax1.tick_params(axis='y', labelcolor='b')
+    ax1.set_ylim(0.65, 1.05)
+
+    # Plot Hesitation Rate
+    ax2 = ax1.twinx()
+    ax2.plot(coverages * 100, np.array(hesitation_rates) * 100,
+             'r--', lw=2, label='Taux d\'hésitation {0,1}')
+    ax2.set_ylabel('Taux d\'hésitation (%)', color='r')
+    ax2.tick_params(axis='y', labelcolor='r')
+    ax2.set_ylim(0, 100)
+
+    plt.title("Illustration de la Prédiction Conforme (Split Conformal)")
+    fig.legend(loc='upper left', bbox_to_anchor=(0.15, 0.85))
+    plt.grid(alpha=0.3)
+    plt.show()
+
+
 # ==============================================================================
 # PARTIE 3 : THÉORIE DE LA DÉCISION
 # ==============================================================================
@@ -565,6 +639,12 @@ if __name__ == "__main__":
     explore_ood_question(X_test_cred, mean_prob, ci_lower, ci_upper)
 
     performance_incertitude(preds_boot, y_test_cred)
+
+    X_train_prop, X_cal, y_train_prop, y_cal = train_test_split(
+        X_train_cred, y_train_cred, test_size=0.2)
+    model_cp = LogisticRegression().fit(X_train_prop, y_train_prop)
+    plot_conformal_prediction_analysis(
+        model_cp, X_cal, y_cal, X_test_cred, y_test_cred)
 
     # -- Exécution Partie 3 --
     # Matrice Credit
