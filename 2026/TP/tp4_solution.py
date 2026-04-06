@@ -255,14 +255,6 @@ def bootstrap_confidence_intervals(X_train, y_train, X_test, n_bootstraps=100):
 
     return preds
 
-
-def analyze_reject_curve(y_test, mean_prob, alphas):
-    """
-    Évalue les performances en introduisant une région d'indécision [0.5 - alpha, 0.5 + alpha].
-    """
-    accuracies = []
-    reject_rates = []
-
     for alpha in alphas:
         lower_bound = 0.5 - alpha
         upper_bound = 0.5 + alpha
@@ -328,7 +320,6 @@ def explore_ood_question(X_test, mean_prob, ci_lower, ci_upper):
         print("-> Il s'agit d'un point 'Out-Of-Distribution' (OOD) ou très rare.")
     else:
         print("Ce profil est atypique en raison d'une combinaison rare de ses variables catégorielles.")
-
 
     print("\n" + "-"*70)
     print("RÉPONSE ATTENDUE (Corrigé / Application Métier) :")
@@ -572,11 +563,8 @@ if __name__ == "__main__":
     mean_prob = np.mean(preds_boot, axis=0)
 
     explore_ood_question(X_test_cred, mean_prob, ci_lower, ci_upper)
-    performance_incertitude(preds_boot, y_test_cred)
 
-    # Courbe de rejet
-    alphas = np.linspace(0.0, 0.49, 20)
-    analyze_reject_curve(y_test_cred, mean_prob, alphas)
+    performance_incertitude(preds_boot, y_test_cred)
 
     # -- Exécution Partie 3 --
     # Matrice Credit
