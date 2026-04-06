@@ -253,12 +253,7 @@ def bootstrap_confidence_intervals(X_train, y_train, X_test, n_bootstraps=100):
         model.fit(X_boot, y_boot)
         preds[i, :] = model.predict_proba(X_test)[:, 1]
 
-    # Calcul des quantiles 2.5% et 97.5% pour l'IC à 95%
-    ci_lower = np.percentile(preds, 2.5, axis=0)
-    ci_upper = np.percentile(preds, 97.5, axis=0)
-    mean_prob = np.mean(preds, axis=0)
-
-    return mean_prob, ci_lower, ci_upper
+    return preds
 
 
 def analyze_reject_curve(y_test, mean_prob, alphas):
@@ -334,28 +329,79 @@ def explore_ood_question(X_test, mean_prob, ci_lower, ci_upper):
     else:
         print("Ce profil est atypique en raison d'une combinaison rare de ses variables catégorielles.")
 
-    print("\n" + "-"*70)
-    print("💡 CONCEPT THÉORIQUE À EXPLIQUER AUX ÉTUDIANTS :")
-    print("1. Incertitude Aléatorique (Bruit inhérent) :")
-    print("   C'est le hasard du monde réel. Exemple : Deux clients ont le MÊME profil exact,")
-    print("   mais l'un fait défaut suite à un accident de la vie (imprévisible).")
-    print(
-        "   Symptôme visuel : Le modèle prédit P=0.5, mais l'intervalle est ÉTROIT (ex: [0.48, 0.52]).")
-    print("   -> Les modèles Bootstrap sont tous d'accord : on ne peut tout simplement pas trancher.")
-    print("\n2. Incertitude Épistémique (Ignorance du modèle) :")
-    print("   C'est le manque de connaissances dû à des données jamais vues (OOD).")
-    print(
-        "   Symptôme visuel : L'intervalle Bootstrap est très LARGE (ex: [0.18, 0.91]).")
-    print("   -> Certains modèles Bootstrap n'ont tiré aucun profil similaire lors du rééchantillonnage.")
-    print("   Ils 'devinent' au hasard, ce qui crée un énorme désaccord.")
 
     print("\n" + "-"*70)
-    print("✅ RÉPONSE ATTENDUE (Corrigé / Application Métier) :")
+    print("RÉPONSE ATTENDUE (Corrigé / Application Métier) :")
     print("La largeur de cet intervalle indique que l'IA ne sait pas évaluer ce client.")
     print("Dans un système de décision bancaire réel, ce client ne doit être ni accepté")
     print("ni rejeté automatiquement. C'est précisément l'Incertitude Épistémique qui")
     print("doit déclencher une 'Alerte' et le renvoi du dossier vers un expert humain.")
     print("="*70 + "\n")
+
+
+def performance_incertitude(preds_boot, y_test):
+    mean_prob = np.mean(preds_boot, axis=0)
+    y_pred_final = (mean_prob >= 0.5).astype(int)
+    # Plage des coefficients de confiance (de 40% à 98%)
+    confidence_levels = np.linspace(0.40, 0.98, 50)
+
+    accuracies_on_sure = []
+    hesitation_rates = []
+
+    for conf in confidence_levels:
+        # Calcul des quantiles (ex: conf=0.90 -> q_low=5%, q_high=95%)
+        alpha = 1.0 - conf
+        q_low = (alpha / 2.0) * 100
+        q_high = (1.0 - alpha / 2.0) * 100
+
+        ci_lower = np.percentile(preds_boot, q=q_low, axis=0)
+        ci_upper = np.percentile(preds_boot, q=q_high, axis=0)
+
+        # Masque d'hésitation : le seuil de 0.5 est dans l'intervalle de confiance
+        # C'est la fameuse "Région de prédiction / d'hésitation"
+        hesitating_mask = (ci_lower < 0.5) & (ci_upper > 0.5)
+
+        # Taux d'échantillons où le modèle hésite
+        hesitation_rate = np.sum(hesitating_mask) / len(y_test)
+        hesitation_rates.append(hesitation_rate)
+
+        # Calcul de l'accuracy uniquement sur la partie "sûre" (~hesitating_mask)
+        sure_mask = ~hesitating_mask
+        if np.sum(sure_mask) > 0:
+            acc = np.mean(y_pred_final[sure_mask] == y_test[sure_mask])
+        else:
+            acc = np.nan  # Si le modèle doute de TOUT, on ne peut pas calculer d'accuracy
+
+        accuracies_on_sure.append(acc)
+
+    # ==========================================
+    #  AFFICHAGE DU GRAPHIQUE À DOUBLE AXE
+    # ==========================================
+
+    fig, ax1 = plt.subplots(figsize=(9, 5))
+
+    # Axe de gauche : Précision (Accuracy)
+    color1 = 'tab:blue'
+    ax1.set_xlabel('Niveau de confiance exigé du Bootstrap')
+    ax1.set_ylabel('Accuracy sur les prédictions "Sûres"', color=color1)
+    ax1.plot(confidence_levels * 100, accuracies_on_sure,
+             color=color1, lw=2, label="Accuracy (sur la partie sûre)")
+    ax1.tick_params(axis='y', labelcolor=color1)
+    ax1.set_ylim(0.5, 1.0)  # L'accuracy varie généralement entre 0.5 et 1.0
+
+    # Axe de droite : Taux d'hésitation
+    ax2 = ax1.twinx()
+    color2 = 'tab:red'
+    ax2.set_ylabel(
+        'Pourcentage d\'échantillons rejetés (Hésitation)', color=color2)
+    ax2.plot(confidence_levels * 100, np.array(hesitation_rates) * 100, color=color2,
+             lw=2, linestyle='--', label="% d'Hésitation (Région de prédiction)")
+    ax2.tick_params(axis='y', labelcolor=color2)
+    ax2.set_ylim(0, 100)
+
+    plt.title("Performance vs Incertitude Épistémique (Régions de prédiction)")
+    fig.tight_layout()
+    plt.show()
 
 # ==============================================================================
 # PARTIE 3 : THÉORIE DE LA DÉCISION
@@ -517,9 +563,16 @@ if __name__ == "__main__":
     evaluate_base_model_credit(y_test_cred, base_probs)
 
     # Incertitude Bootstrap
-    mean_prob, ci_lower, ci_upper = bootstrap_confidence_intervals(
+    preds_boot = bootstrap_confidence_intervals(
         X_train_cred, y_train_cred, X_test_cred)
+
+    # Calcul des quantiles 2.5% et 97.5% pour l'IC à 95%
+    ci_lower = np.percentile(preds_boot, 2.5, axis=0)
+    ci_upper = np.percentile(preds_boot, 97.5, axis=0)
+    mean_prob = np.mean(preds_boot, axis=0)
+
     explore_ood_question(X_test_cred, mean_prob, ci_lower, ci_upper)
+    performance_incertitude(preds_boot, y_test_cred)
 
     # Courbe de rejet
     alphas = np.linspace(0.0, 0.49, 20)
