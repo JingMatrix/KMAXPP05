@@ -1,0 +1,82 @@
+\documentclass[solutions]{../exercices}
+
+\begin{document}
+	
+	\makeheader{2025}{2026}
+	\tdtitle{7}{Arbres de Décision}
+		
+	\begin{exercice}
+		Nous disposons d'une urne contenant des balles de différentes couleurs : rouge (R), vert (V) et bleu (B). On notera $X$ la variable aléatoire correspondant à la couleur d'une balle tirée au hasard de l'urne. Cette variable a trois issues possibles : $X \in \{\text{R}, \text{V}, \text{B}\}$. 
+		
+		\textit{Note : Pour tous les calculs de cet exercice, nous utiliserons le logarithme naturel vu en cours plutôt que le logarithme en base 2 qui est utilisé en théorie de l'information.}
+		
+		\begin{enumerate}
+			\item On nous affirme (à tort ou à raison) que la loi de probabilité de l'urne est la distribution $Q$ suivante : $Q(X=\text{R}) = 0.1$, $Q(X=\text{V}) = 0.6$ et $Q(X=\text{B}) = 0.3$. 
+			Quelles sont les valeurs de surprise (quantité d'information) associées au tirage d'une balle rouge, d'une balle verte et d'une balle bleue ?
+			
+			\item En conservant l'hypothèse que la distribution de l'urne est $Q$, on réalise un tirage avec remise de 10 balles qui donne la séquence suivante : $\{\text{R, V, V, B, V, R, V, V, B, V}\}$. 
+			Déduisez-en la distribution empirique de cet échantillon (que l'on notera $\hat{P}$), puis calculez l'entropie croisée $H(\hat{P}, Q)$.
+			
+			\item On ouvre finalement l'urne pour inspecter son contenu réel. Elle dispose exactement de 20 balles : 3 rouges, 12 vertes et 5 bleues. 
+			Soit $P$ la véritable distribution de l'urne. Calculez son entropie exacte $H(P)$.
+			
+			\item Quelle est la divergence de Kullback-Leibler $D_{KL}(P \parallel Q)$ mesurant l'écart entre la véritable distribution de l'urne ($P$) et la distribution supposée à la première question ($Q$) ? 
+			
+			\item Quelle aurait été cette divergence KL $D_{KL}(P \parallel Q)$ si l'urne avait contenu 20 balles: 2 rouges, 12 vertes et 6 bleues ?
+		\end{enumerate}
+	\end{exercice}
+	
+	\begin{exercice}
+		Pour un problème de classification binaire mono-dimensionnel on dispose des données d'observations suivantes:
+		
+		\begin{table}[h]
+			\centering
+			\begin{tabular}{|l|c|c|c|c|}
+				\hline
+				\textbf{Observation} $i$ & 1 & 2 & 3 & 4 \\
+				\hline
+				\textbf{Classe} $y^{(i)}$ & 0 & 1 & 1 & 0 \\
+				\hline
+				\textbf{Entrée} $x^{(i)}$ & 0. & 0.2 & 0.4 & 0.6 \\
+				\hline
+			\end{tabular}
+		\end{table}
+		
+		On se propose de résoudre ce problème de classification en utilisant un algorithme AdaBoost combiné à un arbre de décision de profondeur maximale 1, de taille minimum de feuille égale à 1 et d'entropie minimale par feuille fixée à 0. On prendra un taux d'apprentissage $\nu = 1$ pour AdaBoost et on considèrera que l'on utilise une séquence de 2 arbres.
+		
+		\begin{enumerate}
+			\item Déterminer les poids initiaux pour les données d'apprentissage.
+			\item On suppose que le premier arbre réalise une découpe en $x^* = 0.1$. Déterminer l'entropie dans les deux branches.
+			\item Calculer l'erreur pondérée $\epsilon_1$ pour ce premier arbre.
+			\item Calculer le poids de vote $\alpha_1$ pour ce premier arbre.
+			\item Calculer les poids pour les données d'apprentissage à considérer pour le deuxième arbre. Que remarquez-vous ?
+			\item Pour le deuxième arbre, considérer une découpe en $x^*=0.1$ et une autre en $x^*=0.5$. Quelle découpe l'arbre va-t-il choisir ? Ce résultat semble-t-il logique ?
+			\item Calculer le poids de vote de ce deuxième arbre.
+			\item Calculer les probabilités prédites pour les classes 0 et 1 pour une donnée d'inférence $x_i = 0.55$.
+			
+		\end{enumerate}
+	\end{exercice}
+	
+	\begin{exercice}
+		Dans l'implémentation de scikit-learn, par défaut, un critère différent de l'entropie est utilisé pour calculer la pureté des feuilles dans les arbres de décision. C'est le critère Gini, noté $G$. Il est défini de la façon suivante pour un problème à $K$ classes:
+		\begin{equation*}
+			G = 1 - \sum_{k=1}^K P(X=k)^2
+		\end{equation*}
+		Ce critère est beaucoup plus rapide à calculer par un ordinateur car il n'implique pas de calculer un logarithme.
+		
+		On considère une pièce de monnaie. On note $X$ l'événement aléatoire correspondant au lancer d'une pièce. On considèrera que l'issue positive est \textit{Face} ($k = 1$) et que l'issue négative est \textit{Pile} ($k = 0$). La loi de probabilité de la pièce est une distribution de Bernoulli de paramètre $p$:
+		\begin{equation*}
+			P(X = k) = p^k \left(1 - p\right)^{\left(1 - k\right)}
+		\end{equation*}
+		\begin{enumerate}
+			\item Calculer l'entropie de la pièce et le critère Gini pour $p = 0$ et $p = 1$.
+			\item Calculer la dérivée de l'entropie et du critère Gini pour la pièce en fonction de $p$.
+			\item Déterminer la valeur de $p$ maximisant l'entropie et le critère Gini.
+			\item \'Etudier les signes des dérivées de l'entropie et du critère Gini en fonction de $p$. En déduire le sens de variation des deux critères.
+			\item On rappelle que le développement limité de $\ln(x)$ autour de $x=1$ est donné par $\ln(x) \approx x - 1$. En utilisant ce développement dans la formulation de l'entropie \\ \mbox{$H = - \sum_{k=1}^K P(X=k) \ln P(X=k)$}, que devient cette expression ?
+			\item Cette approximation du logarithme est, bien entendu, fausse au voisinage de 0. Déterminer $\lim_{P(X=k) \to 0^+} P(X=k) \ln P(X=k)$.
+			\item Que conclure pour l'utilisation de ces critères dans les arbres ?
+		\end{enumerate}
+	\end{exercice}
+	
+\end{document}
