@@ -1,0 +1,104 @@
+\documentclass[solutions]{../exercices}
+
+\begin{document}
+	
+	\makeheader{2025}{2026}
+	\tdtitle{8}{Réseaux de Neurones}
+	
+	\begin{exercice}
+		On considère un réseau de neurones pour résoudre un problème de régression. Les entrées sont mono-variées $\mathcal{X} \subset \R$ et centrées: $\frac{1}{n} \sum_{i=1}^n x^{(i)} = 0$. L'espace des sorties est $\mathcal{Y} \subset \R$.
+		
+		Le réseau de neurones étudié est le suivant:
+		\begin{itemize}
+			\item 1 entrée: $x$
+			\item une couche de sortie avec un biais nul (on ne le représentera pas) et un poids $w$.
+			\item une fonction d'activation linéaire: $\sigma(z) = z$. On notera $z$ l'entrée de cette fonction d'activation.
+			\item 1 sortie: 
+		\end{itemize}
+		
+		On considère la fonction de perte $L: \R \times \R \to \R$ suivante:
+		\begin{equation*}
+			L(y^{(i)}, \hat{y}^{(i)}) = \left(y^{(i)} - \hat{y}^{(i)}\right)^2
+		\end{equation*}
+		
+		On calculera l'erreur de prédiction $e$ comme suit:
+		\begin{equation*}
+			e = \frac{1}{n} \sum_{i=1}^n L(y^{(i)}, \hat{y}^{(i)})
+		\end{equation*}
+		
+		
+		On dispose des $n$ observations suivantes:
+		\begin{table}[h]
+			\centering
+			\begin{tabular}{|l|c|c|c|c|}
+				\hline
+				\textbf{Observation} $i$ & 1 & 2 & 3 \\
+				\hline
+				\textbf{Entrée} $x^{(i)}$ & -1 & 0 & 1 \\
+				\hline
+				\textbf{Cible}  $y^{(i)}$ & -0.9 & 0.1 & 0.8 \\
+				\hline
+			\end{tabular}
+		\end{table}
+		
+		On considèrera un algorithme d'optimisation de descente de gradient avec une taux d'apprentissage $\alpha$:
+		\begin{equation*}
+			w \leftarrow w - \alpha \frac{\partial{e}}{\partial{w}}
+		\end{equation*}
+		
+		\begin{enumerate}
+			\item Donner la formulation mathématique du réseau de neurones (passe avant).
+			\item Représenter graphiquement l'architecture du réseau de neurones.
+			\item Représenter le réseau de neurones sous la forme d'un graphe de calcul en faisant apparaitre l'erreur $e$ et la cible $y$ en plus de la prédiction $\hat{y}$.
+			\item On suppose que le poids $w = 0.5$. Calculer la prédiction du réseau neurones avec une passe avant.
+			\item Calculer l'erreur $e$ obtenue pour cette passe avant.
+			\item Déterminer la dérivée $\displaystyle \frac{\partial{e}}{\partial{\hat{y}}}$. C'est un vecteur colonne de dimension $(n \times 1)$.
+			\item Déterminer la dérivée $\displaystyle \frac{\partial{e}}{\partial{\hat{z}}}$. C'est un vecteur colonne de dimension $(n \times 1)$.
+			\item Déterminer la dérivée $\displaystyle \frac{\partial{e}}{\partial{w}}$. C'est un scalaire.
+			\item Calculer $\displaystyle \frac{\partial{e}}{\partial{w}}$
+			\item Recalculer l'erreur $e$ avec les valeurs suivantes de $w$: $0.75$, $0.85$ et $1.0$. Tracer approximativement $e$ en fonction de $w$.
+			\item On effectue un pas d'optimisation avec l'algorithme considéré en prenant $\alpha = 0.5$ et $\alpha = 2$ pour un poids initial de $0.5$. Calculer les valeurs de $w$ correspondantes.
+			\item Effectuer une nouvelle passe avant avec les deux valeurs de $w$ calculées à la question précédente. Pour chaque passe avant, calculer l'erreur $e$. Que remarquez-vous ?
+		\end{enumerate}
+	\end{exercice}
+	
+	\begin{exercice}
+		Dans cet exercice on étudiera les fonctions d'activation suivantes pour $z \in R$:
+		\begin{equation*}
+			\begin{aligned}
+				\sigma(z) &= \frac{1}{1 + e^{(-z)}} \\
+				\tanh(z) &= \frac{1 - e^{-2 z}}{1 + e^{- 2 z}} \\
+				\operatorname{ReLU}(z) &= \max{(z, 0)}
+			\end{aligned}
+		\end{equation*}
+		
+		\begin{enumerate}
+			\item Démontrer que $\sigma'(z) = \sigma(z) \left(1 - \sigma(z)\right)$.
+			\item Démontrer que $\tanh'(z) = 1 - \tanh^2(z)$.
+			\item Calculer la dérivée de $\operatorname{ReLU}$. On supposera que la dérivée est nulle en $z = 0$.
+			\item Pour les trois fonctions, calculer les dérivées en $z=-5$, $z=0$ et $z=5$.
+			\item Si un réseau dispose de 10 couches, que se passe-t-il lors de la passe arrière si jamais les fonctions d'activations sont toujours sollicitées dans une zone $z=5$ ?
+			\item Pour un réseau de neurones simple à une couche cachée avec une fonction ReLU, que se passe-t-il si lors de la passe avant toutes les entrées de ReLU sont négatives.
+			\item Discuter des potentiels problèmes que cela pourrait causer sur l'apprentissage.
+		\end{enumerate}
+		
+	\end{exercice}
+	
+	\begin{exercice}
+		On considère la couche de sortie d'un réseau de neurones pour un problème de classification binaire. Le réseau prédit une probabilité $\hat{y} \in ]0, 1[$ en utilisant une fonction d'activation de type logistique sur cette couche de sortie. On notera $z$ l'entrée de la fonction logistique: $\sigma(z) = \hat{y}$. Les classes vraies sont notées $y \in \{0, 1\}$. Le réseau est entraîné en utilisant une fonction de perte d'entropie croisée binaire pour une observation $i$:
+		\begin{equation*}
+			L(y^{(i)}, \hat{y}^{(i)}) = - \left[ y^{(i)} \ln(\hat{y}^{(i)}) + (1 - y^{(i)}) \ln(1 - \hat{y}^{(i)}) \right]
+		\end{equation*}
+		L'erreur de prédiction $e$ est calculée comme suit pour les $n$ observations des données d'apprentissage:
+		\begin{equation*}
+			e = \frac{1}{n} \sum_{i=1}^n L(y^{(i)}, \hat{y}^{(i)})
+		\end{equation*}
+		\begin{enumerate}
+			\item Calculer la dérivée $\displaystyle \frac{\partial{L(y^{(i)}, \hat{y}^{(i)})}}{\partial{\hat{y}^{(i)}}}$
+			\item En déduire la dérivée $\displaystyle \frac{\partial{e}}{\partial{\hat{y}}}$
+			\item Démontrer que $\displaystyle \frac{\partial{e}}{\partial{z}} = \frac{1}{n}\left(\hat{y} - y\right)$
+			\item Déduire de ce résultat une simplification possible de l'algorithme d'apprentissage d'un réseau de neurones pour un problème de classification binaire.
+		\end{enumerate}
+	\end{exercice}
+	
+\end{document}

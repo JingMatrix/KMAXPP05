@@ -1,0 +1,1161 @@
+\section[Rétro-propagation du gradient]{Rétro-propagation du gradient}
+
+\begin{frame}{Rétro-propagation du gradient}
+	Dans cette section, nous découvrirons l'algorithme de la \textbf{rétro-propagation du gradient}, qui a historiquement marqué le regain d'intérêt dans les réseaux de neurones à la fin des années 1980. Cet algorithme, aussi appelé \textit{\textbf{backpropagation}} en anglais, est le cœur de l'apprentissage des réseaux de neurones actuels.
+	
+	\pause
+	\vspace{0.3cm}
+	
+	Dans cette section:
+	\begin{itemize}
+		\item Nous introduirons une autre représentation graphique pour un réseau de neurones: le \textbf{graphe de calcul}.
+		\pause
+		\item Nous découvrirons à partir de ce graphe le concept général de l'algorithme de rétro-propagation du gradient.
+		\pause
+		\item Nous donnerons l'expression des gradients des opérateurs rencontrés dans les réseaux denses:
+		\begin{itemize}
+			\item Les différentes fonctions d'activation (fonction logistique, tangente hyperbolique, fonction linéaire rectifiée).
+			\item L'opérateur linéaire.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\subsection[Graphe de calcul]{Graphe de calcul}
+
+\begin{frame}{Graphe de calcul}
+
+	Le \textbf{graphe de calcul} est non seulement un outil \textbf{visuel} pratique pour comprendre l'algorithme de la rétro-propagation du gradient, mais c'est aussi la façon dont les bibliothèques industrielles d'apprentissage profond (PyTorch et Tensorflow) \textbf{implémentent} cet algorithme.
+	
+	\pause
+	\vspace{0.3cm}
+	
+	Dans cette section nous prendrons un exemple simple d'architecture de réseau de neurones pour illustrer, mais la technique s'applique bien évidemment à tous les réseaux de neurones denses que l'on voit dans le cours. Elle s'appliquera même pour les réseaux de neurones plus complexes que vous verrez plus tard !
+
+\end{frame}
+
+\begin{frame}{Concept général - Composition de fonctions}
+	Considérons la \textbf{composition} des fonctions $f$, $g$ et $h$ suivantes:
+	\begin{center}
+		\begin{tikzpicture}[
+			% --- Styles définis localement ---
+			link_st/.style={->, thick, gray!40}, % Style standard
+			link_hl/.style={->, ultra thick, lime!80!black}, % Style mis en avant
+			node_math/.style={inner sep=2pt, font=\large}
+			]
+			
+			% --- 1. Définition des Nœuds ---
+			\node[node_math] (x)    at (0,0)    {$x$};
+			\node[node_math] (fx)   [below=1.2cm of x]  {$f(x)$};
+			\node[node_math] (gfx)  [below=1.2cm of fx] {$g(f(x))$};
+			\node[node_math] (hgfx) [below=1.2cm of gfx]{$h(g(f(x)))$};
+			
+			% --- 2. Définition des Liens (Passe Avant) ---
+			% Pour mettre en surbrillance, remplace 'link_st' par 'link_hl'
+			\draw[link_st] (x)    -- (fx)   node[midway, right=0.1cm, text=gray] {$f$};
+			\draw[link_st] (fx)   -- (gfx)  node[midway, right=0.1cm, text=gray] {$g$};
+			\draw[link_st] (gfx)  -- (hgfx) node[midway, right=0.1cm, text=gray] {$h$};
+			
+			% --- 3. Labels pour les étudiants ---
+			%\node[left=0.5cm of x, text=gray!80, font=\scriptsize\bfseries] {ENTRÉE};
+			%\node[left=0.5cm of hgfx, text=gray!80, font=\scriptsize\bfseries] {SORTIE};
+			
+		\end{tikzpicture}
+	\end{center}
+\end{frame}
+
+\begin{frame}{Concept général - Dérivation d'une composition de fonctions}
+	Le résultat du calcul représenté par cet arbre est:
+	
+	\begin{equation*}
+		h(g(f(x))) = (h \circ g \circ f)(x)
+	\end{equation*}
+	
+	\pause
+	
+	On peut calculer la dérivée de cette sortie $h(g(f(x)))$ en fonction de l'entrée $x$ en utilisant la règle de dérivation des fonctions composées, aussi appelée \textbf{règle de la chaîne} (\textit{chain rule} en anglais) dans le contexte de l'apprentissage automatique:
+	
+	\begin{equation*}
+		\frac{d}{dx} \Big[ h(g(f(x))) \Big] = h'(g(f(x))) \cdot g'(f(x)) \cdot f'(x)
+	\end{equation*}
+		
+\end{frame}
+
+\begin{frame}{Concept général - Dérivation le long du graphe}
+	Revenons au graphe de calcul:
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			\begin{center}
+				\begin{tikzpicture}[
+					% --- Styles définis localement ---
+					link_st/.style={->, thick, gray!40}, % Style standard
+					link_hl/.style={->, ultra thick, lime!80!black}, % Style mis en avant
+					node_math/.style={inner sep=2pt, font=\large}
+					]
+					
+					% --- 1. Définition des Nœuds ---
+					\node[node_math] (x)    at (0,0)    {$x$};
+					\node[node_math] (fx)   [below=1.2cm of x]  {$f(x)$};
+					\node[node_math] (gfx)  [below=1.2cm of fx] {$g(f(x))$};
+					\node[node_math] (hgfx) [below=1.2cm of gfx]{$h(g(f(x)))$};
+					
+					% --- 2. Définition des Liens (Passe Avant) ---
+					% Pour mettre en surbrillance, remplace 'link_st' par 'link_hl'
+					\draw[link_hl] (x)    -- (fx)   node[midway, right=0.1cm, text=gray] {$f$};
+					\draw[link_hl] (fx)   -- (gfx)  node[midway, right=0.1cm, text=gray] {$g$};
+					\draw[link_hl] (gfx)  -- (hgfx) node[midway, right=0.1cm, text=gray] {$h$};
+					
+					% --- 3. Labels pour les étudiants ---
+					%\node[left=0.5cm of x, text=gray!80, font=\scriptsize\bfseries] {ENTRÉE};
+					%\node[left=0.5cm of hgfx, text=gray!80, font=\scriptsize\bfseries] {SORTIE};
+					
+				\end{tikzpicture}
+			\end{center}			
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			Calculer la dérivée $\frac{d}{dx} \Big[ h(g(f(x))) \Big]$ revient à \textbf{multiplier} les dérivées des fonctions en suivant le  \textbf{\textcolor{lime!80!black}{chemin}} entre les entrées et la sortie. C'est d'ailleurs pour cette raison que l'on appelle cela la \textbf{règle de la chaîne}:
+			\begin{equation*}
+				h'(g(f(x))) \cdot g'(f(x)) \cdot f'(x) 
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Exemple concret - Réseau à une couche cachée}
+	\begin{columns}
+		\begin{column}{0.25\textwidth}
+			\begin{center}
+				\resizebox{0.40\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Style standard
+						link_hl/.style={->, ultra thick, lime!80!black},% Style highlight
+						link_param/.style={->, thick, gray!50},        % Pour les params/cible
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L est en rouge
+						]
+						
+						% --- 1. Chemin Principal (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{(0)}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{(1)}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{(1)}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{(2)}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % C'est la prédiction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Liens de la Passe Avant ---
+						% J'ai tout mis en 'standard' par défaut.
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)   -- (x1)    node[midway, left=0.1cm] {$\sigma^{(1)}$};
+						\draw[link_st] (x1)    -- (z2);
+						\draw[link_st] (z2)   -- (x2)    node[midway, left=0.1cm] {$\sigma^{(2)}$};
+						\draw[link_st] (x2) -- (e);
+						
+						% --- 3. Paramètres et Cible ("En biais", structure en Y) ---
+						% Couche 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{(1)}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{(1)}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Couche 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{(2)}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{(2)}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Perte (Cible y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_param] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.75\textwidth}
+			Ce graphe de calcul représente un réseau de neurones à une couche cachée composé:
+			\begin{itemize}
+				\item des \textbf{entrées}: $X^{(0)}$,
+				\item de l'opérateur \textbf{linéaire} de la couche cachée avec ses poids $W^{(1)}$ et biais $b^{(1)}$ et sa sortie $Z^{(1)}$,
+				\item de la fonction d'\textbf{activation} de la couche cachée: $\sigma^{(1)}$ et sa sortie $X^{(1)}$,
+				\item de l'opérateur \textbf{linéaire} de la couche de sortie avec ses poids $W^{(2)}$ et biais $b^{(2)}$ et sa sortie $Z^{(2)}$,
+				\item de la fonction d'\textbf{activation} de la couche de sortie: $\sigma^{(2)}$,
+				\item de la \textbf{prédiction} du réseau de neurones: $\hat{Y}$,
+				\item de la valeur \textbf{cible}: $Y$,
+				\item de l'\textbf{erreur} $e$ calculée par la \textbf{fonction de perte}
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Utilité du graphe}
+	\`A quoi peut donc bien servir ce graphe ?
+	\pause
+	\begin{itemize}
+		\item Les réseaux de neurones (comme la régression logistique) utilisent un algorithme \textbf{incrémental} d'apprentissage.
+		\pause
+		\item \`A partir de valeurs \textbf{initiales} des \textbf{paramètres} du réseau de neurones ($W^{(1)}$, $b^{(1)}$, $W^{(2)}$ et $b^{(2)}$), l'algorithme d'apprentissage \textbf{optimise} ces paramètres.
+		\pause
+		\item Comme pour la régression logistique, des algorithmes de type \textbf{descente de gradient} sont utilisés.
+		\pause
+		\item Il est alors nécessaire de calculer les \textbf{gradients} de l'\textbf{erreur} de prédiction en fonction de \textbf{chacun} des paramètres !
+		\pause
+		\item Dans une régression logistique c'était \textit{facile} parce que nous n'avions qu'un seul opérateur linéaire et le biais était en fait géré dans la fonction d'augmentation, donc nous avions un \textit{chemin} linéaire dans le graphe.
+		\pause
+		\item Dans un réseau de neurones, le graphe est \textbf{ramifié} ce qui introduit une difficulté supplémentaire. De plus, il y a plusieurs couches et donc plusieurs opérateurs \textbf{linéaires} et \textbf{non-linéaires} en \textbf{séquence}. 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Utilité du graphe - Exemple 1}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Style standard
+						link_hl/.style={->, ultra thick, lime!80!black},% Style highlight
+						link_param/.style={->, thick, gray!50},        % Pour les params/cible
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L est en rouge
+						]
+						
+						% --- 1. Chemin Principal (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{(0)}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{(1)}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{(1)}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{(2)}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % C'est la prédiction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Liens de la Passe Avant ---
+						% J'ai tout mis en 'standard' par défaut.
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_hl] (z1)   -- (x1)    node[midway, left=0.1cm] {$\sigma^{(1)}$};
+						\draw[link_hl] (x1)    -- (z2);
+						\draw[link_hl] (z2)   -- (x2)    node[midway, left=0.1cm] {$\sigma^{(2)}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Paramètres et Cible ("En biais", structure en Y) ---
+						% Couche 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{(1)}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{(1)}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_hl] (b1) -- (z1);
+						
+						% Couche 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{(2)}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{(2)}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Perte (Cible y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_param] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Le graphe de calcul nous permet de nous \textbf{repérer} dans l'application de la \textbf{règle de la chaîne}. Dans l'exemple ci-contre on voit le \textbf{chemin} emprunté par la règle de la chaîne pour calculer:
+			\begin{equation*}
+				\frac{\partial{e}}{\partial{b^{(1)}}} = \frac{\partial{e}}{\partial{\hat{Y}}} \frac{\partial{\hat{Y}}}{\partial{Z^{(2)}}} \frac{\partial{Z^{(2)}}}{\partial{X^{(1)}}} \frac{\partial{X^{(1)}}}{\partial{Z^{(1)}}} \frac{\partial{Z^{(1)}}}{\partial{b^{(1)}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Utilité du graphe - Exemple 2}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Style standard
+						link_hl/.style={->, ultra thick, lime!80!black},% Style highlight
+						link_param/.style={->, thick, gray!50},        % Pour les params/cible
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L est en rouge
+						]
+						
+						% --- 1. Chemin Principal (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{(0)}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{(1)}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{(1)}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{(2)}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % C'est la prédiction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Liens de la Passe Avant ---
+						% J'ai tout mis en 'standard' par défaut.
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)   -- (x1)    node[midway, left=0.1cm] {$\sigma^{(1)}$};
+						\draw[link_st] (x1)    -- (z2);
+						\draw[link_hl] (z2)   -- (x2)    node[midway, left=0.1cm] {$\sigma^{(2)}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Paramètres et Cible ("En biais", structure en Y) ---
+						% Couche 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{(1)}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{(1)}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Couche 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{(2)}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{(2)}$};
+						\draw[link_hl] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Perte (Cible y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_param] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Le graphe de calcul nous permet de nous \textbf{repérer} dans l'application de la \textbf{règle de la chaîne}. Dans l'exemple ci-contre on voit le \textbf{chemin} emprunté par la règle de la chaîne pour calculer:
+			\begin{equation*}
+				\frac{\partial{e}}{\partial{W^{(2)}}} = \frac{\partial{e}}{\partial{\hat{Y}}} \frac{\partial{\hat{Y}}}{\partial{Z^{(2)}}} \frac{\partial{Z^{(2)}}}{\partial{W^{(2)}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Application de la règle de la chaîne}
+	Appliquer la règle de la chaîne est facilitée par ce graphe de calcul mais la difficulté réside dans le calcul des dérivées de chaque étape:
+	\begin{itemize}
+		\pause
+		\item Les dérivées font apparaitre des \textbf{tenseurs}.
+		\pause
+		\item Le long de la chaîne des dérivées, les opérations ne sont pas commutatives car il faut assurer les bonnes dimensions pour les tenseurs intermédiaires.
+		\pause
+		\item On a donc besoin de commencer à évaluer ces dérivées en partant de la \textbf{fin}.
+		\pause
+		\item C'est ce qui vaut le nom de \textbf{rétro}-propagation du gradient à cet algorithme d'apprentissage.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Algorithme de la rétro-propagation du gradient}
+	Pour pouvoir appliquer l'algorithme de rétro-propagation du gradient, il nous faut être capable de calculer plusieurs dérivées tensorielles:
+	\begin{itemize}
+		\item La dérivée de la fonction de perte.
+		\item La dérivée des fonctions d'activation.
+		\item La dérivée de l'opérateur linéaire.
+	\end{itemize}
+	\vspace{0.3cm}
+	\pause
+	L'approche générale est résumée comme suit:
+	\begin{itemize}
+		\item On fait une passe avant pour calculer tous les termes intermédiaires et l'erreur $e$.
+		\pause
+		\item On commence à calculer les gradients par la fin: donc par la dérivée de la fonction de perte.
+		\pause
+		\item Puis on remonte progressivement dans le graphe en suivant le chemin jusqu'au paramètre d'intérêt.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Algorithme d'apprentissage d'un réseau de neurones}
+	\begin{enumerate}
+		\item On initialise les paramètres du réseau de neurones aléatoirement.
+		\pause
+		\item On réalise une itération sur l'ensemble des données d'apprentissage.
+		\pause
+		\begin{itemize}
+			\item On fait une passe avant.
+			\pause
+			\item On calcule l'erreur de prédiction $e$.
+			\pause
+			\item On calcule les dérivées de $e$ en fonction de chacun des paramètres du réseau de neurones en utilisant l'algorithme de rétro-propagation du gradient.
+			\pause
+			\item On met à jour les poids et biais avec un algorithme de descente de gradient.
+		\end{itemize}
+		\pause 
+		\item On répète l'étape 2 tant qu'une condition d'arrêt n'est pas rencontrée.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}{Initialisation des paramètres}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Style standard
+						link_hl/.style={->, ultra thick, lime!80!black},% Style highlight
+						link_param/.style={->, thick, gray!50},        % Pour les params/cible
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L est en rouge
+						]
+						
+						% --- 1. Chemin Principal (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{(0)}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{(1)}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{(1)}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{(2)}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % C'est la prédiction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Liens de la Passe Avant ---
+						% J'ai tout mis en 'standard' par défaut.
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)   -- (x1)    node[midway, left=0.1cm] {$\sigma^{(1)}$};
+						\draw[link_st] (x1)    -- (z2);
+						\draw[link_st] (z2)   -- (x2)    node[midway, left=0.1cm] {$\sigma^{(2)}$};
+						\draw[link_st] (x2) -- (e);
+						
+						% --- 3. Paramètres et Cible ("En biais", structure en Y) ---
+						% Couche 1
+						\node[node_param, color=lime!80!black] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{(1)}$};
+						\node[node_param, color=lime!80!black] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{(1)}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Couche 2
+						\node[node_param, color=lime!80!black] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{(2)}$};
+						\node[node_param, color=lime!80!black] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{(2)}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Perte (Cible y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_param] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Plus tard dans le cours on donnera des précisions sur comment les paramètres sont \textbf{\textcolor{lime!80!black}{initialisés}}. Pour le moment, considérons que cette initialisation est \textbf{aléatoire}.
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Calcul de la passe avant}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Style standard
+						link_hl/.style={->, ultra thick, lime!80!black},% Style highlight
+						link_param/.style={->, thick, gray!50},        % Pour les params/cible
+						node_math/.style={inner sep=2pt, font=\large, text=lime!80!black},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=lime!80!black} % L est en rouge
+						]
+						
+						% --- 1. Chemin Principal (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{(0)}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{(1)}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{(1)}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{(2)}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % C'est la prédiction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Liens de la Passe Avant ---
+						% J'ai tout mis en 'standard' par défaut.
+						\draw[link_hl] (x0)    -- (z1);
+						\draw[link_hl] (z1)   -- (x1)    node[midway, left=0.1cm, text=gray!80!black] {$\sigma^{(1)}$};
+						\draw[link_hl] (x1)    -- (z2);
+						\draw[link_hl] (z2)   -- (x2)    node[midway, left=0.1cm, text=gray!80!black] {$\sigma^{(2)}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Paramètres et Cible ("En biais", structure en Y) ---
+						% Couche 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{(1)}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{(1)}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Couche 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{(2)}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{(2)}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Perte (Cible y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_param] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Le calcul de la \textbf{\textcolor{lime!80!black}{passe avant}} pour toutes les données d'apprentissage permet de calculer tous les termes intermédiaires ainsi que l'erreur de prédiction dont on aura besoin pour calculer les gradients.
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Calcul du gradient de l'erreur}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Style standard
+						link_hl/.style={->, ultra thick, lime!80!black},% Style highlight
+						link_param/.style={->, thick, gray!50},        % Pour les params/cible
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L est en rouge
+						]
+						
+						% --- 1. Chemin Principal (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{(0)}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{(1)}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{(1)}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{(2)}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % C'est la prédiction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Liens de la Passe Avant ---
+						% J'ai tout mis en 'standard' par défaut.
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)   -- (x1)    node[midway, left=0.1cm] {$\sigma^{(1)}$};
+						\draw[link_st] (x1)    -- (z2);
+						\draw[link_st] (z2)   -- (x2)    node[midway, left=0.1cm] {$\sigma^{(2)}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Paramètres et Cible ("En biais", structure en Y) ---
+						% Couche 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{(1)}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{(1)}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Couche 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{(2)}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{(2)}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Perte (Cible y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_st] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			On calcule le \textbf{\textcolor{lime!80!black}{gradient de l'erreur}}. On notera $\delta$ le gradient qui se propage à travers le graphe de calcul, il sera mis à jour à chaque étape. 
+			\begin{equation*}
+				\delta^{(0)} = \frac{\partial{e}}{\partial{\hat{Y}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{On remonte par la seconde fonction d'activation}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Style standard
+						link_hl/.style={->, ultra thick, lime!80!black},% Style highlight
+						link_param/.style={->, thick, gray!50},        % Pour les params/cible
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L est en rouge
+						]
+						
+						% --- 1. Chemin Principal (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{(0)}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{(1)}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{(1)}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{(2)}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % C'est la prédiction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Liens de la Passe Avant ---
+						% J'ai tout mis en 'standard' par défaut.
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)   -- (x1)    node[midway, left=0.1cm] {$\sigma^{(1)}$};
+						\draw[link_st] (x1)    -- (z2);
+						\draw[link_hl] (z2)   -- (x2)    node[midway, left=0.1cm] {$\sigma^{(2)}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Paramètres et Cible ("En biais", structure en Y) ---
+						% Couche 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{(1)}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{(1)}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Couche 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{(2)}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{(2)}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Perte (Cible y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_st] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			En remontant par la fonction d'activation, on multiplie le gradient précédent par le \textbf{\textcolor{lime!80!black}{gradient de la fonction d'activation}}:
+			\begin{equation*}
+				\delta^{(1)} = \delta^{(0)} \left(\sigma^{(2)}\right)'\left(Z^{(2)}\right)
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{On remonte par l'opérateur linéaire}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Style standard
+						link_hl/.style={->, ultra thick, lime!80!black},% Style highlight
+						link_param/.style={->, thick, gray!50},        % Pour les params/cible
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L est en rouge
+						]
+						
+						% --- 1. Chemin Principal (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{(0)}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{(1)}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{(1)}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{(2)}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % C'est la prédiction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Liens de la Passe Avant ---
+						% J'ai tout mis en 'standard' par défaut.
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)   -- (x1)    node[midway, left=0.1cm] {$\sigma^{(1)}$};
+						\draw[link_hl] (x1)    -- (z2);
+						\draw[link_hl] (z2)   -- (x2)    node[midway, left=0.1cm] {$\sigma^{(2)}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Paramètres et Cible ("En biais", structure en Y) ---
+						% Couche 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{(1)}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{(1)}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Couche 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{(2)}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{(2)}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Perte (Cible y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_st] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			En remontant par l'opérateur linéaire, on multiplie le gradient précédent par le \textbf{\textcolor{lime!80!black}{gradient de la linéarité}}:
+			\begin{equation*}
+				\delta^{(2)} = \delta^{(1)} \frac{\partial{Z^{(2)}}}{\partial{X^{(1)}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{On remonte par la première fonction d'activation}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Style standard
+						link_hl/.style={->, ultra thick, lime!80!black},% Style highlight
+						link_param/.style={->, thick, gray!50},        % Pour les params/cible
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L est en rouge
+						]
+						
+						% --- 1. Chemin Principal (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{(0)}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{(1)}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{(1)}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{(2)}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % C'est la prédiction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Liens de la Passe Avant ---
+						% J'ai tout mis en 'standard' par défaut.
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_hl] (z1)   -- (x1)    node[midway, left=0.1cm] {$\sigma^{(1)}$};
+						\draw[link_hl] (x1)    -- (z2);
+						\draw[link_hl] (z2)   -- (x2)    node[midway, left=0.1cm] {$\sigma^{(2)}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Paramètres et Cible ("En biais", structure en Y) ---
+						% Couche 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{(1)}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{(1)}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Couche 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{(2)}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{(2)}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Perte (Cible y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_st] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			En remontant par la fonction d'activation, on multiplie le gradient précédent par le \textbf{\textcolor{lime!80!black}{gradient de la fonction d'activation}}:
+			\begin{equation*}
+				\delta^{(3)} = \delta^{(2)} \left(\sigma^{(1)}\right)'\left(Z^{(1)}\right)
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{On remonte vers le paramètre d'intérêt $b^{(1)}$}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Style standard
+						link_hl/.style={->, ultra thick, lime!80!black},% Style highlight
+						link_param/.style={->, thick, gray!50},        % Pour les params/cible
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L est en rouge
+						]
+						
+						% --- 1. Chemin Principal (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{(0)}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{(1)}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{(1)}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{(2)}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % C'est la prédiction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Liens de la Passe Avant ---
+						% J'ai tout mis en 'standard' par défaut.
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_hl] (z1)   -- (x1)    node[midway, left=0.1cm] {$\sigma^{(1)}$};
+						\draw[link_hl] (x1)    -- (z2);
+						\draw[link_hl] (z2)   -- (x2)    node[midway, left=0.1cm] {$\sigma^{(2)}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Paramètres et Cible ("En biais", structure en Y) ---
+						% Couche 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{(1)}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{(1)}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_hl] (b1) -- (z1);
+						
+						% Couche 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{(2)}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{(2)}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Perte (Cible y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_st] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.6\textwidth}
+			On remonte jusqu'à notre paramètre d'intérêt et on multiplie le gradient par le \textbf{\textcolor{lime!80!black}{gradient de la linéarité}}:
+			\begin{equation*}
+				\delta^{(4)} = \delta^{(3)} \frac{\partial{Z^{(1)}}}{\partial{b^{(1)}}}
+			\end{equation*}
+			Puisque l'on est remonté jusqu'à notre paramètre d'intérêt, l'algorithme d'optimisation peut mettre à jour le paramètre avec une descente de gradient pour un \textbf{taux d'apprentissage} $\alpha$ donné:
+			\begin{equation*}
+				b^{(1)} \leftarrow b^{(1)} - \alpha \frac{\partial{e}}{\partial{b^{(1)}}}
+			\end{equation*}
+			Avec:
+			\begin{equation*}
+				\frac{\partial{e}}{\partial{b^{(1)}}} = \delta^{(4)}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\subsection[Dérivées des opérateurs]{Dérivées des opérateurs}
+
+\begin{frame}{Dérivées des opérateurs}
+	Dans cette section on verra comment on peut calculer les dérivées de chacun des opérateurs impliqués dans le réseau de neurones:
+
+	\begin{itemize}
+		\item Dérivées des fonctions d'activation.
+		\item Dérivées de l'opérateur linéaire.
+	\end{itemize}
+
+	\vspace{0.3cm}
+	\pause
+
+	On verra plus tard dans le cours comment on calcule la dérivée des fonctions de perte. Ici, pour rester le plus générique possible, on notera simplement $\delta^{(0)}$ la dérivée de l'erreur par rapport aux prédictions $\hat{Y}$:
+
+	\begin{equation*}
+		\delta^{(0)} = \frac{\partial{e}}{\partial{\hat{Y}}}
+	\end{equation*}
+
+	\vspace{0.3cm}
+	\pause
+
+	Si l'erreur est un scalaire $e \in \R$, la dérivée de l'erreur est un vecteur colonne: $\delta^{(0)} \in \mathcal{M}_{n,1}(\R)$ car nous avons empilé verticalement les $n$ observations dans le vecteur cible: $Y \in \mathcal{M}_{n,1}(\R)$. Donc les prédictions se retrouvent empilées de la même manière: $\hat{Y} \in \mathcal{M}_{n,1}(\R)$.
+\end{frame}
+
+\begin{frame}{Fonction logistique tensorielle}
+	\begin{block}{Définition de la fonction logistique tensorielle}
+		Pour un tenseur $Z$ d'entrée de dimension arbitraire, la fonction logistique est donnée par la relation suivante:
+		\begin{equation*}
+			\sigma(Z) = \frac{1}{1 + \exp{(-Z)}}
+		\end{equation*}
+		L'exponentielle est appliquée à chaque membre du tenseur $Z$. La sortie est un tenseur de même dimension que le tenseur d'entrée $Z$.
+	\end{block}
+\end{frame}
+
+\begin{frame}{Dérivée de la fonction logistique tensorielle}	
+	\begin{block}{Dérivée de la fonction logistique par rapport à ses entrées $Z$}
+		La dérivée de la fonction logistique par rapport à ses entrées $Z$ est donnée par la relation suivante:
+		\begin{equation*}
+			\sigma'(Z) = \sigma(Z) \odot \left(1 - \sigma(Z)\right)
+		\end{equation*}
+		La sortie est un tenseur de même dimension que le tenseur d'entrée $Z$.
+	\end{block}
+	Note: $\odot$ représente la multiplication membre à membre, c'est la \textbf{multiplication d'Hadamard}	
+\end{frame}
+
+\begin{frame}{Tangente hyperbolique tensorielle}
+	\begin{block}{Définition de la tangente hyperbolique tensorielle}
+		Pour un tenseur $Z$ d'entrée de dimension arbitraire, la tangente hyperbolique est donnée par la relation suivante:
+		\begin{equation*}
+			\tanh(Z) = \left(1_Z - \exp{(-2 Z)}\right) \oslash \left(1_Z + \exp{(-2 Z)}\right)
+		\end{equation*}
+		L'exponentielle est appliquée à chaque membre du tenseur $Z$. $1_Z$ est un tenseur de $1$ avec la même dimension que $Z$. La sortie est un tenseur de même dimension que le tenseur d'entrée $Z$.
+	\end{block}
+	Note: $\oslash$ représente la division membre à membre, c'est la \textbf{division d'Hadamard}.
+\end{frame}
+
+\begin{frame}{Dérivée de la tangente hyperbolique tensorielle}
+
+	\begin{block}{Dérivée de la tangente hyperbolique par rapport à ses entrées $Z$}
+		Pour un tenseur $Z$ d'entrée de dimension arbitraire, la dérivée de la tangente hyperbolique est donnée par la relation suivante:
+		\begin{equation*}
+			\tanh'(Z) = 1_Z - \tanh{(Z)} \odot \tanh{(Z)}
+		\end{equation*}
+		La sortie est un tenseur de même dimension que le tenseur d'entrée $Z$.		
+	\end{block}
+\end{frame}
+
+\begin{frame}{Fonction linéaire rectifiée (ReLU) tensorielle}
+	\begin{block}{Définition de la fonction linéaire rectifiée tensorielle}
+		Pour un tenseur $Z$ d'entrée de dimension arbitraire, la fonction linéaire rectifiée est donnée par la relation suivante:
+		\begin{equation*}
+			\operatorname{ReLU}(Z) = Z \odot \mathbb{1}_{Z > 0}
+		\end{equation*}
+		$\mathbb{1}_{Z > 0}$ est la fonction indicatrice appliquée à chaque membre du tenseur. La sortie est un tenseur de même dimension que le tenseur d'entrée $Z$.
+	\end{block}
+	\pause
+	Exemple:
+	\begin{equation*}
+		\operatorname{ReLU}\begin{pmatrix}
+			0 & 2 \\
+			-1 & 1 
+		\end{pmatrix} = \begin{pmatrix}
+		0 & 2 \\
+		0 & 1 
+		\end{pmatrix}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Dérivée de la fonction linéaire rectifiée ReLU}
+	\begin{block}{Dérivée de la fonction linéaire rectifiée par rapport à ses entrées $Z$}
+	Pour un tenseur $Z$ d'entrée de dimension arbitraire, la dérivée de la fonction linéaire rectifiée est donnée par la relation suivante:
+	\begin{equation*}
+		\operatorname{ReLU}'(Z) = \mathbb{1}_{Z > 0}
+	\end{equation*}
+	La sortie est un tenseur de même dimension que le tenseur d'entrée $Z$.		
+\end{block}	
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par une fonction d'activation}
+	\begin{block}{Propagation d'un gradient $\delta$ par une fonction d'activation}
+			Pour un tenseur $Z$ d'entrée de dimension arbitraire, le gradient $\delta$ qui est propagé a la même dimension que $Z$. Pour propager le gradient au travers d'une fonction d'activation $\sigma$ \textit{quelconque} il faut donc multiplier, membre à membre, les termes de $\delta$ et de la dérivée de la fonction d'activation:
+			\begin{equation*}
+					\frac{\partial{e}}{\partial{Z}} = \delta \odot \sigma'(Z)
+				\end{equation*}
+		\end{block}
+\end{frame}
+
+\begin{frame}{Cas de l'opérateur linéaire}
+	C'est ici que cela se complique. Comme nous l'avons vu dans le graphe des calculs, l'opérateur linéaire est un nœud à partir duquel on observe 3 ramifications:
+	
+	\begin{itemize}
+		\item Une vers la couche précédente.
+		\item Une vers le paramètre poids.
+		\item Une vers le paramètre biais.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Cas de l'opérateur linéaire}
+	De plus, comme les sorties, les entrées, les poids et les biais sont de dimensions différentes, la dérivée des sorties de l'opérateur linéaire par rapport aux entrées, aux poids et au biais sont des tenseurs de dimensions différentes.
+	
+	\vspace{0.3cm}
+	\pause
+	
+	Par exemple si la dimension des entrées est $n \times p^{(k)}$ et la dimension des sorties est $n \times p^{(k+1)}$, alors les poids sont de dimension $p^{(k)} \times p^{(k+1)}$ et les biais de dimension $1 \times p^{(k+1)}$, les dérivées ont rigoureusement les dimensions suivantes:
+	
+	\begin{itemize}
+		\item $\frac{\partial{Z^{(k+1)}}}{\partial{X^{(k)}}}$: $n \times p^{(k+1)} \times n \times p^{(k)}$
+		\item $\frac{\partial{Z^{(k+1)}}}{\partial{W^{(k+1)}}}$: $n \times p^{(k+1)} \times p^{(k)} \times p^{(k+1)}$
+		\item $\frac{\partial{Z^{(k+1)}}}{\partial{b^{(k+1)}}}$: $n \times p^{(k+1)} \times 1 \times p^{(k+1)}$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Cas de l'opérateur linéaire}
+	Nous allons donc utiliser une astuce. Au lieu de calculer formellement la dérivée de l'opérateur linéaire, nous allons \textbf{directement} calculer le résultat de la propagation à partir du gradient $\delta$. On sait que $\delta$ a la même dimension que les sorties de l'opérateur linéaire, donc $n \times p^{(k+1)}$. Il y a donc un produit \textbf{matriciel} entre $\delta$ et les différentes dérivées de l'opérateur linéaire. Ces produits ont les dimensions suivantes:
+	
+	\begin{itemize}
+		\item $\delta \frac{\partial{Z^{(k+1)}}}{\partial{X^{(k)}}}$: $n \times p^{(k)}$
+		\item $\delta \frac{\partial{Z^{(k+1)}}}{\partial{W^{(k+1)}}}$: $p^{(k)} \times p^{(k+1)}$
+		\item $\delta \frac{\partial{Z^{(k+1)}}}{\partial{b^{(k+1)}}}$: $1 \times p^{(k+1)}$
+	\end{itemize}
+	
+	Ces dimensions sont \textbf{exactement} les dimensions des quantités par lesquelles on a dérivé $Z^{(k+1)}$ et donc respectivement, la dimension des entrées, des poids et des biais.
+\end{frame}
+
+\begin{frame}{Cas général de la règle de la chaîne}
+	Dans le cadre de la règle de la chaîne, la \textbf{multiplication} n'est pas un produit matriciel ou un produit de Hadamard, c'est en fait une \textbf{contraction tensorielle}:
+	
+	\begin{block}{Règle de la chaîne - Contraction tensorielle}
+		Soit un opérateur dans un réseau de neurones (fonction d'activation ou opérateur linéaire). On note $U \in \mathcal{M}_{n, u}(\R)$ ses entrées et $V \in \mathcal{M}_{n, v}(\R)$ ses sorties. Dans le cas d'une fonction d'activation, on a $u = v$. Pour un opérateur linéaire, les poids et biais ont des dimensions compatibles: $W \in \mathcal{M}_{u, v}(\R)$ et $b \in \mathcal{M}_{1, v}(\R)$. On note $\delta \in \mathcal{M}_{n, v}(\R)$ le gradient que l'on est en train de propager. $\delta$ n'est rien d'autre que $\frac{\partial{e}}{\partial{V}}$.
+		La règle générale de la chaîne utilisant la contraction tensorielle est la suivante:
+		\begin{equation*}
+			\frac{\partial{e}}{\partial{Q_{i,j}}} = \sum_{a=1}^n \sum_{b=1}^v \frac{\partial{e}}{\partial{V_{a,b}}} \frac{\partial{V_{a,b}}}{\partial{Q_{i,j}}}
+		\end{equation*}
+		Avec $Q$ qui peut, selon les besoins, représenter $U$, $W$ ou $b$.
+	\end{block}
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour une fonction d'activation}
+	Pour une fonction d'activation on a $u = v$. De plus:
+	\begin{equation*}
+		\frac{\partial{V_{a,b}}}{\partial{U_{i,j}}} = 0 \; \text{si} \; a \ne i \; \text{ou} \; b \ne j
+	\end{equation*}
+	C'est la conséquence d'appliquer la fonction d'activation membre à membre. La règle de la chaîne se simplifie:
+	\pause
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{e}}{\partial{U_{i,j}}} 
+			&= \frac{\partial{e}}{\partial{V_{i,j}}} \frac{\partial{V_{i,j}}}{\partial{U_{i,j}}} \\
+			&= \frac{\partial{e}}{\partial{V_{i,j}}} \sigma'\left(U_{i,j}\right)
+		\end{aligned}
+	\end{equation*}
+	\pause
+	Par conséquent:
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{e}}{\partial{U}} 
+			&= \frac{\partial{e}}{\partial{V}} \odot \sigma'\left(U\right) \\
+			&= \delta \odot \sigma'\left(U\right)
+		\end{aligned}
+	\end{equation*}
+	C'est la relation déjà présentée plus tôt.
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les entrées}
+	Pour un opérateur linéaire, la contraction tensorielle vers les entrées donne la relation suivante:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{a=1}^n \sum_{b=1}^v \frac{\partial{e}}{\partial{V_{a,b}}} \frac{\partial{V_{a,b}}}{\partial{U_{i,j}}}
+	\end{equation*}
+	Avec:
+	\begin{equation*}
+		V_{a,b} = \sum_{k=1}^u U_{a, k} W_{k, b} + b_{1,b}
+	\end{equation*}
+	\pause
+	Les lignes des tenseurs représentent les observations. Les opérations sont réalisées sur chaque observation indépendamment, donc:
+	\begin{equation*}
+		\frac{\partial{V_{a,b}}}{\partial{U_{i,j}}} = 0 \; \text{si} \; a \ne i
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les entrées}
+	Par conséquent,  on peut simplifier la règle de la chaîne:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{b=1}^v \frac{\partial{e}}{\partial{V_{i,b}}} \frac{\partial{V_{i,b}}}{\partial{U_{i,j}}}
+	\end{equation*}
+	\pause
+	Or:
+	\begin{equation*}
+		V_{i,b} = \sum_{k=1}^u U_{i, k} W_{k, b} + b_{1,b}
+	\end{equation*}
+	Donc:
+	\begin{equation*}
+		\frac{\partial{V_{i,b}}}{\partial{U_{i,j}}} = W_{j, b}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les entrées}
+	La règle de la chaîne se simplifie encore:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{b=1}^v \frac{\partial{e}}{\partial{V_{i,b}}} W_{j, b} = \sum_{b=1}^v \delta_{i,b} W_{j, b} = \sum_{b=1}^v \delta_{i,b} \left(W^T\right)_{b, j}
+	\end{equation*}
+	\pause
+	Cela correspond donc à l'opération matricielle suivante:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U}} = \delta W^T
+	\end{equation*}
+	$\delta$ a pour dimension $n \times v$ et $W^T$ a pour dimension $v \times u$ ce qui donne bien un tenseur de dimension $n \times u$ en sortie, soit exactement la dimension des entrées $U$. 
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les poids}
+	Pour un opérateur linéaire, la contraction tensorielle vers les poids donne la relation suivante:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{W_{i,j}}} = \sum_{a=1}^n \sum_{b=1}^v \frac{\partial{e}}{\partial{V_{a,b}}} \frac{\partial{V_{a,b}}}{\partial{W_{i,j}}}
+	\end{equation*}
+	Avec:
+	\begin{equation*}
+		V_{a,b} = \sum_{k=1}^u U_{a, k} W_{k, b} + b_{1,b}
+	\end{equation*}
+	\pause
+	Donc:
+	\begin{equation*}
+		\frac{\partial{V_{a,b}}}{\partial{W_{i,j}}} = 0 \; \text{si} \; b \ne j
+	\end{equation*}
+	\pause
+	Et:
+	\begin{equation*}
+		\frac{\partial{V_{a,j}}}{\partial{W_{i,j}}} = U_{a,i}
+	\end{equation*}	
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les poids}
+	La règle de la chaîne se simplifie donc:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{W_{i,j}}} = \sum_{a=1}^n \frac{\partial{e}}{\partial{V_{a,j}}} U_{a,i} = \sum_{a=1}^n \delta_{a,j} U_{a,i} = \sum_{a=1}^n \left(U^T\right)_{i,a} \delta_{a,j}
+	\end{equation*}
+	\pause
+	On reconnaît un produit matriciel, donc:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{W}} = U^T \delta
+	\end{equation*}
+	$\delta$ a pour dimension $n \times v$ et $U^T$ a pour dimension $u \times n$ ce qui donne bien un tenseur de dimension $u \times v$ en sortie, soit exactement la dimension des poids $W$. 	
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les biais}
+	Pour un opérateur linéaire, la contraction tensorielle vers les biais donne la relation suivante:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{b_{1,j}}} = \sum_{a=1}^n \sum_{b=1}^v \frac{\partial{e}}{\partial{V_{a,b}}} \frac{\partial{V_{a,b}}}{\partial{b_{1,j}}}
+	\end{equation*}
+	Avec:
+	\begin{equation*}
+		V_{a,b} = \sum_{k=1}^u U_{a, k} W_{k, b} + b_{1,b}
+	\end{equation*}
+	\pause
+	Donc:
+	\begin{equation*}
+		\frac{\partial{V_{a,b}}}{\partial{b_{1,j}}} = 0 \; \text{si} \; b \ne j
+	\end{equation*}
+	Et:
+	\begin{equation*}
+		\frac{\partial{V_{a,j}}}{\partial{b_{1,j}}} = 1
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les biais}
+	La règle de la chaîne se simplifie donc:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{b_{1,j}}} = \sum_{a=1}^n \frac{\partial{e}}{\partial{V_{a,j}}} \frac{\partial{V_{a,j}}}{\partial{b_{1,j}}} = \sum_{a=1}^n \frac{\partial{e}}{\partial{V_{a,j}}} = \sum_{a=1}^n \delta_{a,j}
+	\end{equation*}
+	\pause
+	On constate que l'on somme simplement les éléments de la $j\textsuperscript{ème}$ colonne de la matrice $\delta$. En notation vectorielle, en sommant sur l'axe des observations (les lignes), on obtient:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{b}} = \sum_{a=1}^n \delta_{a, \bigdot} = 1_n^T \delta
+	\end{equation*}
+	En sommant les $n$ lignes de $\delta$ (qui est de dimension $n \times v$), on obtient bien un vecteur ligne de dimension $1 \times v$, soit exactement la dimension des biais $b$.	
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par un opérateur linéaire}
+	\begin{block}{Propagation d'un gradient $\delta$ par un opérateur linéaire}
+		Soit un opérateur linéaire défini par ses poids $W \in \mathcal{M}_{u,v}(\R)$ et ses biais $b \in \mathcal{M}_{1,v}(\R)$. L'opérateur s'applique à des entrées $X \in \mathcal{M}_{n,u}(\R)$ pour produire des sorties $Z \in \mathcal{M}_{n,v}(\R)$. La propagation des gradients $\delta \in \mathcal{M}_{n,v}(\R)$ dépend de la quantité par rapport à laquelle on dérive:
+		\begin{equation*}
+			\begin{aligned}
+				\frac{\partial{e}}{\partial{X}} &= \delta W^T \\
+				\frac{\partial{e}}{\partial{W}} &=  X^T \delta \\
+				\frac{\partial{e}}{\partial{b}} &= 1_n^T \delta	
+			\end{aligned}
+		\end{equation*} 
+	\end{block}
+\end{frame}
+
+\begin{frame}{Synthèse sur la rétro-propagation du gradient}
+	Nous avons vu dans cette section comment:
+	\begin{itemize}
+		\item Exprimer un réseau de neurones sous la forme d'un \textbf{graphe de calcul}.
+		\item Appliquer la \textbf{règle de la chaîne} pour déterminer analytiquement toutes les dérivées de l'\textbf{erreur} en fonction des des différents \textbf{paramètres} du réseau (poids et biais).
+		\item Propager les gradients au travers des différents opérateurs (opérateur linéaire et fonction d'activation). 
+	\end{itemize}
+	\pause
+	Vous avez probablement noté que je n'ai pas donné les expressions pour la dérivée du softmax et pour la propagation du gradient. On discutera de ce point plus tard dans ce cours, on aura recours à une autre astuce liée aux fonctions de perte.
+\end{frame}
