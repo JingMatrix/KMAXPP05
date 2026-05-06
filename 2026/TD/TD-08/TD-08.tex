@@ -41,7 +41,7 @@
 			\end{tabular}
 		\end{table}
 		
-		On considèrera un algorithme d'optimisation de descente de gradient avec une taux d'apprentissage $\alpha$:
+		On considèrera un algorithme d'optimisation de descente de gradient avec un taux d'apprentissage $\alpha$:
 		\begin{equation*}
 			w \leftarrow w - \alpha \frac{\partial{e}}{\partial{w}}
 		\end{equation*}
@@ -75,11 +75,11 @@
 		\begin{enumerate}
 			\item Démontrer que $\sigma'(z) = \sigma(z) \left(1 - \sigma(z)\right)$.
 			\item Démontrer que $\tanh'(z) = 1 - \tanh^2(z)$.
-			\item Calculer la dérivée de $\operatorname{ReLU}$. On supposera que la dérivée est nulle en $z = 0$.
+			\item Calculer la dérivée de $\operatorname{ReLU}(z)$. On supposera que la dérivée est nulle en $z = 0$.
 			\item Pour les trois fonctions, calculer les dérivées en $z=-5$, $z=0$ et $z=5$.
 			\item Si un réseau dispose de 10 couches, que se passe-t-il lors de la passe arrière si jamais les fonctions d'activations sont toujours sollicitées dans une zone $z=5$ ?
 			\item Pour un réseau de neurones simple à une couche cachée avec une fonction ReLU, que se passe-t-il si lors de la passe avant toutes les entrées de ReLU sont négatives.
-			\item Discuter des potentiels problèmes que cela pourrait causer sur l'apprentissage.
+			\item Discuter des potentiels problèmes que les réponses aux question 5 et 6 pourraient causer sur l'apprentissage.
 		\end{enumerate}
 		
 	\end{exercice}
