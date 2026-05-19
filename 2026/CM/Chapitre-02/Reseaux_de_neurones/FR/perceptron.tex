@@ -85,7 +85,7 @@
 	
 	\begin{itemize}
 		\item On dispose de plusieurs points: $\mathcal{P} = \left\{ \left( x_1^{(i)}, x_2^{(i)}\right) \right\}_{i=1}^n$.
-		\item Chaque point (ou observation) est associé à une classe $K = \{0, 1\}$.
+		\item Chaque point (ou observation) est associé à une classe $y^{(i)} = \{0, 1\}$.
 		\item On cherche alors une droite $\mathcal{D}$ \textbf{séparant parfaitement} les observations des deux classes.
 	\end{itemize}
 	
@@ -109,7 +109,7 @@
 	\begin{enumerate}
 		\item On initialise aléatoirement les coefficients $w_1$, $w_2$, $w_3$.
 		\pause
-		\item Boucle principale: \textbf{epochs}
+		\item Boucle principale: \textbf{epoques}
 		\pause
 		\begin{itemize}
 			\item Pour chaque observation $i$:
@@ -224,32 +224,32 @@
 \subsection[Neurone mathématique]{Neurone mathématique}
 
 \begin{frame}{Classe prédite par le Perceptron}
-	Pour une observation $i$ donnée, en considérant l'augmentation $x^{(i)} = (x_1^{(i)}, x_2^{(i)}, \cdots, x_p^{(i)}, 1)$ organisée dans un vecteur ligne $x^{(i)} \in \mathcal{M}_{1,p+1}(\R),$  quand l'espace des entrées est p-dimensionnel: $\mathcal{X} \subset \R^p$, on peut écrire la classe prédite $y^{(i)}$ à partir des caractéristiques d'entrée et des coefficients de la droite arrangés en colonne $w = (w_1, w_2, \cdots, w_p, w_{p+1})^T$ comme suit:
+	Pour une observation $i$ donnée, en considérant l'augmentation $x^{(i)} = (x_1^{(i)}, x_2^{(i)}, \cdots, x_p^{(i)}, 1)$ organisée dans un vecteur ligne $x^{(i)} \in \mathcal{M}_{1,p+1}(\R),$  quand l'espace des entrées est p-dimensionnel: $\mathcal{X} \subset \R^p$, on peut écrire la classe prédite $\hat{y}^{(i)}$ à partir des caractéristiques d'entrée et des coefficients de la droite arrangés en colonne $w = (w_1, w_2, \cdots, w_p, w_{p+1})^T$ comme suit:
 	
 	\begin{equation*}
-		y^{(i)} = \sign{x^{(i)} w}
+		\hat{y}^{(i)} = \sign{x^{(i)} w}
 	\end{equation*}
 	
 	\pause
 	On peut représenter le signe de la quantité $z$ en utilisant la fonction d'Heaviside $\sigma_h: \R \to \{0, 1\}$, la formulation devient alors:
 	
 	\begin{equation*}
-		y^{(i)} = \heaviside{x^{(i)} w}
+		\hat{y}^{(i)} = \heaviside{x^{(i)} w}
 	\end{equation*}
 	
 \end{frame}
 
 \begin{frame}{Similarité avec la régression logistique}
-	Le Perceptron de Rosenblatt prédit la classe $y^{(i)}$ avec:
+	Le Perceptron de Rosenblatt prédit la classe $\hat{y}^{(i)}$ avec:
 	
 	\begin{equation*}
-		y^{(i)} = \heaviside{x^{(i)} w}
+		\hat{y}^{(i)} = \heaviside{x^{(i)} w}
 	\end{equation*}
 	
 	La régression logistique utilise la fonction logistique $\sigma: \R \to ]0, 1[$ à la place de la fonction d'Heaviside:
 	
 	\begin{equation*}
-		y^{(i)} = \logistic{x^{(i)} w}
+		\hat{y}^{(i)} = \logistic{x^{(i)} w}
 	\end{equation*}
 \end{frame}
 
@@ -258,13 +258,13 @@
 	Sans considérer une augmentation de $x$, on peut simplement écrire $x^{(i)} = (x_1^{(i)}, x_2^{(i)}, \cdots, x_p^{(i)})$. Une formulation équivalente du Perceptron est alors:
 	
 	\begin{equation*}
-		y^{(i)} = \heaviside{x^{(i)} w + w_{p+1}}
+		\hat{y}^{(i)} = \heaviside{x^{(i)} w + w_{p+1}}
 	\end{equation*}
 	
 	Qu'il est plus courant d'écrire:
 	
 	\begin{equation*}
-		y^{(i)} = \heaviside{x^{(i)} w + b}
+		\hat{y}^{(i)} = \heaviside{x^{(i)} w + b}
 	\end{equation*}
 	
 	Où $w$ est appelé \textbf{poids} du Perceptron et $b$ est appelé \textbf{biais} du perceptron.
@@ -311,7 +311,7 @@
 			\draw[->, thick] (sum) -- (act) node[midway, above, font=\tiny] {$z^{(i)}$};
 			
 			% --- 6. Sortie (Output) ---
-			\node (y) at (7, 0.6) {$y^{(i)}$};
+			\node (y) at (7, 0.6) {$\hat{y}^{(i)}$};
 			\draw[->, thick] (act) -- (y);
 			
 			% --- Annotations mathématiques ---

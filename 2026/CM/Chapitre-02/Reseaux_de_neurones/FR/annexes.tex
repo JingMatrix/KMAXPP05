@@ -1,0 +1,338 @@
+\section[Annexes]{Annexes}
+
+\begin{frame}{Annexes}
+	Dans ces annexes vous trouverez principalement les démonstrations pour la propagation des gradients issues de la contraction tensorielle:
+	\begin{itemize}
+		\item Pour les fonctions d'activation de type logistique, tangente hyperbolique et ReLU.
+		\item Pour l'opérateur linéaire vers les entrées, les poids et les biais.
+		\item Pour la classification multi-classe avec la prise en compte du softmax pour l'entropie croisée catégorielle moyenne.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Cas général de la règle de la chaîne}
+	Dans le cadre de la règle de la chaîne, la \textbf{multiplication} est une \textbf{contraction tensorielle}:
+	
+	\begin{block}{Règle de la chaîne - Contraction tensorielle}
+		Soit un opérateur dans un réseau de neurones (fonction d'activation ou opérateur linéaire). On note $U \in \mathcal{M}_{n, u}(\R)$ ses entrées et $V \in \mathcal{M}_{n, v}(\R)$ ses sorties. Dans le cas d'une fonction d'activation, on a $u = v$. Pour un opérateur linéaire, les poids et biais ont des dimensions compatibles: $W \in \mathcal{M}_{u, v}(\R)$ et $b \in \mathcal{M}_{1, v}(\R)$. On note $\delta \in \mathcal{M}_{n, v}(\R)$ le gradient que l'on est en train de propager. $\delta$ n'est rien d'autre que $\frac{\partial{e}}{\partial{V}}$.
+		La règle générale de la chaîne utilisant la contraction tensorielle est la suivante:
+		\begin{equation*}
+			\frac{\partial{e}}{\partial{Q_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{Q_{i,j}}}
+		\end{equation*}
+		Avec $Q$ qui peut, selon les besoins, représenter $U$, $W$ ou $b$.
+	\end{block}
+\end{frame}
+
+\subsection{Contraction tensorielle: fonctions d'activation logistique, tangente hyperbolique et ReLU}
+
+\begin{frame}{Contraction tensorielle pour une fonction d'activation}
+	Pour une fonction d'activation on cherche à calculer $\frac{\partial{e}}{\partial{U}}$ avec $u = v$:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{U_{i,j}}} \quad \text{avec} \quad \frac{\partial{V_{\mu,\nu}}}{\partial{U_{i,j}}} = 0 \; \text{si} \; \mu \ne i \; \text{ou} \; \nu \ne j
+	\end{equation*}
+	C'est la conséquence d'appliquer la fonction d'activation membre à membre. \\
+	
+	\pause
+	
+	La règle de la chaîne se simplifie:
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{e}}{\partial{U_{i,j}}} 
+			&= \frac{\partial{e}}{\partial{V_{i,j}}} \frac{\partial{V_{i,j}}}{\partial{U_{i,j}}} \\
+			&= \frac{\partial{e}}{\partial{V_{i,j}}} \sigma'\left(U_{i,j}\right)
+		\end{aligned}
+	\end{equation*}
+	
+	\pause
+	
+	On retrouve donc l'expression vue plus tôt:
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{e}}{\partial{U}} 
+			&= \frac{\partial{e}}{\partial{V}} \odot \sigma'\left(U\right) \\
+			&= \delta \odot \sigma'\left(U\right)
+		\end{aligned}
+	\end{equation*}
+\end{frame}
+
+\subsection{Contraction tensorielle: opérateur linéaire}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les entrées}
+	Pour un opérateur linéaire, la contraction tensorielle vers les entrées donne la relation suivante:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{U_{i,j}}}
+	\end{equation*}
+	
+	\pause
+	
+	Les lignes des tenseurs représentent les observations. Les opérations sont réalisées sur chaque observation indépendamment, donc:
+	\begin{equation*}
+		\frac{\partial{V_{\mu,\nu}}}{\partial{U_{i,j}}} = 0 \; \text{si} \; \mu \ne i
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les entrées}
+	Par conséquent,  on peut simplifier la règle de la chaîne:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{i,\nu}}} \frac{\partial{V_{i,\nu}}}{\partial{U_{i,j}}}
+	\end{equation*}
+	\pause
+	Or l'opérateur linéaire $V = U W + b$ peut aussi s'écrire:
+	\begin{equation*}
+		V_{i,\nu} = \sum_{k=1}^u U_{i, k} W_{k, \nu} + b_{1,\nu}
+	\end{equation*}
+	Donc:
+	\begin{equation*}
+		\frac{\partial{V_{i,\nu}}}{\partial{U_{i,j}}} = W_{j, \nu}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les entrées}
+	La règle de la chaîne se simplifie encore:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{i,\nu}}} W_{j, \nu} = \sum_{\nu=1}^v \delta_{i,\nu} W_{j, \nu} = \sum_{\nu=1}^v \delta_{i,\nu} \left(W^T\right)_{\nu, j}
+	\end{equation*}
+	\pause
+	Cela correspond donc à l'opération matricielle suivante:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U}} = \delta W^T
+	\end{equation*}
+	$\delta$ a pour dimension $n \times v$ et $W^T$ a pour dimension $v \times u$ ce qui donne bien un tenseur de dimension $n \times u$ en sortie, soit exactement la dimension des entrées $U$. 
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les poids}
+	Pour un opérateur linéaire, la contraction tensorielle vers les poids donne la relation suivante:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{W_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{W_{i,j}}}
+	\end{equation*}
+	\pause
+	Avec l'opérateur linéaire $V = U W + b$:
+	\begin{equation*}
+		V_{\mu,\nu} = \sum_{k=1}^u U_{\mu, k} W_{k, \nu} + b_{1,\nu}
+	\end{equation*}
+	\pause
+	Donc:
+	\begin{equation*}
+		\frac{\partial{V_{\mu,\nu}}}{\partial{W_{i,j}}} = 0 \; \text{si} \; \nu \ne j
+	\end{equation*}
+	\pause
+	Et:
+	\begin{equation*}
+		\frac{\partial{V_{\mu,j}}}{\partial{W_{i,j}}} = U_{\mu,i}
+	\end{equation*}	
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les poids}
+	La règle de la chaîne se simplifie donc:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{W_{i,j}}} = \sum_{\mu=1}^n \frac{\partial{e}}{\partial{V_{\mu,j}}} U_{\mu,i} = \sum_{\mu=1}^n \delta_{\mu,j} U_{\mu,i} = \sum_{\mu=1}^n \left(U^T\right)_{i,\mu} \delta_{\mu,j}
+	\end{equation*}
+	\pause
+	On reconnaît un produit matriciel, donc:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{W}} = U^T \delta
+	\end{equation*}
+	$\delta$ a pour dimension $n \times v$ et $U^T$ a pour dimension $u \times n$ ce qui donne bien un tenseur de dimension $u \times v$ en sortie, soit exactement la dimension des poids $W$. 	
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les biais}
+	Pour un opérateur linéaire, la contraction tensorielle vers les biais donne la relation suivante:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{b_{1,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{b_{1,j}}}
+	\end{equation*}
+	\pause
+	Avec l'opérateur linéaire $V = U W + b$:
+	\begin{equation*}
+		V_{\mu,\nu} = \sum_{k=1}^u U_{\mu, k} W_{k, \nu} + b_{1,\nu}
+	\end{equation*}
+	\pause
+	Donc:
+	\begin{equation*}
+		\frac{\partial{V_{\mu,\nu}}}{\partial{b_{1,j}}} = 0 \; \text{si} \; \nu \ne j
+	\end{equation*}
+	\pause
+	Et:
+	\begin{equation*}
+		\frac{\partial{V_{\mu,j}}}{\partial{b_{1,j}}} = 1
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Contraction tensorielle pour un opérateur linéaire vers les biais}
+	La règle de la chaîne se simplifie donc:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{b_{1,j}}} = \sum_{\mu=1}^n \frac{\partial{e}}{\partial{V_{\mu,j}}} \frac{\partial{V_{\mu,j}}}{\partial{b_{1,j}}} = \sum_{\mu=1}^n \frac{\partial{e}}{\partial{V_{\mu,j}}} = \sum_{\mu=1}^n \delta_{\mu,j}
+	\end{equation*}
+	\pause
+	On constate que l'on somme simplement les éléments de la $j\textsuperscript{ème}$ colonne de la matrice $\delta$. En notation vectorielle, en sommant sur l'axe des observations (les lignes), on obtient:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{b}} = \sum_{\mu=1}^n \delta_{\mu, \bigdot} = 1_n^T \delta
+	\end{equation*}
+	En sommant les $n$ lignes de $\delta$ (qui est de dimension $n \times v$), on obtient bien un vecteur ligne de dimension $1 \times v$, soit exactement la dimension des biais $b$.	
+\end{frame}
+
+\subsection{Contraction tensorielle: softmax et entropie croisée catégorielle moyenne}
+
+\begin{frame}{Propagation d'un gradient par la fonction softmax}
+	La dérivée de la fonction softmax par rapport à ses entrées est un tenseur de dimension $(n\times K \times n \times K)$. Autant le dire tout de suite, on ne va pas s'amuser à le calculer. En fait, on va utiliser la même astuce que précédemment. On va passer par une \textbf{contraction tensorielle}:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Z_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^K \frac{\partial{e}}{\partial{\hat{Y}_{\mu,\nu}}} \frac{\partial{\hat{Y}_{\mu,\nu}}}{\partial{Z_{i,j}}}
+	\end{equation*}
+	\pause
+	Chaque observation est traitée de manière indépendante, donc:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{\mu,\nu}}}{\partial{Z_{i,j}}} = 0 \; \text{si} \; \mu \ne i
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par la fonction softmax}
+	On peut donc simplifier la contraction tensorielle:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Z_{i,j}}} = \sum_{\nu=1}^K \frac{\partial{e}}{\partial{\hat{Y}_{i,\nu}}} \frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}}
+	\end{equation*}
+	\pause
+	On a vu précédemment que la dérivée de l'erreur (entropie croisée catégorique moyenne) en fonction des prédictions $\hat{Y}$ est:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{\hat{Y}}} = - \frac{1}{n} Y \oslash \hat{Y}
+	\end{equation*}
+	Par conséquent:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{\hat{Y}_{i,\nu}}} = - \frac{1}{n} \frac{Y_{i,\nu}}{\hat{Y}_{i,\nu}}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par la fonction softmax}
+	Il nous reste à étudier le terme $\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}}$. Avec:
+	\begin{equation*}
+		\hat{Y}_{i,\nu} = \frac{\exp{(Z_{i,\nu})}}{\sum_{k=1}^K \exp{(Z_{i,k})}}
+	\end{equation*}
+	\pause
+	Pour calculer cette dérivée, on procède à un changement d'écriture en utilisant deux fonctions $f$ et $g$ de $\R^K$ dans $\R$. On pose:
+	\begin{equation*}
+		\begin{cases}
+			f(Z_{i,\bigdot}) = \exp{(Z_{i,\nu})} \\
+			g(Z_{i,\bigdot}) = \sum_{k=1}^K \exp{(Z_{i,k})}
+		\end{cases}
+	\end{equation*}
+	\pause
+	De sorte que:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}} = \frac{\partial{(f / g)}}{\partial{Z_{i,j}}} =  \frac{\frac{\partial{f}}{\partial{Z_{i,j}}} \cdot g - f \cdot \frac{\partial{g}}{\partial{Z_{i,j}}}}{g^2}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par la fonction softmax}
+	On doit alors considérer deux cas:
+	\begin{itemize}
+		\item $\nu = j$
+		\item $\nu \ne j$
+	\end{itemize}
+	\pause
+	On considère dans un premier temps $\nu = j$:
+	\begin{equation*}
+		\begin{cases}
+			\frac{\partial{f}}{\partial{Z_{i,j}}} = \exp{(Z_{i,j})} \\
+			\frac{\partial{g}}{\partial{Z_{i,j}}} = \exp{(Z_{i,j})}
+		\end{cases}
+	\end{equation*}
+	\pause
+	La dérivée se simplifie:
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}}
+			&= \frac{\exp{(Z_{i,j})} \cdot g(Z_{i,\bigdot}) - \exp{(Z_{i,j})} \exp{(Z_{i,j})}}{g(Z_{i,\bigdot})^2} \\
+			&= \frac{\exp{(Z_{i,j})}}{g(Z_{i,\bigdot})} \frac{g(Z_{i,\bigdot}) - \exp{(Z_{i,j})}}{g(Z_{i,\bigdot})} \\
+			&= \frac{\exp{(Z_{i,j})}}{g(Z_{i,\bigdot})} \left(1 - \frac{\exp{(Z_{i,j})}}{g(Z_{i,\bigdot})}\right)
+		\end{aligned}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par la fonction softmax}
+	Or nous avons:
+	\begin{equation*}
+		\hat{Y}_{i,j} = \frac{\exp{(Z_{i,j})}}{g(Z_{i,\bigdot})}
+	\end{equation*}
+	\pause
+	Donc, si $\nu = j$:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}} = \frac{\partial{\hat{Y}_{i,j}}}{\partial{Z_{i,j}}} = \hat{Y}_{i,j} \left(1 - \hat{Y}_{i,j}\right)
+	\end{equation*}	
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par la fonction softmax}
+	Dans le second cas, si $\nu \ne j$:
+	\begin{equation*}
+		\begin{cases}
+			\frac{\partial{f}}{\partial{Z_{i,j}}} = 0 \\
+			\frac{\partial{g}}{\partial{Z_{i,j}}} = \exp{(Z_{i,j})}
+		\end{cases}
+	\end{equation*}
+	\pause
+	La dérivée se simplifie:
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}}
+			&= \frac{- \exp{(Z_{i,\nu})} \exp{(Z_{i,j})}}{g(Z_{i,\bigdot})^2} \\
+			&= -\frac{\exp{(Z_{i,\nu})}}{g(Z_{i,\bigdot})} \frac{\exp{(Z_{i,j})}}{g(Z_{i,\bigdot})} \\
+			&= - \hat{Y}_{i,\nu} \hat{Y}_{i,j}
+		\end{aligned}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par la fonction softmax}
+	En résumé:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}} =
+		\begin{cases}
+			\hat{Y}_{i,j} \left(1 - \hat{Y}_{i,j}\right) & \text{si} \; \nu = j \\
+			- \hat{Y}_{i,\nu} \hat{Y}_{i,j}              & \text{sinon}
+		\end{cases}
+	\end{equation*}
+	\pause
+	On peut combiner ces deux cas en une seule équation en utilisant la fonction indicatrice:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}} = \hat{Y}_{i,\nu} \left(\mathbb{1}_{\nu=j} - \hat{Y}_{i,j}\right)
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par la fonction softmax}
+	Revenons maintenant à la contraction tensorielle initiale:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Z_{i,j}}} = \sum_{\nu=1}^K \frac{\partial{e}}{\partial{\hat{Y}_{i,\nu}}} 	\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}}
+	\end{equation*}
+	\pause
+	On a démontré que:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{\hat{Y}_{i,\nu}}} = - \frac{1}{n} \frac{Y_{i,\nu}}{\hat{Y}_{i,\nu}}
+	\end{equation*}	
+	\pause
+	et:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}} = \hat{Y}_{i,\nu} \left(\mathbb{1}_{\nu=j} - \hat{Y}_{i,j}\right)
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par la fonction softmax}
+	Nous pouvons donc assembler le tout en:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Z_{i,j}}} = \sum_{\nu=1}^K - \frac{1}{n} \frac{Y_{i,\nu}}{\hat{Y}_{i,\nu}} \hat{Y}_{i,\nu} \left(\mathbb{1}_{\nu=j} - \hat{Y}_{i,j}\right)
+	\end{equation*}
+	\pause
+	On peut alors simplifier, en utilisant la propriété de l'encodage One-Hot $\sum_{\nu=1}^K Y_{i,\nu} = 1$:
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{e}}{\partial{Z_{i,j}}} 
+			&= \sum_{\nu=1}^K - \frac{1}{n} Y_{i,\nu} \left(\mathbb{1}_{\nu=j} - \hat{Y}_{i,j}\right)
+			= - \frac{1}{n} \sum_{\nu=1}^K Y_{i,\nu} \left(\mathbb{1}_{\nu=j} - \hat{Y}_{i,j}\right) \\
+			&= - \frac{1}{n} \left(\sum_{\nu=1}^K Y_{i,\nu} \mathbb{1}_{\nu=j} - \sum_{\nu=1}^K Y_{i,\nu} \hat{Y}_{i,j} \right) \\
+			&= - \frac{1}{n} \left(Y_{i,j} - \hat{Y}_{i,j} \sum_{\nu=1}^K Y_{i,\nu} \right) \\
+			&= \frac{1}{n} \left(\hat{Y}_{i,j} - Y_{i,j} \right)
+		\end{aligned}
+	\end{equation*}	
+\end{frame}
+
+\begin{frame}{Propagation d'un gradient par la fonction softmax}
+	Il ne nous reste plus qu'à réécrire sous forme tensorielle ce gradient:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Z}} = \frac{1}{n} \left(\hat{Y} - Y \right)
+	\end{equation*}
+	C'est exactement la même expression que pour la propagation du gradient d'une entropie croisée binaire moyenne à travers une fonction logistique pour la classification binaire.
+\end{frame}

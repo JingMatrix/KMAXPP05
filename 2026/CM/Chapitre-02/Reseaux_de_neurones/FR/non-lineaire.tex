@@ -3,9 +3,9 @@
 \begin{frame}{Problèmes non-linéaires}
 	Dans cette section on verra:
 	\begin{itemize}
-		\item Comment on peut adapter la définition d'un neurone artificiel pour le préparer à l'algorithme d'apprentissage de \textbf{rétro-propagation du gradient}.
-		\item Comment on peut créer un \textbf{réseau} pour résoudre un problème non-linéaire.
-		\item Comment on pourrait adapter la structure d'un neurone artificiel pour les problèmes de \textbf{régression}.
+		\item Comment adapter la définition d'un neurone artificiel pour le préparer à l'algorithme d'apprentissage de \textbf{rétro-propagation du gradient}.
+		\item Comment créer un \textbf{réseau} pour résoudre un problème non-linéaire.
+		\item Comment adapter la structure d'un neurone artificiel pour les problèmes de \textbf{régression}.
 	\end{itemize}
 \end{frame}
 
@@ -25,7 +25,7 @@
 	Avec la fonction logistique, la formulation d'un neurone artificiel devient:
 	
 	\begin{equation*}
-		y = \logistic{x \cdot w + b}
+		\hat{y} = \logistic{x \cdot w + b}
 	\end{equation*}
 	
 	\pause
@@ -47,18 +47,18 @@
 	On écrit couramment l'expression suivante pour un empilement vertical des observations pour un neurone artificiel:
 	
 	\begin{equation*}
-		Y = \logistic{X \cdot w + b}
+		\hat{Y} = \logistic{X \cdot w + b}
 	\end{equation*}
 	
-	Mais c'est un abus. En effet $X \in \mathcal{M}_{n,p}(\R)$, $Y \in \mathcal{M}_{n,1}(\R)$, $w \in \mathcal{M}_{p,1}(\R)$ et $b \in \R$. On ne peut rigoureusement pas additionner un vecteur et un scalaire.
+	Mais c'est un abus. En effet $X \in \mathcal{M}_{n,p}(\R)$, $\hat{Y} \in \mathcal{M}_{n,1}(\R)$, $w \in \mathcal{M}_{p,1}(\R)$ et $b \in \R$. On ne peut rigoureusement pas additionner un vecteur et un scalaire.
 	
 	\vspace{0.2cm}
 	\pause
 	
-	C'est une pratique qui nous vient du monde de l'informatique. Les librairies de calcul utilisent un concept de \textbf{broadcasting} qui permet de modifier automatiquement la forme d'une opérande entre vecteurs, matrices, tenseurs et scalaires. Rigoureusement, l'opération qui va être réalisée est la suivante:
+	C'est une pratique qui nous vient du monde de l'informatique. Les librairies de calcul utilisent un concept de \textbf{broadcasting} qui permet de modifier automatiquement la forme d'un opérande entre vecteurs, matrices, tenseurs et scalaires. Rigoureusement, l'opération qui va être réalisée est la suivante:
 	
 	\begin{equation*}
-		Y = \logistic{X \cdot w + b \cdot \mathbf{1}_n}
+		\hat{Y} = \logistic{X \cdot w + b \cdot \mathbf{1}_n}
 	\end{equation*}
 	
 	Avec $\mathbf{1}_n \in \mathcal{M}_{n,1}$ tel que $\mathbf{1}_n = \begin{pmatrix}
@@ -82,11 +82,11 @@
 	Un empilement vertical des observations donnera la formulation suivante pour une couche de neurones:
 	
 	\begin{block}{Une couche de neurones dans un réseau dense}
-		L'information se propage de la couche $k$: $X^{(k)}$ à la couche $k+1$: $X^{(k+1)}$ lors d'une \textbf{passe avant} dans le réseau de neurones. La dimensionnalité de $X$ change entre chaque couche: $X^{(k)} \in \mathcal{M}_{n,p^{(k)}}(\R)$ et $X^{(k+1)} \in \mathcal{M}_{n,p^{(k+1)}}(\R)$. Les \textbf{poids} des neurones dans la couche sont notés $W^{(k+1)} \in \mathcal{M}_{p^{(k)},p^{(k+1)}}(\R)$ et les \textbf{biais} sont notés $b^{(k+1)} \in \mathcal{M}_{1,p^{(k+1)}}(\R)$:
+		L'information se propage de la couche $k$: $X^{[k]}$ à la couche $k+1$: $X^{[k+1]}$ lors d'une \textbf{passe avant} dans le réseau de neurones. La dimensionnalité de $X$ change entre chaque couche: $X^{[k]} \in \mathcal{M}_{n,p^{[k]}}(\R)$ et $X^{[k+1]} \in \mathcal{M}_{n,p^{[k+1]}}(\R)$. Les \textbf{poids} des neurones dans la couche sont notés $W^{[k+1]} \in \mathcal{M}_{p^{[k]},p^{[k+1]}}(\R)$ et les \textbf{biais} sont notés $b^{[k+1]} \in \mathcal{M}_{1,p^{[k+1]}}(\R)$:
 		\begin{equation*}
-			X^{(k+1)} = \logistic{X^{(k)} W^{(k+1)} + b^{(k+1)}}
+			X^{[k+1]} = \logistic{X^{[k]} W^{[k+1]} + b^{[k+1]}}
 		\end{equation*}
-		Attention: dans l'empilement vertical, les exposants $(k)$ et $(k+1)$ permettent d'identifier la couche du réseau et plus les observations.
+		Attention: dans l'empilement vertical, les exposants $[k]$ et $[k+1]$ permettent d'identifier la couche du réseau et plus les observations.
 	\end{block}
 \end{frame}
 
@@ -94,23 +94,23 @@
 	Encore une fois, la formule donnée sur la diapositive précédente est un abus de langage:
 	
 	\begin{equation*}
-		X^{(k+1)} = \logistic{X^{(k)} W^{(k+1)} + b^{(k+1)}}
+		X^{[k+1]} = \logistic{X^{[k]} W^{[k+1]} + b^{[k+1]}}
 	\end{equation*}
 	
-	Dans cette expression, le produit $X^{(k)} W^{(k+1)}$ est une matrice de dimension $n \times p^{(k+1)}$ et $b^{(k+1)}$ est une vecteur ligne $1 \times p^{(k+1)}$. L'opération de broadcasting réalisée par un programme informatique est la suivante:
+	Dans cette expression, le produit $X^{[k]} W^{[k+1]}$ est une matrice de dimension $n \times p^{[k+1]}$ et $b^{[k+1]}$ est un vecteur ligne $1 \times p^{[k+1]}$. L'opération de broadcasting réalisée par un programme informatique est la suivante:
 	
 	\begin{equation*}
-		X^{(k)} W^{(k+1)} + \left.
+		X^{[k]} W^{[k+1]} + \left.
 		\smash[b]{\underbrace{
 				\begin{pmatrix}
-					\text{---} & b^{(k+1)} & \text{---} \\
-					\text{---} & b^{(k+1)} & \text{---} \\
+					\text{---} & b^{[k+1]} & \text{---} \\
+					\text{---} & b^{[k+1]} & \text{---} \\
 					\vdots & \vdots & \vdots \\
-					\text{---} & b^{(k+1)} & \text{---}
+					\text{---} & b^{[k+1]} & \text{---}
 				\end{pmatrix}
-			}_{p^{(k+1)} \text{ colonnes}}}
+			}_{p^{[k+1]} \text{ colonnes}}}
 		\right\} n \text{ lignes}
-		\vphantom{\underbrace{\begin{matrix} \\ \\ \\ \end{matrix}}_{p^{(k)} \text{ colonnes}}}
+		\vphantom{\underbrace{\begin{matrix} \\ \\ \\ \end{matrix}}_{p^{[k]} \text{ colonnes}}}
 	\end{equation*}
 	
 \end{frame}
@@ -128,12 +128,12 @@
 				}
 				
 				% --- 1. Entrées (Inputs) ---
-				\node[input] (x1) at (0, 3) {$x_1^{(k,i)}$};
-				\node[input] (x2) at (0, 1.5) {$x_2^{(k,i)}$};
+				\node[input] (x1) at (0, 3) {$x_1^{(i)[k]}$};
+				\node[input] (x2) at (0, 1.5) {$x_2^{(i)[k]}$};
 				\node (xdots) at (0, 0) {$\vdots$};
-				\node[input] (xp) at (0, -1.5) {$x_{p^{(k)}}^{(k,i)}$};
+				\node[input] (xp) at (0, -1.5) {$x_{p^{[k]}}^{(i)[k]}$};
 				
-				\node[anchor=south, font=\scriptsize\bfseries] at (x1.north) {Couche $X^{(k)}$};
+				\node[anchor=south, font=\scriptsize\bfseries] at (x1.north) {Couche $X^{[k]}$};
 				
 				% --- 2. Zone Couche de Neurones ---
 				\draw[dashed, gray!50, rounded corners=10pt, fill=blue!2] (2.2, -2.7) rectangle (5.5, 4.5);
@@ -154,18 +154,18 @@
 					([xshift=0.25cm, yshift=0.25cm]act\j.center);
 					
 					% Transfert interne (z)
-					\draw[->, thick] (sum\j) -- (act\j) node[midway, above, font=\small] {$z_{\j}^{(k+1,i)}$};
+					\draw[->, thick] (sum\j) -- (act\j) node[midway, above, font=\small] {$z_{\j}^{(i)[k+1]}$};
 					
 					% Sortie (y)
-					\node (y\j) at (6.5, \y) {$x_{\j}^{(k+1,i)}$};
+					\node (y\j) at (6.5, \y) {$x_{\j}^{(i)[k+1]}$};
 					\draw[->, thick] (act\j) -- (y\j);
 					
 					% Biais local pour la lisibilité
 					\node[input, fill=green!10, draw=green!60!black, minimum size=0.4cm, font=\tiny] (b\j) at (3, \y+0.9) {$+1$};
-					\draw[->, green!60!black, thick] (b\j) -- (sum\j) node[midway, right, font=\small] {$b_{\j}^{(k+1)}$};
+					\draw[->, green!60!black, thick] (b\j) -- (sum\j) node[midway, right, font=\small] {$b_{\j}^{[k+1]}$};
 				}
 				
-				\node[anchor=south, font=\scriptsize\bfseries] at (y1.north) {Couche $X^{(k+1)}$};
+				\node[anchor=south, font=\scriptsize\bfseries] at (y1.north) {Couche $X^{[k+1]}$};
 				\node[anchor=north, font=\small, text=blue, align=center] at (act3.south) {Logistique\\$\sigma(z)$};
 				
 				% --- 4. Connexions (Synapses) ---
@@ -178,8 +178,8 @@
 				}
 				
 				% Lignes mises en évidence pour montrer la notation
-				\draw[->, gray!80, thick] (x1) -- (sum1) node[pos=0.25, above, weight] {$w_{1,1}^{(k+1)}$};
-				\draw[->, gray!80, thick] (xp) -- (sum3) node[pos=0.25, below, weight] {$w_{3,p^{(k)}}^{(k+1)}$};
+				\draw[->, gray!80, thick] (x1) -- (sum1) node[pos=0.25, above, weight] {$w_{1,1}^{[k+1]}$};
+				\draw[->, gray!80, thick] (xp) -- (sum3) node[pos=0.25, below, weight] {$w_{3,p^{[k]}}^{[k+1]}$};
 				
 			\end{tikzpicture}
 		}
@@ -621,11 +621,11 @@
 \begin{frame}{Choix des fonctions d'activation}
 	Il est également possible d'utiliser des fonctions d'\textbf{activation} (aussi appelées fonctions \textbf{non-linéaires}) différentes à chaque couche.
 	\begin{itemize}
-		\item Le choix de la fonction d'activation sur la couche de sortie est généralement dicté par la nature du problème. Dans le cadre d'une \textbf{classification binaire}, la sortie $Y$ représente des probabilités, utiliser une fonction \textbf{logistique} est alors naturel.
+		\item Le choix de la fonction d'activation sur la couche de sortie est généralement dicté par la nature du problème. Dans le cadre d'une \textbf{classification binaire}, la sortie $\hat{Y}$ représente des probabilités, utiliser une fonction \textbf{logistique} est alors naturel.
 		\pause
 		\item Pour une classification multi-classe, utiliser une fonction \textbf{softmax} en sortie est un choix très pertinent. 
 		\pause
-		\item Pour un problème de \textbf{régression}, il n'y a en général pas de fonction d'activation sur la couche de sortie. Un réseau à une couche de neurones avec un neurone est donc \textbf{strictement} équivalent à la formulation mathématique d'une \textbf{régression linéaire}.
+		\item Pour un problème de \textbf{régression}, il n'y a en général pas de fonction d'activation sur la couche de sortie. Un réseau à une couche de neurones avec un neurone est donc \textbf{strictement} équivalent à la formulation mathématique d'une \textbf{régression linéaire}: $\hat{Y} = XW + b$
 		\pause
 		\item Pour les couches cachées, historiquement 3 fonctions se sont particulièrement distinguées: la fonction \textbf{logistique}, la \textbf{tangente hyperbolique} et la fonction linéaire rectifiée \textbf{ReLU}.
 	\end{itemize}
@@ -660,7 +660,7 @@
 		La fonction \textbf{softmax} est une fonction $\operatorname{softmax}: \R^p \to ]0, 1[^p$ définie comme suit:
 		
 		\begin{equation*}
-			\operatorname{softmax}: z_j \mapsto \frac{e^{z_j}}{\sum_{i=1}^{p} e^{z_j}} \; \forall \; j = 1, 2, \cdots, p
+			\operatorname{softmax}: z_j \mapsto \frac{e^{z_j}}{\sum_{i=1}^{p} e^{z_i}} \; \forall \; j = 1, 2, \cdots, p
 		\end{equation*}
 		
 		C'est une généralisation de la fonction logistique pour des problèmes de \textbf{classification multi-classe} utilisée exclusivement sur la couche de sortie. Elle dispose de la propriété suivante:
@@ -740,7 +740,7 @@
 		\pause
 		\item ReLU fonctionne généralement mieux sur les modèles disposant de nombreuses couches et de nombreux neurones par couche.
 		\pause
-		\item La fonction logistique et la tangente hyperbolique performent davantage sur des réseaux de neurones simples. Le choix entre l'une ou l'autre peut dépendre du choix de standardisation ou normalisation des données d'entrée.
+		\item La fonction logistique et la tangente hyperbolique offrent de meilleures performances sur des réseaux de neurones simples. On limite en général la fonction logistique à la couche de sortie.
 	\end{itemize}
 \end{frame}
 
