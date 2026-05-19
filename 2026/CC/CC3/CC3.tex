@@ -1,0 +1,74 @@
+\documentclass[solutions]{../cc}
+
+\usepackage{enumitem}
+\usepackage[french]{babel}
+
+\begin{document}
+	
+	\makeheader{2025}{2026}
+	\cctitle{3}{Métriques de performance en classification, algorithme Bayésien naïf et Régression linéaire}
+	
+	\noindent \textbf{Consignes du CC3 - Durée 1h30}:
+	\begin{itemize}[nosep]
+		\item Notes de cours, TD et fiches de synthèses personnelles autorisés au \textbf{format papier} seulement.
+		\item Les calculatrices sont autorisées.
+		\item Le contrôle est noté sur 20 points.
+	\end{itemize}
+	
+	\begin{exopoints}{3}
+		Une entreprise réalise un test qualité produit avec un algorithme de classification. Sur un échantillon de 1000 produits représentatifs de la production globale, on obtient les résultats suivants:
+		\begin{itemize}
+			\item 953 produits étaient conformes aux normes de l'entreprise.
+			\item Parmi les produits défectueux, l'algorithme de classification en a classés 38 comme tels.
+			\item Le même algorithme a également classé 72 produits parfaitement conformes comme défectueux.
+		\end{itemize}
+		On considèrera qu'un résultat positif de l'algorithme signifie que le produit est défectueux.
+		\begin{enumerate}
+			\item Calculer la matrice de confusion. Préciser la convention utilisée dans la matrice pour les classes réelles et les classes prédites.\points{1,5}
+			\item Calculer la précision et le rappel.\points{1,5}
+		\end{enumerate}
+	\end{exopoints}
+	
+	\begin{exopoints}{10}
+		On dispose de deux types de dés, A et B, à 6 faces et complètement indiscernables par un examen visuel. Chaque dé dispose de 6 faces différentes, une pour chaque résultat possible: $\Omega = \{1, 2, 3, 4, 5, 6\}$. Chaque type de dé a été testé individuellement en effectuant 60 lancers indépendants. Voici les résultats de ces tests qui compilent combien de fois le lancer a abouti sur une face donnée:
+		
+		\begin{table}[h]
+			\centering
+			\begin{tabular}{|l|c|c|c|c|c|c|c|}
+				\hline
+				\textbf{Face} & 1 & 2 & 3 & 4 & 5 & 6 & \textbf{Total} \\
+				\hline
+				\textbf{Type A} & 7 & 11 & 12 & 6 & 11 & 13 & 60 \\
+				\hline
+				\textbf{Type B} & 13 & 19 & 11 & 13 & 4 & 0 & 60 \\
+				\hline
+			\end{tabular}
+		\end{table}
+		
+		On place dans un sac 9 dés de type A et 1 dé de type B. On en pioche un aléatoirement et on effectue 3 lancers avec ce même dé: $(1, 6, 1)$. On utilisera un algorithme Bayésien naïf pour calculer la probabilité que le dé pioché aléatoirement est de type A ou de type B.
+
+		\begin{enumerate}
+			\item Quel type de distribution doit être utilisée dans l'algorithme Bayésien naïf dans ce problème pour représenter les dés de types A et B ? \points{1}
+			\item Déterminer les fonctions de masse correspondantes pour l'algorithme Bayésien naïf. Conseil: conserver les probabilités sous forme de fractions.\points{1}
+			\item Quelle est l'hypothèse qui vaut à cet algorithme la qualification de naïve ? Comment jugez-vous la pertinence de cette hypothèse pour ce problème ? \points{1}
+			\item Quelle est la probabilité \textit{a priori} que le dé soit de type A ou de type B dans ce problème ? \points{1}
+			\item Déterminer la log-vraisemblance d'obtenir ce résultat sur 3 lancers sachant que le dé est de type A. Arrondir le résultat à 2 chiffres après la virgule. \points{1,5}
+			\item Déterminer la log-vraisemblance d'obtenir ce résultat sur 3 lancers sachant que le dé est de type B. Attention, si vous avez obtenu une log-vraisemblance non-définie, vous avez probablement un problème avec votre fonction de masse. Arrondir le résultat à deux chiffres après la virgule.\points{1,5}
+			\item Calculer les probabilités \textit{a posteriori} pour chaque type de dé. \points{2}
+			\item En utilisant la règle du Maximum \textit{A Posteriori}, déterminer le type de dé prédit par l'algorithme Bayésien naïf pour ce problème. \points{1}
+		\end{enumerate}
+	\end{exopoints}
+	
+	\begin{exopoints}{7}
+		On considère un problème de régression linéaire. On note $x \in \mathcal{X}$ les caractéristiques d'entrées et $y \in \mathcal{Y}$ les caractéristiques de sortie, avec $\mathcal{Y} \subset \mathbb{R}$. La fonction d'augmentation $\Phi: \mathcal{X} \to \tilde{\mathcal{X}}$ permet de déterminer les caractéristiques augmentées à partir des caractéristiques d'entrée: $\Phi: x \mapsto \tilde{x}$. On notera $\hat{y} \in \mathcal{Y}$ la prédiction réalisée par le modèle de régression linéaire. On suppose que $\tilde{\mathcal{X}} \subset \mathbb{R}^p$. On notera $\beta \in \mathcal{M}_{p,1}(\mathbb{R})$ les coefficients vrais du modèle de régression linéaire et $\hat{\beta}$ leurs estimations par la méthode des moindres carrés ordinaire. On notera $n$ le nombre d'observations dans les données d'apprentissage.
+		\begin{enumerate}
+			\item Quelle est l'expression analytique liant les entrées augmentées $\tilde{X} \in \mathcal{M}_{n,p}(\mathbb{R})$ et les caractéristiques de sortie (vraies) $Y \in \mathcal{M}_{n,1}(\mathbb{R})$ dans un problème de régression linéaire?\points{1}
+			\item Quelle est l'expression analytique liant les entrées augmentées $\tilde{X}$ et la prédiction $\hat{Y}$ du modèle de régression linéaire ?\points{1}
+			\item Quelle est la solution pour l'estimateur $\hat{\beta}$ selon la méthode des moindres carrés ordinaire ? Aucune démonstration n'est requise.\points{1}
+			\item On note $H \in \mathcal{M}_{n,n}(\mathbb{R})$ la matrice \textit{chapeau} telle que $\hat{Y} = HY$. \\Démontrer que $H=\tilde{X}\left(\tilde{X}^T \tilde{X}\right)^{-1} \tilde{X}^T$.\points{1,5}
+			\item Exprimer les résidus $r \in \mathcal{M}_{n,1}(\mathbb{R})$ en fonction de la matrice $H$ et de $Y$.\points{0,5}
+			\item On propose d'utiliser une décomposition $QR$ de la matrice des caractéristiques augmentées $\tilde{X} \in \mathcal{M}_{n,p}(\mathbb{R})$, telle que $\tilde{X} = QR$. La matrice $Q \in \mathcal{M}_{n,p}(\mathbb{R})$ est une matrice orthogonale: $Q^T Q = I$. La matrice $R \in \mathcal{M}_{n,p}(\mathbb{R})$ est une matrice triangulaire supérieure. On suppose que $\tilde{X}$ est de plein rang de colonnes, par conséquent $R$ est inversible. Démontrer que $H = QQ^T$.\points{2}
+		\end{enumerate}
+	\end{exopoints}
+	
+\end{document}

@@ -37,6 +37,7 @@
 % Symbol Aliases and Redefinitions
 \renewcommand{\epsilon}{\varepsilon}
 \newcommand{\eps}{\varepsilon}
+\newcommand{\points}[1]{\hfill (\textbf{#1~pt})}
 
 \definecolor{SolutionGray}{gray}{0.24}
 
@@ -57,6 +58,12 @@
 \else
 	\newenvironment{solution}{\comment}{\endcomment}
 \fi
+
+\newenvironment{exopoints}[1]{%
+	\begin{exercice}[\textbf{#1~pt}]%
+	}{%
+	\end{exercice}%
+}
 
 % --- Header and Title Commands ---
 \newcommand{\makeheader}[2]{%
