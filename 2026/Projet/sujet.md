@@ -55,6 +55,12 @@ Chaque groupe doit soumettre son Jupyter Notebook par e-mail à son encadrant de
 _Soutenance (Mardi 9 juin 2026) :_
 *   Chaque groupe disposera d'un maximum de _15 minutes de présentation_, suivies de _5 minutes de questions-réponses_ avec le jury.
 *   *Format de présentation :* La préparation d'un support visuel (ex. : PowerPoint, Beamer ou Google Slides) est _fortement recommandée_. Présenter directement en faisant défiler un Jupyter Notebook est souvent laborieux pour le groupe comme pour le jury, et rend la communication de vos résultats beaucoup plus difficile.
+*   **Structure recommandée pour la présentation :** Pour vous aider à structurer vos 15 minutes et éviter de vous perdre dans les détails techniques ou le code, nous vous conseillons de suivre ce plan en vous concentrant sur les éléments les plus marquants de votre travail :
+    1. _Introduction :_ Présentation du jeu de données choisi et de la problématique (quelle est la question posée et quel est son intérêt ?).
+    2. _Exploration (EDA) :_ Synthèse de vos analyses du jeu de données et des premières informations clés que vous en avez tirées.
+    3. _Méthodologie :_ Présentation et justification de vos choix de modèles (ML classique et Deep Learning), de paramètres, de structure de réseau et de fonctions de perte.
+    4. _Résultats :_ Comparaison des performances de vos modèles à l'aide de métriques pertinentes.
+    5. _Synthèse & Perspectives :_ Qu'avez-vous appris ? Quelles ont été les principales difficultés et qu'auriez-vous fait différemment avec plus de temps ?
 
 _Barème de notation (8 points au total) :_
 La note sera attribuée de manière égale à chaque membre du groupe, sur la base du notebook soumis, de la présentation et de la phase de questions-réponses. Les points sont répartis comme suit :
