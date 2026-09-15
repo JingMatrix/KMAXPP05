@@ -1,0 +1,167 @@
+\section[Problématique]{Problématique}
+\begin{frame}{Problématique}
+	Dans cette section nous introduirons des concepts fondamentaux de l'apprentissage supervisé:
+	\begin{itemize}
+		\item L'espace des hypothèses
+		\item La hiérarchie des espaces d'apprentissage
+		\item La formulation des problèmes de régression et classification
+	\end{itemize}
+\end{frame}
+
+\subsection[Espaces]{Espaces des hypothèses et de l'apprentissage}
+
+\begin{frame}{Espace des hypothèses}
+	Soient $\mathcal{X}$ et $\mathcal{Y}$, respectivement l'espace des entrées et l'espace des sorties dont nous disposons pour notre problème d'apprentissage supervisé.
+	\begin{block}{Hypothèse: fonction vraie $f$}
+		On suppose qu'il existe une fonction \textbf{vraie} mais inconnue $f: \mathcal{X} \rightarrow \mathcal{Y}$ qui régit la relation entre les données, telle que:
+		\begin{equation}
+			y = f(x) + \epsilon
+			\nonumber
+		\end{equation}
+		\hfill
+	\end{block}
+	$\epsilon$ représente un bruit aléatoire dans les caractéristiques observées (erreur de mesure), ou des caractéristiques non-observées.
+\end{frame}
+
+\begin{frame}{Espace des hypothèses}
+	\begin{block}{Définition: espace des hypothèses $\mathcal{H}$}
+		On définit l'\textbf{espace des hypothèses} $\mathcal{H}$ comme l'ensemble des fonctions candidates:
+		\begin{equation}
+			h: \mathcal{X} \rightarrow \mathcal{Y}
+			\nonumber
+		\end{equation}
+		\hfill
+	\end{block}
+	Le but de l'apprentissage est de trouver, à partir des données d'apprentissage $\mathcal{D}$ la \textit{meilleure} fonction $h^* \in \mathcal{H}$. \\
+	\vspace{0.5cm}
+	Il nous reste à définir ce que \textit{meilleure} signifie dans ce contexte.
+\end{frame}
+
+\begin{frame}[fragile]{Hiérarchie des espaces d'apprentissage}
+	% On utilise hspace pour manger la marge de gauche et recentrer visuellement
+	\hspace*{+1.0cm}
+	\begin{tikzpicture}[
+		% Style des blocs du funnel (largeurs légèrement réduites)
+		stage/.style={
+			fill=#1,
+			draw=none, 
+			rounded corners=8pt, 
+			text=white, 
+			font=\small\bfseries,
+			align=center,
+			minimum height=1.0cm,
+			inner sep=5pt,
+		},
+		% Style des étiquettes à droite
+		labelstyle/.style={
+			font=\footnotesize,
+			text=black,
+			anchor=west
+		}
+		]
+		% --- DÉFINITION DES BLOCS ---
+		% Largeurs ajustées : 8cm / 6.4cm / 4.8cm / 3.2cm
+		\node[stage=blue!85, text width=8cm] (s1) at (0,0) {L'espace des \mbox{caractéristiques} globales $\mathcal{U}$};
+		
+		\node[stage=blue!70, text width=6.4cm, below=10pt of s1] (s2) {L'espace des \mbox{caractéristiques} observées $\mathcal{X}$};
+		
+		\node[stage=blue!55, text width=4.8cm, below=10pt of s2] (s3) {L'espace des hypothèses $\mathcal{H}$};
+		
+		\node[stage=blue!40, text width=3.2cm, below=10pt of s3] (s4) {Les données \mbox{d'apprentissage} $\mathcal{D}$};
+		
+		% --- COORDONNÉES D'ALIGNEMENT ---
+		% L décalé à -4.4 pour coller au bloc de 8cm
+		% R décalé à 4.2 pour ne pas sortir de la slide
+		\coordinate (L) at (-4.4,0); 
+		\coordinate (R) at (4.2,0);  
+		
+		% --- COMMENTAIRES À DROITE ---
+		\node[labelstyle] at (R |- s1) {$g(u)$};
+		\node[labelstyle] at (R |- s2) {$f(x)$};
+		\node[labelstyle] at (R |- s3) {$h^*(x)$};
+		\node[labelstyle] at (R |- s4) {$\hat{f}(x)$};
+		
+	\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Hiérarchie des espaces d'apprentissage}
+	Nous voulons prédire la vitesse d'une voiture en fonction de la consommation instantanée de carburant:
+	\pause
+	\begin{itemize}
+		\item La consommation instantanée est bien une caractéristique explicative de la vitesse.
+		\pause
+		\item Mais il y a d'autres caractéristiques non-observées qui sont aussi pertinentes: poids du véhicule, vent, pente... La fonction vraie $f$ sera donc un modèle très approximatif de la réalité $g$.
+		\pause
+		\item L'espace des hypothèses $\mathcal{H}$ limite les fonctions candidates explorées, ce qui peut introduire des pertes complémentaires par rapport à la fonction vraie $f$.
+		\pause
+		\item Enfin nous ne disposons que d'un ensemble limité de données d'apprentissage $\mathcal{D}$. Le mieux que nous puissions faire est d'obtenir une approximation de $h^{*}$ que l'on note $\hat{f}$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Espace des hypothèses et hiérarchie des espaces d'apprentissage}
+	En résumé:
+	\begin{itemize}
+		\item On note $g$ le \textbf{processus générateur} reliant les caractéristiques globales aux sorties.
+		\item On note $f$ la fonction \textbf{vraie} reliant l'espace $\mathcal{X}$ à l'espace $\mathcal{Y}$.
+		\item On note $h^*$ la \textbf{meilleure} fonction de l'espace $\mathcal{H}$ reliant ces mêmes espaces.
+		\item On note $\hat{f} \in \mathcal{H}$ l'\textbf{estimation} de $f$ après entraînement de l'algorithme à partir des données $\mathcal{D}$.
+	\end{itemize}
+\end{frame}
+
+\subsection[Apprentissage supervisé]{Apprentissage supervisé}
+
+\begin{frame}{Apprentissage supervisé}
+	\begin{block}{Problématique de l'apprentissage supervisé}
+		L'objectif de l'apprentissage supervisé est de trouver une fonction $\hat{f}: \mathcal{X} \to \mathcal{Y}$ dans l'espace des hypothèses $\mathcal{H}$ qui soit un bon \textbf{estimateur} de la fonction \textbf{vraie} $f$ à partir des données $\mathcal{D} = \begin{Bmatrix}(x^{(i)}, y^{(i)})\end{Bmatrix}_{i=1}^n$:
+		\begin{equation}
+			y = f(x) + \epsilon
+			\nonumber
+		\end{equation}
+		Où $\epsilon$ représente une incertitude liée au bruit de mesure des données observées ou à des variables explicatives non-observées.
+		\hfill
+	\end{block}
+	\vspace{0.5cm}
+	\pause
+	On note $\hat{y} = \hat{f}(x)$ la prédiction réalisée par le modèle pour une entrée $x$. \\
+	\vspace{0.5cm}
+	\pause
+	Un bon estimateur $\hat{f}$ est tel qu'il minimise une \textbf{fonction de perte} $L(y, \hat{y})$ sur l'ensemble des données observées $\mathcal{D}$, aussi appelées données d'apprentissage.
+\end{frame}
+
+\begin{frame}{Problème de régression}
+	\begin{block}{Problématique de la régression}
+		Dans un problème de \textbf{régression}, la variable de sortie est quantitative : $\mathcal{Y} \subseteq \mathbb{R}$. \\
+		\vspace{0.3cm}
+		La fonction de perte $L$ mesure une distance entre la prédiction de l'algorithme $\hat{y}$ et la valeur observée $y$. 
+	\end{block}
+	\pause
+	Un exemple de fonction de perte est l'erreur quadratique:
+	\begin{equation}
+		L(y, \hat{y}) = \left( y - \hat{y}\right)^2
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Problème de classification}
+	\begin{block}{Problématique de la classification binaire}
+		Dans un problème de \textbf{classification binaire}, la variable de sortie est qualitative : $\mathcal{Y} = \{0, 1\}$. \\
+		\vspace{0.3cm}
+		La fonction de perte $L$ est un compteur d'erreurs de classification. \\
+		\vspace{0.3cm}
+	\end{block}
+	\pause
+	Un exemple de fonction de perte serait la fonction 0-1:
+	\begin{equation}
+		\begin{cases}
+			L(y, \hat{y}) = 0 & \text{si } y = \hat{y} \\
+			L(y, \hat{y}) = 1 & \text{si } y \ne \hat{y}
+		\end{cases}
+		\nonumber
+	\end{equation}
+	\pause
+	\begin{itemize}
+		\item \textbf{Note sur l'incertitude:} Ici, $\epsilon = y - f(x)$ représente une incertitude discrète prenant ses valeurs dans $\{-1, 0, 1\}$.
+		\item \textbf{Note sur l'optimisation :} La fonction 0-1 n'est pas dérivable. En pratique, nous utiliserons des substituts (comme la log-vraisemblance).
+	\end{itemize}
+	
+\end{frame}

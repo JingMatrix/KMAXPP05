@@ -1,0 +1,105 @@
+\documentclass[solutions]{../cc}
+
+\usepackage{enumitem}
+\usepackage[french]{babel}
+
+\newcommand{\bigdot}{\scalebox{0.6}{$\bullet$}}
+
+\begin{document}
+	
+	\makeheader{2025}{2026}
+	\cctitle{4}{Analyse en composantes principales, Réseaux de neurones, Arbres de décision, Optimisation}
+	
+	\noindent \textbf{Consignes du CC4 - Durée 1h30}:
+	\begin{itemize}[nosep]
+		\item Notes de cours, TD et fiches de synthèses personnelles autorisés au \textbf{format papier} seulement.
+		\item Les calculatrices sont autorisées.
+		\item Les exercices 1 et 2 sont \textbf{obligatoires}. Choisissez ensuite l'exercice 3 \textbf{ou} 4. Je retiendrai dans la note finale, sur 20 points, celui vous rapportant le plus de points.
+	\end{itemize}
+	
+	\begin{exopoints}{5}
+		\textit{\textbf{Obligatoire}}. On considère un algorithme d'analyse en composantes principales. On représente par $X \in \mathcal{M}_{n,p}(\R)$ un ensemble de $n$ observations d'une caractéristique d'entrée $p$-dimensionnelle. On suppose que les caractéristiques sont centrées: la moyenne de chaque colonne de $X$ est nulle. On suppose également que la variance de chaque colonne de $X$ est unitaire. On dit alors que les entrées sont centrées et réduites.
+		
+		On note $\Sigma \in \mathcal{M}_{p,p}(\R)$ la matrice de covariance des colonnes de $X$ et $U \in \mathcal{M}_{p,p}(\R)$ la matrice des vecteurs propres de $\Sigma$, telle que le premier vecteur propre est la première colonne de $U$, le second vecteur propre est la seconde colonne de $U$ et ainsi de suite.
+		
+		On note $\lambda_i \in \R^+$ pour tout $i \in \{1, 2, \cdots, p\}$ la valeur propre associée au i\textsuperscript{ème} vecteur propre de $\Sigma$.
+				
+		Dans cet exercice, on donne $p = 2$ et la matrices $U$ ainsi que $\lambda_1$ et $\lambda_2$:
+		
+		\begin{equation*}
+			U = \frac{1}{\sqrt{2}}\begin{pmatrix}
+					1 & 1 \\
+					1 & -1
+			\end{pmatrix};
+			\quad \lambda_1 = \frac{3}{2};
+			\quad \lambda_2 = \frac{1}{2}
+		\end{equation*}
+		
+		\begin{enumerate}
+			\item Calculer la matrice de covariance $\Sigma$.\points{1,5}
+			\item Quel est le vecteur propre associé à la composante principale de la matrice de covariance ?\points{1}
+			\item En déduire le coefficient de corrélation de Pearson entre $X_{\bigdot,1}$ et $X_{\bigdot,2}$ (les première et seconde colonnes de $X$). On rappelle que le coefficient de corrélation de Pearson est donné par $\rho = \frac{\operatorname{\mathbb{C}ov}[X_{\bigdot,1}, X_{\bigdot,2}]}{\sqrt{\operatorname{\mathbb{V}ar}[X_{\bigdot,1}] \operatorname{\mathbb{V}ar}[X_{\bigdot,2}]}}$.\points{1}
+			\item Déterminer $U^*$ une matrice de changement de base permettant de conserver au moins 70\% de la variance des colonnes de $X$.\points{0,5}
+			\item Calculer le score associé à une observation $x = \begin{pmatrix}0 & 1\end{pmatrix}$ par l'algorithme d'analyse en composantes principales. Cette observation est déjà centrée et réduite.\points{1}
+		\end{enumerate}
+		
+	\end{exopoints}
+
+		
+	\begin{exopoints}{10}
+		\textit{\textbf{Obligatoire}}. Soit un problème de classification avec les caractéristiques d'entrée \mbox{$X \in \mathcal{M}_{n,2}(\R)$} et la caractéristique de sortie $Y \in \mathcal{M}_{n,1}(\{0, 1\})$. On dispose d'un réseau de neurones à une couche cachée de 2 neurones utilisant une fonction d'activation que l'on notera $\sigma_C$ et dont on connait la dérivée $\sigma_C'$.
+				
+		On note $W^{[1]}$ et $b^{[1]}$ respectivement les poids et biais de la couche cachée, et $W^{[2]}$ et $b^{[2]}$ respectivement les poids et biais de la couche de sortie.
+		
+		Vérifier que les tenseurs sont compatibles pour les opérations dans vos réponses. Toutefois, l'abus de notation  $X W + b$ est autorisé pour additionner le terme de biais dans l'opérateur linéaire.
+		
+		\begin{enumerate}
+			\item Quel type de fonction d'activation $\sigma_S$ faudrait-il utiliser sur la couche de sortie du réseau de neurones ?\points{1}
+			\item Quelle fonction de coût est le meilleur choix pour ce problème ?\points{1}
+			\item Dessiner le graphe de calcul associé à ce réseau de neurones en faisant apparaître les entrées, l'opérateur linéaire de la couche cachée avec ses poids et biais, la fonction d'activation de la couche cachée $\sigma_C$, l'opérateur linéaire de la couche de sortie avec la fonction d'activation choisie $\sigma_S$, la prédiction du réseau de neurones que l'on notera $\hat{Y}$, les valeurs vraies des données d'apprentissage $Y$ et l'erreur calculée avec la fonction de coût choisie que l'on notera $e$. Dans cet exercice, on considère que $e$ est un scalaire (une erreur moyennée sur le batch).\points{2}
+			\item Préciser, sur le graphe de calcul, les dimensions des différents tenseurs.\points{1}
+			\item Donner l'expression analytique de $\hat{Y}$ pour un batch de $n$ observations.\points{2}
+			\item Donner l'expression analytique (tensorielle) des gradients $\frac{\partial{e}}{\partial{W^{[1]}}}$ et $\frac{\partial{e}}{\partial{b^{[1]}}}$ pour le même batch.\points{3}		
+		\end{enumerate}
+	\end{exopoints}
+		
+	\begin{exopoints}{5}
+		\textit{\textbf{Optionnel}}. Soit un arbre de décision $\mathcal{A}$ pour un problème de classification dont la variable d'entrée est notée $x \in \R$ et la variable de sortie est notée $y \in \{0, 1\}$. On cherche une valeur de séparation optimale entre les deux propositions suivantes $x^* = -1$ et $x^* = 2$ en utilisant un critère d'entropie pour les données d'apprentissage suivantes:
+		
+		\begin{table}[h]
+			\centering
+			\begin{tabular}{|l|c|c|c|c|c|c|}
+				\hline
+				\textbf{Observation} & 1 & 2 & 3 & 4 & 5 & 6 \\
+				\hline
+				\textbf{x} & -2 & 0 & 1 & 3 & 4 & 5 \\
+				\hline
+				\textbf{y} & 0 & 1 & 1 & 0 & 0 & 0 \\
+				\hline
+			\end{tabular}
+		\end{table}
+		
+		Dans cet exercice, par convention, on suppose qu'une branche constituée d'une seule classe a une entropie nulle. 
+		\begin{enumerate}
+			\item Calculer les entropies à gauche et à droite d'une séparation en $x^* = -1$. \points{1}
+			\item Calculer les entropies à gauche et à droite d'une séparation en $x^* = 2$. \points{1}
+			\item Quelle est la valeur optimale de séparation pour l'arbre de décision ? Justifier la réponse.\points{1}
+			\item En considérant la valeur optimale de séparation trouvée à l'étape précédente, calculer le taux des vrais positifs et le taux des faux positifs pour les données d'apprentissage. On considèrera un seuil de décision $\theta = 0.5$: si $P(y^{(i)} = 1 \mid x^{(i)}) \ge \theta$ alors $\hat{y}^{(i)} = 1$.\points{2}
+		\end{enumerate}			
+	\end{exopoints}
+
+	
+	\begin{exopoints}{5}
+		\textit{\textbf{Optionnel}}. Dans cet exercice on s'intéresse à l'algorithme de descente du gradient avec momentum sans correction de biais d'un réseau de neurones. Le paramètre $P$ que nous cherchons à optimiser est un tenseur $\mathcal{M}_{2, 1}(\R)$. On notera $\alpha \in \R^+$ le taux d'apprentissage, $\beta \in [0, 1]$ le coefficient pour le momentum et $\nabla_P$ le gradient calculé par l'algorithme de la rétro-propagation du gradient: $\nabla_P = \frac{\partial{e}}{\partial{P}}$ avec $e$ une erreur moyenne scalaire calculée sur le batch.
+		
+		Le paramètre $P$ est initialisé à la valeur suivante: $P = \begin{pmatrix}0.5 & -0.3\end{pmatrix}^T$ et on prendra $\alpha = 0.1$ et $\beta = 0.9$ pour les applications numériques.
+		
+		\begin{enumerate}
+			\item Quelle doit être la dimension du tenseur $\nabla_P$ dans cet exercice ?\points{0,5}
+			\item Rappeler l'algorithme pour la mise à jour du paramètre $P$ à partir de $\alpha$, $\nabla_P$ et $\beta$. On notera $v_P$ le terme d'historique pour le lissage. Préciser la dimension du tenseur $v_P$ et sa valeur initiale.\points{1,5}
+			\item Pour le premier batch, on donne $\nabla_P = \begin{pmatrix}-0.1 & 0.2\end{pmatrix}^T$. Calculer la première mise à jour de $P$.\points{1,5}
+			\item Pour le second batch on donne $\nabla_P = \begin{pmatrix}0 & -0.1\end{pmatrix}^T$. Calculer la seconde mise à jour de $P$.\points{1,5}
+		\end{enumerate}
+		
+	\end{exopoints}
+\end{document}

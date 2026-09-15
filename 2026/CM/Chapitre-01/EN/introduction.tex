@@ -1,0 +1,155 @@
+\section[Introduction]{Introduction}
+
+\subsection[Course Organization]{Course Organization}
+
+\begin{frame}{Course Organization}
+	The course is organized around:
+	\begin{itemize}
+		\item Lectures: 20 hours (2h x 10 sessions)
+		\item Tutorials: 16 hours (2h x 8 sessions)
+		\item Practical sessions: 20 hours (2h x 10 sessions)
+	\end{itemize}
+	\vspace{0.5cm}
+	The following time slots will be used:
+	\begin{itemize}
+		\item Tuesday 15:45 - 17:45: Tutorials / Practical sessions
+		\item Tuesday 18:00 - 20:00: Exams
+		\item Thursday 13:30 - 15:30: Lectures / Practical sessions
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Assessments}
+	\begin{tabular}{|l|l|l|l|l|}
+		\hline
+		\textbf{Item} & \textbf{\%} & \textbf{Duration} & \textbf{Format} & \textbf{Date} \\
+		\hline
+		CC1 & 33\% & 20 min & In-class, MCQ & 19/03 \\
+		\hline
+		TD \& TP & 33\% & - & Attendance, lab completion, project & - \\
+		\hline
+		CC3 & 34\% & 1h30 & Exam conditions & 19/05 \\
+		\hline
+		CC4 & - & 1h30 & Exam conditions & 11/06 \\
+		\hline
+	\end{tabular} \\
+	\vspace{0.5cm}
+	Note: The CC3 exam will take place during the Tuesday 18:00 - 20:00 slot.
+\end{frame}
+
+\begin{frame}{Course Outline}
+	\begin{itemize}
+		\item Foundations of Machine Learning [6h]
+		\begin{itemize}
+			\item Introduction
+			\item Typology of Machine Learning Problems
+			\item Core Issues in Artificial Learning
+			\item Linear Models
+			\item Validation of Machine Learning Algorithms
+		\end{itemize}
+		\item Machine Learning Algorithms [13h30]
+		\begin{itemize}
+			\item Naïve Bayes Algorithm [1h30]
+			\item Principal Component Analysis [2h]
+			\item Decision Trees [2h]
+			\item Perceptrons and Multilayer Perceptrons [4h]
+			\item K-Means [2h]
+			\item K-Nearest Neighbors [2h]
+			%\item Support Vector Machines [4h]%
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\subsection[Paradigms]{Paradigms}
+
+\begin{frame}{Paradigms and Systems of Thought}
+	Daniel Kahneman (2002 Nobel Prize in Economics) theorized 2 modes of functioning of the human brain:
+	\begin{itemize}
+		\item \textbf{Slow thinking}: conscious, logical, effortful
+		\item \textbf{Fast thinking}: unconscious, intuitive, effortless
+	\end{itemize}
+	\vspace{0.5cm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.5\linewidth]{Images/velo_centrifuge}
+				\label{fig:velo-centrifuge}
+			\end{figure}
+			%\vspace{-0.5cm}
+			\centering
+			\small Logical approach
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.5\linewidth]{Images/velo-t-es-capable}
+				%\caption{approche intuitive}
+				\label{fig:velo-t-es-capable}
+			\end{figure}
+			%\vspace{-0.5cm}
+			\centering
+			\small Intuitive approach
+		\end{column}
+	\end{columns}
+	\vfill 
+	\tiny \textcolor{gray}{Source: Thinking, fast and slow - D. Kahneman - 2012 - Penguin}
+\end{frame}
+
+\begin{frame}{Paradigms and Systems of Thought}
+	A link can be established with programming paradigms:
+	\begin{itemize}
+		\item Slow thinking $\rightarrow$ \textbf{Deductive} programming: based on logical and explicit rules, derived from human knowledge. The program applies the rules to the provided data.
+		\item Fast thinking $\rightarrow$ \textbf{Inductive} programming: based on data and experience; the rules are implicit and discovered by the algorithm. The program applies the rules it has discovered to new data; it generalizes.
+	\end{itemize}
+\end{frame}
+
+%\begin{frame}{Paradigms and Systems of Thought}
+%	Nevertheless, another paradigm exists:
+%	\begin{itemize}
+	%		\item Mimicry $\rightarrow$ \textbf{Transductive} programming: there are no rules, implicit or explicit, independent of the training data. The algorithm does not generalize, it copies.
+	%	\end{itemize}
+%	\begin{figure}
+	%		\centering
+	%		\includegraphics[height=0.3\linewidth]{Images/mimétisme}
+	%		\label{fig:mimétisme}
+	%	\end{figure}
+%	%\vspace{-0.5cm}
+%	\centering
+%	\small Mimetic approach
+%\end{frame}
+
+\subsection[Definitions]{Definitions}
+
+\begin{frame}{Definitions of Machine Learning}
+	\begin{block}{Definition 1}
+		Field of study that gives computers the ability to learn without being explicitly programmed. \\
+		\hfill
+		\textit{--- Arthur Samuel (1959)}
+	\end{block}
+	\vfill
+	\tiny \textcolor{gray}{Source: Some Studies in Machine Learning Using the Game of Checkers - A.L. Samuel - 1959 - IBM Journal}
+\end{frame}
+
+\begin{frame}{Definitions of Machine Learning}
+	\begin{block}{Definition 2}
+		A program learns from \textbf{experience $E$} for a \textbf{task $T$} with a \textbf{performance $P$}, if $P$ improves with $E$. \\
+		\hfill 
+		\textit{--- Tom Mitchell (1997)}
+	\end{block}
+	%\pause
+	\begin{itemize}
+		\item \textbf{Experience ($E$)} = Data.
+		\item \textbf{Task ($T$)} = Predict, classify, cluster, act, generate.
+		\item \textbf{Performance ($P$)} = The mathematical loss function.
+	\end{itemize}
+	\vfill 
+	\tiny \textcolor{gray}{Source: Machine Learning - T.M. Mitchell - 1997 - McGraw-Hill}
+\end{frame}
+
+\begin{frame}{Everything is a number!}
+	\begin{figure}
+		\centering
+		\includegraphics[width=1.0\linewidth]{Images/tout_est_nombre}
+		\label{fig:tout-est-nombre}
+	\end{figure}
+\end{frame}

@@ -1,0 +1,166 @@
+\section[Problem Statement]{Problem Statement}
+\begin{frame}{Problem Statement}
+	In this section, we will introduce fundamental concepts of supervised learning:
+	\begin{itemize}
+		\item The hypothesis space
+		\item The hierarchy of learning spaces
+		\item The formulation of regression and classification problems
+	\end{itemize}
+\end{frame}
+
+\subsection[Spaces]{Hypothesis and Learning Spaces}
+
+\begin{frame}{Hypothesis Space}
+	Let $\mathcal{X}$ and $\mathcal{Y}$ be, respectively, the input space and the output space available for our supervised learning problem.
+	\begin{block}{Hypothesis: True Function $f$}
+		We assume there exists a \textbf{true} but unknown function $f: \mathcal{X} \rightarrow \mathcal{Y}$ that governs the relationship between the data, such that:
+		\begin{equation}
+			y = f(x) + \epsilon
+			\nonumber
+		\end{equation}
+		\hfill
+	\end{block}
+	$\epsilon$ represents random noise in the observed features (measurement error), or unobserved features.
+\end{frame}
+
+\begin{frame}{Hypothesis Space}
+	\begin{block}{Definition: Hypothesis Space $\mathcal{H}$}
+		We define the \textbf{hypothesis space} $\mathcal{H}$ as the set of candidate functions:
+		\begin{equation}
+			h: \mathcal{X} \rightarrow \mathcal{Y}
+			\nonumber
+		\end{equation}
+		\hfill
+	\end{block}
+	The goal of learning is to find, from the training data $\mathcal{D}$, the \textit{best} function $h^* \in \mathcal{H}$. \\
+	\vspace{0.5cm}
+	It remains for us to define what \textit{best} means in this context.
+\end{frame}
+
+\begin{frame}[fragile]{Hierarchy of Learning Spaces}
+	% On utilise hspace pour manger la marge de gauche et recentrer visuellement
+	\hspace*{+1.0cm}
+	\begin{tikzpicture}[
+		% Style des blocs du funnel (largeurs légèrement réduites)
+		stage/.style={
+			fill=#1,
+			draw=none, 
+			rounded corners=8pt, 
+			text=white, 
+			font=\small\bfseries,
+			align=center,
+			minimum height=1.0cm,
+			inner sep=5pt,
+		},
+		% Style des étiquettes à droite
+		labelstyle/.style={
+			font=\footnotesize,
+			text=black,
+			anchor=west
+		}
+		]
+		% --- DÉFINITION DES BLOCS ---
+		% Largeurs ajustées : 8cm / 6.4cm / 4.8cm / 3.2cm
+		\node[stage=blue!85, text width=8cm] (s1) at (0,0) {The global \mbox{feature} space $\mathcal{U}$};
+		
+		\node[stage=blue!70, text width=6.4cm, below=10pt of s1] (s2) {The observed \mbox{feature} space $\mathcal{X}$};
+		
+		\node[stage=blue!55, text width=4.8cm, below=10pt of s2] (s3) {The hypothesis space $\mathcal{H}$};
+		
+		\node[stage=blue!40, text width=3.2cm, below=10pt of s3] (s4) {The training \mbox{data} $\mathcal{D}$};
+		
+		% --- COORDONNÉES D'ALIGNEMENT ---
+		% L décalé à -4.4 pour coller au bloc de 8cm
+		% R décalé à 4.2 pour ne pas sortir de la slide
+		\coordinate (L) at (-4.4,0); 
+		\coordinate (R) at (4.2,0);  
+		
+		% --- COMMENTS ON THE RIGHT ---
+		\node[labelstyle] at (R |- s1) {$g(u)$};
+		\node[labelstyle] at (R |- s2) {$f(x)$};
+		\node[labelstyle] at (R |- s3) {$h^*(x)$};
+		\node[labelstyle] at (R |- s4) {$\hat{f}(x)$};
+		
+	\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Hierarchy of Learning Spaces}
+	We want to predict a car's speed based on its instantaneous fuel consumption:
+	\pause
+	\begin{itemize}
+		\item Instantaneous consumption is indeed an explanatory feature of speed.
+		\pause
+		\item However, there are other unobserved features that are also relevant: vehicle weight, wind, slope... The true function $f$ will therefore be a highly approximate model of reality $g$.
+		\pause
+		\item The hypothesis space $\mathcal{H}$ restricts the candidate functions explored, which can introduce additional losses compared to the true function $f$.
+		\pause
+		\item Finally, we only have a limited set of training data $\mathcal{D}$. The best we can do is obtain an approximation of $h^{*}$, denoted as $\hat{f}$.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Hypothesis Space and Learning Space Hierarchy}
+	In summary:
+	\begin{itemize}
+		\item We denote by $g$ the \textbf{generative process} linking global features to outputs.
+		\item We denote by $f$ the \textbf{true} function linking space $\mathcal{X}$ to space $\mathcal{Y}$.
+		\item We denote by $h^*$ the \textbf{best} function in the hypothesis space $\mathcal{H}$ linking these same spaces.
+		\item We denote by $\hat{f} \in \mathcal{H}$ the \textbf{estimation} of $f$ after training the algorithm on data $\mathcal{D}$.
+	\end{itemize}
+\end{frame}
+
+\subsection[Supervised Learning]{Supervised Learning}
+
+\begin{frame}{Supervised Learning}
+	\begin{block}{Supervised Learning Formulation}
+		The objective of supervised learning is to find a function $\hat{f}: \mathcal{X} \to \mathcal{Y}$ within the hypothesis space $\mathcal{H}$ that serves as a good \textbf{estimator} of the \textbf{true} function $f$, using the data $\mathcal{D} = \begin{Bmatrix}(x^{(i)}, y^{(i)})\end{Bmatrix}_{i=1}^n$:
+		\begin{equation*}
+			y = f(x) + \epsilon
+		\end{equation*}
+		Where $\epsilon$ represents an uncertainty linked to measurement noise in the observed data or to unobserved explanatory variables.
+		\hfill
+	\end{block}
+	\vspace{0.5cm}
+	\pause
+	We denote by $\hat{y} = \hat{f}(x)$ the prediction made by the model for an input $x$. \\
+	\vspace{0.5cm}
+	\pause
+	A good estimator $\hat{f}$ is one that minimizes a \textbf{loss function} $L(y, \hat{y})$ over the set of observed data $\mathcal{D}$, also called training data.
+\end{frame}
+
+\begin{frame}{Regression Problem}
+	\begin{block}{Regression Problem Setting}
+		In a \textbf{regression} problem, the output variable is quantitative: $\mathcal{Y} \subseteq \mathbb{R}$. \\
+		\vspace{0.3cm}
+		The loss function $L$ measures a distance between the algorithm's prediction $\hat{y}$ and the observed value $y$. 
+	\end{block}
+	\pause
+	An example of a loss function is the squared error:
+	\begin{equation}
+		L(y, \hat{y}) = \left( y - \hat{y}\right)^2
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Classification Problem}
+	\begin{block}{Binary Classification Problem Setting}
+		In a \textbf{binary classification} problem, the output variable is qualitative: $\mathcal{Y} = \{0, 1\}$. \\
+		\vspace{0.3cm}
+		The loss function $L$ acts as a counter for classification errors. \\
+		\vspace{0.3cm}
+	\end{block}
+	\pause
+	An example of a loss function would be the 0-1 loss function:
+	\begin{equation}
+		\begin{cases}
+			L(y, \hat{y}) = 0 & \text{si } y = \hat{y} \\
+			L(y, \hat{y}) = 1 & \text{si } y \ne \hat{y}
+		\end{cases}
+		\nonumber
+	\end{equation}
+	\pause
+	\begin{itemize}
+		\item \textbf{Note on uncertainty:} Here, $\epsilon = y - f(x)$ represents a discrete uncertainty taking its values in $\{-1, 0, 1\}$.
+		\item \textbf{Note on optimization:} The 0-1 function is non-differentiable. In practice, we will use surrogates (such as log-likelihood).
+	\end{itemize}
+	
+\end{frame}

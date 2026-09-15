@@ -1,0 +1,181 @@
+\section[Traitements simples de données textuelles]{Traitements simples de données textuelles}
+
+\subsection[Introduction]{Introduction}
+
+\begin{frame}{Contenu}
+	Ce cours n'a pas vocation à être très avancé sur le traitement des données textuelles. Mais nous introduirons les concepts suivants:
+	\begin{itemize}
+		\item Tokenisation et mots vides (stop words)
+		\item Lemmatisation et analyse grammaticale (Part of Speech)
+		\item Vectorisation
+		\item TF-IDF (term frequency, inverse document frequency)
+	\end{itemize}
+	Nous illustrerons ces éléments sur le dataset d'analyse de sentiment \href{https://www.kaggle.com/datasets/yasserh/imdb-movie-ratings-sentiment-analysis}{IMDb}. Il existe des librairies disposant de fonctions pour traiter les textes en langue anglaise, comme \href{https://www.nltk.org/}{NLTK (Natural Language Toolkit)}.
+\end{frame}
+
+\subsection[Tokenisation]{Tokenisation}
+
+\begin{frame}[fragile]{Tokenisation}
+	La tokenisation consiste à découper une phrase en éléments simples, \textbf{tokens}. On en profite en général pour passer le texte en lettres minuscules et pour supprimer la ponctuation.\\
+	
+	Par exemple:
+	\begin{lstlisting}
+		reviews = [
+		"I loved every second of this masterpiece!",
+		"The actors were terrible and the story was boring.",
+		"Amazing music and great special effects!",
+		"I would rather watch paint dry than see this movie.",
+		"A complete waste of time and money!",
+		"Don't miss this masterpiece!"
+		]
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Tokenisation}
+	Donnerait les tokens suivants:
+	\begin{lstlisting}
+		['i', 'loved', 'every', 'second', 'of', 'this', 'masterpiece']
+		['the', 'actors', 'were', 'terrible', 'and', 'the', 'story', 'was', 'boring']
+		['amazing', 'music', 'and', 'great', 'special', 'effects']
+		['i', 'would', 'rather', 'watch', 'paint', 'dry', 'than', 'see', 'this', 'movie']
+		['a', 'complete', 'waste', 'of', 'time', 'and', 'money']
+		['do', "n't", 'miss', 'this', 'masterpiece']
+	\end{lstlisting}
+	\vfill
+	Méthodes: \href{https://www.nltk.org/api/nltk.tokenize.html\#nltk-tokenize-package}{\texttt{nltk.word\_tokenize}}
+\end{frame}
+
+\begin{frame}[fragile]{Tokenisation - Stop Words}
+	NLTK dispose d'une liste de mots vides (stop words) qui n'apportent que peu ou pas de sens à la phrase. Ou alors qui sont tellement communs qu'on les retrouverait à la fois dans des critiques positives et négatives:
+	\begin{lstlisting}
+		['loved', 'every', 'second', 'masterpiece']
+		['actors', 'terrible', 'story', 'boring']
+		['amazing', 'music', 'great', 'special', 'effects']
+		['would', 'rather', 'watch', 'paint', 'dry', 'see', 'movie']
+		['complete', 'waste', 'time', 'money']
+		["n't", 'miss', 'masterpiece']
+	\end{lstlisting}
+	\vfill
+	Méthodes: \href{https://www.nltk.org/howto/corpus.html\#word-lists-and-lexicons}{\texttt{nltk.corpus.stopwords}}
+\end{frame}
+
+\subsection[Lemmatisation]{Lemmatisation}
+
+\begin{frame}[fragile]{Lemmatisation}
+	\begin{itemize}
+		\item La \textbf{lemmatisation} est une technique qui consiste à remplacer un mot, par le mot que l'on trouverait dans un dictionnaire. Par exemple un mot pluriel deviendrait singulier. Un verbe conjugué prendrait une forme infinitive...
+		\pause
+		\item La tokenisation et les mots vides semblaient plus simples, la lemmatisation nécessite d'utiliser des bases de données pour connaitre les différents \textbf{lemmes} et leurs variantes.
+		\pause
+		\item Une autre difficulté est que la lemmatisation peut dépendre du contexte grammatical. Et donc de la langue ! C'est pour cette raison que l'on se repose sur des librairies qui implémentent tout ça pour nous, comme NLTK.
+		\pause
+		\item L'analyse grammaticale (\textbf{Part of Speech}) est réalisée par un outil. D'ailleurs il arrive que ce soit lui-même un outil d'apprentissage automatique, comme un réseau de neurones ou une chaine de Markov !
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Lemmatisation - POS}
+	Part of Speech appliqué à notre exemple:
+	\begin{lstlisting}
+		[('i', 'NN'), ('loved', 'VBD'), ('every', 'DT'), ('second', 'NN'), ('of', 'IN'), ('this', 'DT'), ('masterpiece', 'NN'), ('!', '.')]
+		[('the', 'DT'), ('actors', 'NNS'), ('were', 'VBD'), ('terrible', 'JJ'), ('and', 'CC'), ('the', 'DT'), ('story', 'NN'), ('was', 'VBD'), ('boring', 'VBG'), ('.', '.')]
+	\end{lstlisting}
+	Où nous retrouvons des noms singulier (NN) ou pluriel (NNS), des verbes (VBD), -parfois au gérondif (VBG)-, des déterminants (DT), de la ponctuation (.), des adjectifs (JJ), des conjonctions de coordination (CC). \\
+	\vfill
+	Méthodes: \href{https://www.nltk.org/api/nltk.stem.wordnet.html#nltk.stem.wordnet.WordNetLemmatizer}{\texttt{nltk.stem.wordnet.WordNetLemmatizer}}
+\end{frame}
+
+\begin{frame}[fragile]{Lemmatisation - POS}
+	Après une lemmatisation utilisant POS:
+	\begin{lstlisting}
+		['love', 'second', 'masterpiece']
+		['actor', 'terrible', 'story', 'bore']
+		['amazing', 'music', 'great', 'special', 'effect']
+		['rather', 'watch', 'paint', 'dry', 'see', 'movie']
+		['complete', 'waste', 'time', 'money']
+		["n't", 'miss', 'masterpiece']
+	\end{lstlisting}
+	Les mots sont maintenant uniquement singuliers et les verbes ont été remplacés par leur forme infinitive.
+\end{frame}
+
+\subsection[Vectorisation]{Vectorisation}
+
+\begin{frame}{Vectorisation - Idée générale}
+	Une fois les critiques tokénisées et lemmatisées, il est nécessaire de convertir ces données en \textbf{données numériques} pour qu'elles puissent être traitées par un algorithme d'apprentissage automatique. Cette opération peut être réalisée par une opération simple de \textbf{vectorisation par comptage}:
+	\begin{itemize}
+		\item L'idée consiste à établir une liste de $d$ tokens qui vont définir un \textbf{vocabulaire}.
+		\item Chaque mot dans le vocabulaire est associé à un élément $i$ d'un vecteur.
+		\item Chaque critique ayant été convertie en une liste de tokens, on compte combien de fois chaque token du vocabulaire est représenté dans la liste de tokens de la critique.
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}{Vocabulaire et Corpus}
+	\begin{block}{Définition: vocabulaire}
+		On appelle \textbf{vocabulaire} l'ensemble $V$ des $d$ tokens (ou mots) \textbf{uniques} présents dans les données d'apprentissage $\mathcal{D}$:
+		\begin{equation}
+			V = \{m_1, m_2, \cdots, m_d\}
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	\begin{block}{Définition: corpus}
+		On appelle \textbf{corpus} l'ensemble $\mathcal{D}$ des $n$ documents textuels $t \in \mathcal{T}$  présents dans les données d'apprentissage:
+		\begin{equation}
+			\mathcal{D} = \{t^{(1)}, t^{(2)}, \cdots, t^{(n)}\}
+			\nonumber
+		\end{equation}
+	\end{block}	
+\end{frame}
+
+\begin{frame}{Vectorisation par comptage - Formulation}
+	\begin{block}{Vectorisation par comptage}
+		La \textbf{vectorisation par comptage} consiste en une fonction $\Phi: \mathcal{T} \to \mathbb{N}^d$ qui permet de déterminer, pour un texte $i$, un vecteur $x^{(i)} \in \mathbb{N}^d$:
+		\begin{equation}
+			x^{(i)} = \Phi(t^{(i)}) = \begin{pmatrix}
+				\text{tf}^{(i)}_1 &	\text{tf}^{(i)}_2 &	\cdots & \text{tf}^{(i)}_d
+			\end{pmatrix}
+			\nonumber
+		\end{equation}
+		Où $\text{tf}^{(i)}_j$ représente le nombre de fois (i.e. \textbf{fréquence du mot}) où le mot $m_j$ apparait dans le document textuel $t^{(i)}$. $\text{tf}^{(i)}_j$ peut aussi être décrite avec une \textbf{fonction indicatrice}:
+		\begin{equation}
+			\text{tf}^{(i)}_j = \underset{w \in t^{(i)}}{\sum} 1(w = m_j)
+			\nonumber
+		\end{equation}
+		La fonction $1(u)$ vaut 1 si $u$ est une condition vraie et 0 sinon.
+	\end{block}
+	\vfill
+	Méthodes: \href{https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html}{\texttt{sklearn.feature\_extraction.text.CountVectorizer}}
+\end{frame}
+
+\begin{frame}{Vectorisation avec TF-IDF}
+	Le comptage simple donne trop d'importance aux mots fréquents. Le \textbf{TF-IDF} permet de pénaliser les mots communs à tout le corpus $\mathcal{D}$:
+	\begin{block}{Calcul du score TF-IDF}
+		Le score pour un mot $m_j$ dans un document $t^{(i)}$ est :
+		\begin{equation}
+			\text{tf-idf}_j^{(i)} = \text{tf}_j^{(i)} \times \ln\left( \frac{n}{n_{m_j}} \right)
+			\nonumber
+		\end{equation}
+		Avec $n_{m_j}$ le nombre de documents contenant le mot $m_j$.
+	\end{block}
+	\begin{itemize}
+		\item \textbf{TF}: Fréquence du mot dans le document ($\text{tf}^{(i)}_j$).
+		\item \textbf{IDF}: Logarithme de l'inverse de la fréquence documentaire. Nul si $n_{m_j} = n$
+	\end{itemize}
+	\vfill
+	Méthodes: \href{https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfTransformer.html}{\texttt{sklearn.feature\_extraction.text.TfidfTransformer}} et \href{https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html}{\texttt{sklearn.feature\_extraction.text.TfidfVectorizer}}.
+\end{frame}
+
+\subsection[Calcul des probabilités]{Calcul des probabilités}
+
+\begin{frame}{Calcul des probabilités}
+	Le vocabulaire $V$ est le \textbf{même} pour toutes les classes. La vectorisation se fait pour chaque classe $k$ séparément à partir des données de la classe $\mathcal{D}_k$. Les probabilités sont calculées par l'algorithme \href{https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.MultinomialNB.html}{\texttt{sklearn.naive\_bayes.MultinomialNB}}:
+	\begin{block}{Calcul des probabilités avec lissage de Laplace}
+		Les probabilités de la loi multinomiale sont calculées séparément pour chaque classe $k$ :
+		\begin{equation}
+			P(m_j \mid C = k) = \frac{1 + \underset{t^{(i)} \in \mathcal{D}_k}{\sum} \text{tf}^{(i)}_j}{d + \underset{t^{(i)} \in \mathcal{D}_k}{\sum} \sum_{j=1}^d \text{tf}^{(i)}_j}
+			\nonumber
+		\end{equation}
+		Dans le cas où TF-IDF est utilisé, on remplace $\text{tf}^{(i)}_j$ par $\text{tf-idf}^{(i)}_j$.
+	\end{block}
+	\textit{Note : Le lissage ajoute virtuellement un document de $d$ tokens contenant chaque mot une fois.}
+\end{frame}
+

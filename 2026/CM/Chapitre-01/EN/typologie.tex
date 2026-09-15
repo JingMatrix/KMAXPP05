@@ -1,0 +1,219 @@
+\section[Typology]{Typology of Machine Learning Problems}
+
+\begin{frame}{Machine Learning}
+	We can distinguish 3 major families of machine learning algorithms:
+	\begin{itemize}
+		\item \textbf{Unsupervised} learning
+		\item \textbf{Supervised} learning
+		\item \textbf{Reinforcement} learning
+	\end{itemize}
+\end{frame}
+
+\subsection[Unsupervised Learning]{Unsupervised Learning}
+
+\begin{frame}{Unsupervised Learning}
+	From a sample of observations $\mathcal{D} = \begin{Bmatrix}x^{(1)}, x^{(2)}, \cdots, x^{(n)}\end{Bmatrix}$, the goal of an unsupervised learning algorithm is to discover the \textbf{internal structure} of the data. This can be achieved by:
+	
+	\begin{itemize}
+		\item Grouping together observations that share similar characteristics: \textbf{clustering}
+		\item Finding a simplified representation of the observations with a reduced number of features: \textbf{dimensionality reduction}
+	\end{itemize}
+	\vspace{0.5cm}
+	There is, a priori, no specific expected response from the algorithm.
+	
+\end{frame}
+
+\begin{frame}{Unsupervised Learning}
+	Here are a few examples of algorithms:
+	
+	\begin{itemize}
+		\item Clustering:
+		\begin{itemize}
+			\item K-Means algorithm: \href{https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html}{\texttt{sklearn.cluster.KMeans}}
+			\item DBSCAN (Density-Based Spatial Clustering of Applications with Noise): \href{https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html}{\texttt{sklearn.cluster.DBSCAN}}
+		\end{itemize}
+		\item Dimensionality reduction:
+		\begin{itemize}
+			\item Principal Component Analysis (PCA): \href{https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html}{\texttt{sklearn.decomposition.PCA}}
+			\item t-SNE (t-Distributed Stochastic Neighbor Embedding): \href{https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html}{\texttt{sklearn.manifold.TSNE}}
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Example of Unsupervised Learning}
+	Consider the following data for rugby players:
+	\begin{table}
+		\centering
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			\textbf{Height} (cm) & \textbf{Weight} (kg) & \textbf{Age} & \textbf{Number of caps} \\ \hline
+			190              & 112            & 29           & 47 \\
+			172              & 85             & 22           & 5  \\
+			186              & 135            & 37           & 0  \\
+			180              & 92             & 30           & 70 \\
+			\hline
+		\end{tabular}
+	\end{table}
+	\begin{itemize}
+		\item A clustering algorithm could, for example, group the tallest and heaviest players together, or those with the highest number of caps.
+		\item A dimensionality reduction algorithm could, for example, take advantage of the correlation between height and weight on one hand, and age and number of caps on the other, to propose a simplified representation based on only 2 features, respectively: build and experience.
+	\end{itemize}
+\end{frame}
+
+\subsection[Supervised Learning]{Supervised Learning}
+
+\begin{frame}{Supervised Learning}
+	From a sample of observations $\mathcal{D} = \begin{Bmatrix}(x^{(1)}, y^{(1)}), (x^{(2)}, y^{(2)}), \cdots, (x^{(n)}, y^{(n)})\end{Bmatrix}$, the goal of a supervised learning algorithm is to discover the \textbf{relationship} linking the input features ($x$) to the output features ($y$). \\
+	\vspace{0.5cm}
+	Two families stand out based on the continuous or discrete nature of the output features:
+	\begin{itemize}
+		\item \textbf{Regression} algorithms: when the output features represent a continuous value
+		\item \textbf{Classification} algorithms: when the output features represent a discrete value
+	\end{itemize}
+	\vspace{0.5cm}
+	There is, a priori, a precise expected response from the algorithm.
+\end{frame}
+
+\begin{frame}{Example of a Regression Problem}
+	Staying with our rugby players example:
+	\begin{table}
+		\centering
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			\textbf{Height} (cm) & \textbf{Weight} (kg) \\ \hline
+			190              & 112 \\
+			172              & 85  \\
+			186              & 135 \\
+			180              & 92  \\
+			\hline
+		\end{tabular}
+	\end{table}
+	A supervised learning algorithm could, for example, find a relationship between a player's height and weight. This would allow us to \textbf{predict} the weight of a rugby player not listed in this experiment, based purely on their height.
+\end{frame}
+
+\begin{frame}{Example of a Classification Problem}
+	Never change a winning team:
+	\begin{table}
+		\centering
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			\textbf{Height} (cm) & \textbf{Weight} (kg) & \textbf{Position} \\ \hline
+			190              & 112 &  Back row       \\
+			172              & 85  &  Fly-half \\
+			186              & 135 &  Prop           \\
+			180              & 92  &  Centre           \\
+			\hline
+		\end{tabular}
+	\end{table}
+	A supervised learning algorithm could, for example, find a relationship between a player's height and weight on one hand, and their position on the other. This would allow us to \textbf{predict} the position of a rugby player not listed in this experiment, based on their height and weight.
+\end{frame}
+
+\subsection[Reinforcement Learning]{Reinforcement Learning}
+
+\begin{frame}{Reinforcement Learning}
+	Unlike the previous modes, reinforcement learning does not rely on a fixed data sample but on dynamic \textbf{interactions}. \\
+	\vspace{0.5cm}
+	An \textbf{agent} operates within an \textbf{environnement} and must learn to make \textbf{sequential} decisions:
+	\begin{itemize}
+		\item The agent observes a \textbf{state} (the current context)
+		\item It chooses an \textbf{action} to execute
+		\item It receives a \textbf{reward} (positive or negative, immediate or deferred) in return
+	\end{itemize}
+	\vspace{0.5cm}
+	The goal of the algorithm is to discover the \textbf{optimal strategy} to maximize the total long-term reward. \\
+	\vspace{0.5cm}
+	There is, a priori, no specific expected response from the algorithm. However, it is possible to precisely evaluate the quality of its answer.
+\end{frame}
+
+\begin{frame}{Example of Reinforcement Learning}
+	In the example below, we can see how an agent interacts with its environment (the car and the track) through its sensors and actions performed on the vehicle's steering and speed. The objective is to find an optimal trajectory (position and speed) to minimize lap time without leaving the track (penalty):
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.6\linewidth]{Images/autonomous_car1}
+				\label{fig:autonomous-car-1}
+			\end{figure}
+			\vspace{-0.3cm}
+			\centering
+			\small The agent's interactions
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.6\linewidth]{Images/autonomous_car2}
+				\label{fig:autonomous-car-2}
+			\end{figure}
+			\vspace{-0.3cm}
+			\centering
+			\small Optimal strategies
+		\end{column}		
+	\end{columns}
+	\vfill 
+	\tiny \textcolor{gray}{Source: Comparing deep reinforcement learning architectures for autonomous racing - B.D Evans, H.W. Jordaan, H.A Engelbrecht - Elsevier 2023}
+\end{frame}
+
+%\subsection[Methods]{Methods}
+%
+%\begin{frame}<0>{Parametric and Non-Parametric Methods}
+%	There is another way to categorize machine learning algorithms:
+%	\begin{itemize}
+	%		\item \textbf{Parametric} methods: The algorithm has a \textbf{fixed} number of parameters, independent of the size of the training sample. The algorithm \textbf{summarizes} the training data.		
+	%		\item \textbf{Non-parametric} methods: The algorithm has a \textbf{variable} number of parameters, depending on the sample size. The algorithm \textbf{adapts} its structure to the training data.
+	%	\end{itemize}
+%\end{frame}
+%
+%\begin{frame}<0>{Example of Parametric and Non-Parametric Methods}
+%	Using the same data as before:
+%	\begin{table}
+	%		\centering
+	%		\begin{tabular}{|c|c|c|c|}
+		%			\hline
+		%			\textbf{Height} (cm) & \textbf{Weight} (kg) & \textbf{Position} \\ \hline
+		%			190              & 112 &  Back row       \\
+		%			172              & 85  &  Fly-half \\
+		%           186              & 135 &  Prop           \\
+		%			180              & 92  &  Centre           \\
+		%			\hline
+		%		\end{tabular}
+	%	\end{table}
+%	We could imagine an algorithm that predicts the position of a player of a given height and weight (for example, 185 cm and 95 kg) based on the observation in the training data that is closest to this player's characteristics. Proximity can be evaluated using a Euclidean norm.
+%\end{frame}
+%
+%\begin{frame}<0>{Example of Parametric and Non-Parametric Methods}
+%	Here, the algorithm would predict the position as "centre". To support its prediction, the algorithm relies directly on the training data without resorting to the generalization of a rule. The internal structure of the algorithm is directly the training data itself, and it becomes more complex as the number of observations grows. This algorithm is both \textbf{transductive} (there is no explicit prediction function independent of the data) and \textbf{non-parametric}. \\
+%	\vspace{0.5cm}
+%	An extremely similar algorithm will be studied in this course: the K-Nearest Neighbors algorithm.
+%\end{frame}
+%
+%\begin{frame}<0>{Example of Parametric and Non-Parametric Methods}
+%	Focusing now solely on height and weight:
+%	\begin{table}
+	%		\centering
+	%		\begin{tabular}{|c|c|c|c|}
+		%			\hline
+		%			\textbf{Height} (cm) & \textbf{Weight} (kg) \\ \hline
+		%			190              & 112 \\
+		%			172              & 85  \\
+		%			186              & 135 \\
+		%			180              & 92  \\
+		%			\hline
+		%		\end{tabular}
+	%	\end{table}
+%	An algorithm could predict a player's weight knowing their height. This is typically what a linear regression can achieve:
+%
+%	\begin{equation}
+	%		\text{weight} = \beta_0 + \beta_1 \times \text{height}
+	%		\nonumber
+	%	\end{equation}
+%	
+%	Here, the algorithm only has two parameters, $\beta_0$ and $\beta_1$, regardless of the number of observations. It is both \textbf{inductive} and \textbf{parametric}.
+%	
+%\end{frame}
+%
+%\begin{frame}<0>{Example of Parametric and Non-Parametric Methods}
+%	\begin{itemize}
+	%	\item A learning algorithm can be both \textbf{inductive} and \textbf{non-parametric}. Gaussian Processes are an example of an algorithm that meets both criteria. A Gaussian Process builds a covariance matrix from the observed data. The Gaussian Process summarizes the interdependencies of the training data within this covariance matrix (inductive nature). However, the rank of the covariance matrix grows with the number of observations, and the output features of the training data remain required for prediction (non-parametric nature).
+	%	\item There are algorithms that are both \textbf{transductive} and \textbf{parametric}, such as transductive support vector machines. However, these algorithms remain quite rare.
+	%	\end{itemize}
+%\end{frame}
