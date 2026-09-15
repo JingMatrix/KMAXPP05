@@ -1,0 +1,468 @@
+\section[Modèles linéaires]{Modèles linéaires}
+
+\begin{frame}{Modèles linéaires}
+	Dans cette section, nous étudierons 2 modèles linéaires pour des problèmes de régression et de classification:
+	\begin{itemize}
+		\item La \textbf{régression linéaire} pour les problèmes de régression.
+		\item La \textbf{régression logistique} pour les problèmes de classification.
+	\end{itemize}
+\end{frame}
+
+\subsection[Régression linéaire]{Régression linéaire}
+
+\begin{frame}{Régression linéaire}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/regression_lineaire_3}
+				\label{fig:regression-lineaire-3}
+			\end{figure}			
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{table}
+				\centering
+				\begin{tabular}{|c|c|c|c|}
+					\hline
+					\textbf{Taille} (cm) & \textbf{Poids} (kg) \\ \hline
+					190             & 112 \\
+					172             & 85  \\
+					186             & 135 \\
+					180             & 92  \\
+					\hline
+				\end{tabular}
+			\end{table}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Exemples}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/regression_lineaire_1}
+				\label{fig:regression-lineaire-1}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/regression_lineaire_2}
+				\label{fig:regression-lineaire-2}
+			\end{figure}
+		\end{column}		
+	\end{columns}
+	\pause
+	L'idée est de construire une droite qui passe le plus proche possible des observations $\mathcal{D}$. L'algorithme tente de minimiser la distance totale entre les observations et les prédictions.
+\end{frame}
+
+\begin{frame}{Modèle}
+	Le modèle de régression linéaire peut s'écrire sous une forme simple:
+	\begin{equation}
+		\text{poids}^{(i)} \approx \beta_0 + \beta_1 \times \text{taille}^{(i)}
+		\nonumber
+	\end{equation}
+	Une forme équivalente, vectorielle, serait:
+	\begin{equation}
+		\text{poids}^{(i)} \approx \begin{pmatrix}1 & \text{taille}^{(i)}\end{pmatrix} \begin{pmatrix}\beta_0 \\ \beta_1\end{pmatrix}
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Modèle}
+	L'avantage de cette forme vectorielle, c'est qu'elle peut évoluer vers une forme matricielle nous permettant de faire plusieurs prédictions à la fois, grâce à un empilement:
+	\begin{equation}
+		\begin{pmatrix}\text{poids}^{(1)} \\ \text{poids}^{(2)} \\ \text{poids}^{(3)} \\ \text{poids}^{(4)}\end{pmatrix} \approx \begin{pmatrix}1 & \text{taille}^{(1)} \\ 1 & \text{taille}^{(2)} \\ 1 & \text{taille}^{(3)} \\ 1 & \text{taille}^{(4)} \end{pmatrix} \begin{pmatrix}\beta_0 \\ \beta_1\end{pmatrix}
+		\nonumber
+	\end{equation}
+	\pause
+	Et sous une forme plus condensée:
+	\begin{equation}
+		Y \approx \tilde{X} \beta
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Formulation}
+	Soient $\mathcal{X} \subseteq \mathbb{R}^d$ l'espace des caractéristiques d'entrée,  $\mathcal{Y} \subseteq \mathbb{R}$ l'espace des caractéristiques de sortie, et $\mathcal{D} = \begin{Bmatrix}(x^{(i)}, y^{(i)})\end{Bmatrix}_{i=1}^n$ les données d'apprentissage. On définit l'application $\Phi$ qui réalise le passage à l'espace augmenté $\tilde{\mathcal{X}} \subseteq \mathbb{R}^{d+1}$:
+	\begin{equation}
+		\begin{aligned}
+			\Phi: \mathcal{X} &\to \tilde{\mathcal{X}} \\
+			x^{(i)} &\mapsto \tilde{x}^{(i)} = \begin{pmatrix}1 & x^{(i)}\end{pmatrix}
+			\nonumber
+		\end{aligned}
+	\end{equation}
+	L'espace des hypothèses $\mathcal{H}: \mathcal{X} \to \mathcal{Y}$ dans le cadre de la régression linéaire est:
+	\begin{equation}
+		\mathcal{H} = \begin{Bmatrix}h: x \mapsto \Phi(x) \beta \mid \beta \in \mathbb{R}^{d+1}\end{Bmatrix}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Empilement matriciel}
+	Pour des données d'apprentissage $\mathcal{D}$ , on construit une matrice de design $\tilde{X}$ par empilement vertical des observations augmentées $\tilde{x}^{(i)}$:
+	\begin{equation}
+		\tilde{X} = \begin{pmatrix}\tilde{x}^{(1)} \\ \tilde{x}^{(2)} \\ \vdots \\ \tilde{x}^{(n)} \end{pmatrix} \in \mathcal{M}_{n, d+1}(\mathbb{R})
+		\nonumber
+	\end{equation}
+	On note $Y$ l'empilement vertical des observations des caractéristiques de sortie:
+	\begin{equation}
+		Y = \begin{pmatrix}y^{(1)} \\ y^{(2)} \\ \vdots \\ y^{(n)} \end{pmatrix} \in \mathcal{M}_{n, 1}(\mathbb{R})
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Méthode des moindres carrés}
+	La méthode des moindres carrés cherche à minimiser la somme des erreurs quadratiques:
+	\begin{equation}
+		\begin{aligned}
+			J(\beta) &= \sum_{i=1}^n \left(y^{(i)} - \tilde{x}^{(i)} \beta\right)^2 \\
+			&= \left(Y - \tilde{X} \beta\right)^T \left(Y - \tilde{X} \beta\right)
+		\end{aligned}
+		\nonumber
+	\end{equation}
+	$\hat{\beta}$ est un estimateur de $\beta$ minimisant cette somme des erreurs quadratiques:
+	\begin{equation}
+		\hat{\beta} = \underset{\beta \in \mathbb{R}^{d+1}}{\text{arg min}}\left(\left(Y - \tilde{X} \beta\right)^T \left(Y - \tilde{X} \beta\right)\right)
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Méthode des moindres carrés}
+	Il existe une solution analytique à ce problème d'optimisation:
+	\begin{equation}
+		\begin{aligned}
+			&\hat{\beta} = \left( \tilde{X}^T \tilde{X}\right)^{-1} \tilde{X}^T Y \\
+			&\hat{\beta} \in \mathcal{M}_{d+1, 1}(\mathbb{R}) \\
+			\nonumber
+		\end{aligned}
+	\end{equation}
+	Pour exister, cette solution nécessite que la matrice $\left(\tilde{X}^T \tilde{X}\right)$ soit inversible. Ce qui signifie que les colonnes de $\tilde{X}$ sont linéairement indépendantes.
+	La fonction d'estimation $\hat{f}$ est donc:
+	\begin{equation}
+		\begin{aligned}
+			\hat{f}: \mathcal{X} &\to \mathcal{Y} \\
+			x &\mapsto \Phi(x) \hat{\beta}
+			\nonumber
+		\end{aligned}
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Hypothèses de la méthode des moindres carrés}
+	La méthode des moindres carrés prend un certain nombre d'hypothèses pour l'incertitude $\epsilon$ afin de dériver la matrice de covariance de $\hat{\beta}$. Pour rappel, en apprentissage supervisé nous cherchons une fonction estimant la fonction vraie $f$ définie comme:
+	\begin{equation}
+		y = f(x) + \epsilon
+		\nonumber
+	\end{equation}
+	Notons $X$ l'empilement matriciel des observations de caractéristiques d'entrées. $\epsilon$ doit satisfaire les conditions suivantes:
+	\begin{itemize}
+		\item La condition d'\textbf{exogénéité}: $\mathbb{E}[\epsilon \mid X] = 0$.
+		\begin{itemize}
+			\item C'est la condition qui garantit que $\mathbb{E}[\hat{\beta}] = \beta$. Ici $\beta$ est celui de $h^*$.
+			\item Il n'existe aucun lien fonctionnel entre l'espérance de $\epsilon$ et les données d'entrée.
+		\end{itemize}
+		\item La condition d'\textbf{homoscédasticité}: $\text{Var}[\epsilon \mid X] = \sigma_{\epsilon}^2$.
+		\begin{itemize}
+			\item Il n'existe aucun lien fonctionnel entre la variance de $\epsilon$ et les données d'entrée.
+		\end{itemize}
+		\item La condition d'\textbf{indépendance} implique: $\text{Cov}[\epsilon^{(i)}, \epsilon^{(j)}] =0 \quad \forall i \ne j$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Hiérarchie des espaces d'apprentissage et régression linéaire}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=1.0\linewidth]{Images/regression_lineaire}
+				\label{fig:poids-taille}
+			\end{figure}			
+		\end{column}
+		\begin{column}{0.6\textwidth}
+			Le modèle linéaire est loin d'être parfait:
+			\begin{itemize}
+				\item Soit l'hypothèse de linéarité n'est pas la bonne. L'espace des hypothèses $\mathcal{H}$ n'est pas le plus approprié.
+				\item Soit il manque des caractéristiques, par exemple la densité, le tour de hanche, le rapport masse musculaire sur masse grasse...
+				\item Soit il y a un bruit de mesure important dans la taille et/ou le poids.
+				\item Soit une combinaison quelconque des éléments ci dessus !
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}	
+
+\begin{frame}{Espaces des hypothèses et régression linéaire}
+	Il aurait été possible de considérer une autre application $\Phi'$ pour réaliser le passage de l'espace d'entrée $\mathcal{X} \subseteq \mathbb{R}$ à l'espace augmenté $\tilde{\mathcal{X}}' \subseteq \mathbb{R}^3$, par exemple:
+	\begin{equation}
+		\begin{aligned}
+			\Phi': \mathcal{X} &\rightarrow \tilde{\mathcal{X}}' \\
+			x^{(i)} &\mapsto \tilde{x}^{(i)} = \begin{pmatrix}1 & x^{(i)} & \left(x^{(i)}\right)^2\end{pmatrix}
+			\nonumber
+		\end{aligned}		
+	\end{equation}
+	La régression linéaire devient en fait une régression polynomiale de degré 2. C'est donc un nouvel espace des hypothèses $\mathcal{H}'$ qui est exploré:
+	\begin{equation}
+		\mathcal{H}' = \begin{Bmatrix}h: x \mapsto \Phi'(x) \beta \mid \beta \in \mathbb{R}^3\end{Bmatrix}
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Espaces des hypothèses et régression linéaire}
+	Dans le cadre de la régression linéaire, la nature de l'application $\Phi$ est un \textbf{hyper-paramètre} de l'algorithme d'apprentissage automatique. \\
+	\vspace{0.5cm}
+	Les coefficients $\beta$ du polynôme sont les $\textbf{paramètres}$ de l'algorithme. Ce sont les paramètres qui sont explorés par l'espace des hypothèses $\mathcal{H}$.\\
+	\vspace{0.5cm}
+	La méthode des moindres carrés permet d'obtenir une estimation $\hat{f}$ de la fonction vraie $f$ parmi les fonctions $h$ de l'espace $\mathcal{H}$.
+\end{frame}
+
+\subsection[Régression logistique]{Régression logistique}
+
+\begin{frame}{Régression logistique}
+	\begin{table}
+		\centering
+		\begin{tabular}{|c|c|}
+			\hline
+			\textbf{Poids} (kg) & \textbf{Position} \\ \hline
+			112 &  avant = 1       \\
+			85  &  trois-quart = 0 \\
+			135 &  avant = 1       \\
+			92  &  trois-quart = 0 \\
+			\hline
+		\end{tabular}
+	\end{table}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Images/regression_logistique_1}
+		\label{fig:regression-logistique-1}
+	\end{figure}			
+\end{frame}
+
+\begin{frame}{Fonction logistique}
+	\begin{columns}
+		\begin{column}{0.6\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=1.0\linewidth]{Images/regression_logistique_3}
+				\label{fig:regression-logistique-3}
+			\end{figure}			
+		\end{column}
+		\begin{column}{0.4\textwidth}
+			\begin{equation}
+				\begin{aligned}
+					\sigma: \mathbb{R} &\to ]0, 1[ \\
+					t &\mapsto \frac{1}{1 + e^{-t}}
+				\end{aligned}
+				\nonumber
+			\end{equation}
+			\pause
+			L'idée est d'associer les avants au plateau supérieur de cette fonction ($\sigma(t) = 1$) et d'associer les trois-quarts au plateau inférieur ($\sigma(t) = 0$).
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Exemples}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/regression_logistique_4}
+				\label{fig:regression-logistique-4}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/regression_logistique_5}
+				\label{fig:regression-logistique-5}
+			\end{figure}
+		\end{column}		
+	\end{columns}
+	\pause
+	Cette régression logistique calcule en fait une probabilité $p$, plus spécifiquement la probabilité qu'un joueur d'un poids donné soit un avant.
+\end{frame}
+
+\begin{frame}{Modèle}
+	Le modèle de régression logistique peut s'écrire sous une forme relativement simple:
+	\begin{equation}
+		p^{(i)} \approx \frac{1}{1 + e^{\displaystyle -\left(\beta_0 + \beta_1 \times \text{poids}^{(i)} \right)}}
+		\nonumber
+	\end{equation}
+	On peut le voir comme un modèle linéaire, dans l'exponentielle, combiné à une fonction qui envoie les résultats dans l'espace des probabilités $]0, 1[$. \\
+\end{frame}
+
+\begin{frame}{Modèle}
+	Et en notation matricielle:
+	\begin{equation}
+		p \approx \frac{1}{1 + e^{\displaystyle -\tilde{X} \beta}}
+		\nonumber
+	\end{equation} \\
+	\vspace{0.5cm}
+	En condensant avec la fonction logistique $\sigma$:
+	\begin{equation}
+		p \approx \sigma\left(\tilde{X} \beta\right)
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Formulation}
+	Soient $\mathcal{X} \subseteq \mathbb{R}^d$ l'espace des caractéristiques d'entrée,  $\mathcal{Y} = \{0, 1\}$ l'espace des caractéristiques de sortie, et $\mathcal{D} = \begin{Bmatrix}(x^{(i)}, y^{(i)})\end{Bmatrix}_{i=1}^n$ les données d'apprentissage. On définit l'application $\Phi$ qui réalise le passage à l'espace augmenté $\tilde{\mathcal{X}} \subseteq \mathbb{R}^{d+1}$:
+	\begin{equation}
+		\begin{aligned}
+			\Phi: \mathcal{X} &\to \tilde{\mathcal{X}} \\
+			x^{(i)} &\mapsto \tilde{x}^{(i)} = \begin{pmatrix}1 & x^{(i)}\end{pmatrix}
+			\nonumber
+		\end{aligned}
+	\end{equation}
+	L'espace des hypothèses $\mathcal{H}: \mathcal{X} \to ]0, 1[$ dans le cadre de la régression logistique est:
+	\begin{equation}
+		\mathcal{H} = \begin{Bmatrix}h: x \mapsto \displaystyle \frac{1}{1 + e^{-\Phi(x) \beta}} \mid \beta \in \mathbb{R}^{d+1}\end{Bmatrix}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Hypothèses et Approche itérative}
+	Contrairement à la régression linéaire, il n'existe pas de solution analytique au problème. Pour déterminer un $\hat{\beta}$ nous allons donc avoir besoin d'utiliser une approche \textbf{itérative}. \\
+\end{frame}
+
+\begin{frame}{Loi de Bernoulli}
+	Une approche pour résoudre le problème consiste à considérer chaque observation ${y^{(i)}}$ comme la réalisation d'une variable aléatoire $Y^{(i)}$ suivant une \textbf{loi de Bernoulli} de paramètre $p^{(i)}$. Les observations sont indépendantes mais ne sont pas identiquement distribuées.\\
+	\vspace{0.5cm}
+	\pause
+	Pour rappel, une variable aléatoire $Y^{(i)}$ suivant une loi de Bernoulli de paramètre $p^{(i)}$ est telle que:
+	\begin{equation}
+		\begin{cases}
+			P(Y^{(i)} = 1) = p^{(i)} \\
+			P(Y^{(i)} = 0) = 1 - p^{(i)}
+		\end{cases}
+		\nonumber
+	\end{equation}
+	Ou de manière condensée avec $y \in \{0, 1\}$:
+	\begin{equation}
+		P(Y^{(i)} = y^{(i)}) = \left(p^{(i)}\right)^{y^{(i)}} \left(1 - p^{(i)}\right)^{1 - y^{(i)}}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Maximisation de la vraisemblance}
+	La vraisemblance de notre échantillon $\mathcal{D}$ est alors:
+	\begin{equation}
+		\mathcal{L}(\beta) = P(Y = \begin{Bmatrix}y^{(i)}\end{Bmatrix}_{i=1}^n \mid \beta, \tilde{X})
+		\nonumber
+	\end{equation} \\
+	\vspace{0.5cm}
+	\pause
+	L'idée consiste à trouver $\hat{\beta}$ tel qu'il maximise la vraisemblance des observations:
+	\begin{equation}
+		\hat{\beta} = \underset{\beta \in \mathbb{R}^{d+1}}{\text{arg max}} \, \mathcal{L}(\beta)
+		\nonumber
+	\end{equation} \\
+	\vspace{0.5cm}
+	\pause
+	Cette méthode de maximisation de la vraisemblance suppose que les conditions d'exogénéité et d'indépendance des $\epsilon^{(i)}$ sont satisfaites afin d'obtenir le meilleur estimateur possible.
+\end{frame}
+
+\begin{frame}{Intuition}
+	Prenons un "avant", à qui nous avons associé la valeur $y^{(i)}=1$. La variable aléatoire est $Y^{(i)}$. Si la loi de Bernoulli associée est bien faite on devrait avoir $P(Y^{(i)} = 1)$ très proche de 1 et $P(Y^{(i)} = 0)$ très proche de 0. \\
+	\vspace{0.5cm}
+	\pause
+	Pour un "trois-quart", à qui nous avons associé la valeur $y^{(i)}=0$, c'est l'inverse. On voudra avoir $P(Y^{(i)} = 1)$ très proche de 0 et $P(Y^{(i)} = 0)$ très proche de 1. \\
+	\vspace{0.5cm}
+	\pause
+	Ceci est équivalent à dire que pour un "avant" on veut que le paramètre $p^{(i)}$ de la loi de Bernoulli soit proche de 1 et que pour un arrière, on veut que ce même paramètre soit proche de 0. \\
+\end{frame}
+
+\begin{frame}{Intuition}
+	$p^{(i)}$ étant la prédiction de notre régression logistique, c'est à dire la probabilité que l'observation $i$ soit un avant, maximiser la vraisemblance de l'ensemble des variables de Bernoulli revient à avoir une régression logistique bien calibrée ! \\
+	\vspace{0.5cm}
+	\pause
+	L'ensemble de ces lois de Bernoulli est en fait contrôlé par un vecteur paramètre $\beta$ \textbf{commun} à toutes les lois. Notre problème est donc sur-contraint, comme l'était la régression linéaire dans l'exemple précédent.	
+\end{frame}
+
+\begin{frame}{Log-vraisemblance négative moyenne}
+	En pratique, on préfère minimiser une log-vraisemblance négative moyenne que maximiser une vraisemblance:
+	\begin{equation}
+		\hat{\beta} = \underset{\beta \in \mathbb{R}^{d+1}}{\text{arg min}} \, - \frac{1}{n} \ln{\left(\mathcal{L}(\beta)\right)}
+		\nonumber
+	\end{equation} \\
+	\vspace{0.5cm}
+	\pause
+	Comme les observations sont indépendantes, cette log-vraisemblance négative moyenne est en fait:
+	\begin{equation}
+		- \frac{1}{n}\ln{\left(\mathcal{L}(\beta)\right)} = - \frac{1}{n} \sum_{i=1}^n \ln{\left(P(y^{(i)} \mid \tilde{x}^{(i)}, \beta)\right)}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Entropie croisée moyenne}
+	Cette log-vraisemblance négative moyenne prend une valeur très particulière et caractéristique. Pour rappel $p^{(i)} = \sigma(\tilde{x}^{(i)} \beta)$:
+	\begin{equation}
+		\begin{aligned}
+			-\frac{1}{n} \ln{\left(\mathcal{L}(\beta)\right)} 
+			&= - \frac{1}{n} \sum_{i=1}^n \ln{P(y^{(i)} \mid \tilde{x}^{(i)}, \beta)} \\
+			&= - \frac{1}{n} \sum_{i=1}^n \ln{\left(\left(p^{(i)}\right)^{y^{(i)}} \left(1 - p^{(i)}\right)^{1 - y^{(i)}}\right)} \\
+			&= - \frac{1}{n} \sum_{i=1}^n y^{(i)} \ln{\left(p^{(i)}\right)} + (1 - y^{(i)}) \ln{\left(1 - p^{(i)}\right)}
+		\end{aligned}
+		\nonumber
+	\end{equation}
+	Cette quantité est appelée \textbf{entropie croisée moyenne} !
+\end{frame}
+
+\begin{frame}{Gradient d'entropie croisée}
+	On pourrait montrer que la dérivée de la log-vraisemblance négative moyenne par rapport à $\beta$ s'écrit:
+	\begin{equation}
+		\begin{aligned}
+			\nabla_{\beta}\left(- \frac{1}{n} \ln{\left(\mathcal{L}(\beta)\right)}\right) 
+			&= - \frac{1}{n} \sum_{i=1}^n \left(y^{(i)} - \sigma(\tilde{x}^{(i)} \beta)\right) \tilde{x}^{(i)T} \\
+			&= - \frac{1}{n} \tilde{X}^T \left(Y - \sigma\left(\tilde{X} \beta\right)\right)
+		\end{aligned}
+		\nonumber
+	\end{equation}
+	Ce gradient fait apparaitre 2 termes:
+	\begin{itemize}
+		\item $\left(Y - \sigma\left(\tilde{X} \beta\right)\right)$ qui est la différence entre la probabilité associée à la valeur observée et la probabilité prédite par la régression logistique pour un vecteur paramètre $\beta$ donné.
+		\item $\tilde{X}^T$ sont juste les caractéristiques d'entrée observées (et augmentées).
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Descente de gradient}
+	La minimisation de la log-vraisemblance négative moyenne peut être effectuée à l'aide d'une méthode de descente de gradient. La fonction à minimiser est strictement convexe (si les colonnes de $\tilde{X}$ sont linéairement indépendantes). Donc la descente de gradient est garantie de trouver un minimum \textbf{global}. \\
+	\vspace{0.5cm}
+	On notera $\alpha \in \mathbb{R}^+$ le taux d'apprentissage. Une valeur trop grande peut conduire à une instabilité numérique de la descente de gradient et une valeur trop faible peut conduire à une convergence trop lente. Une valeur de $\alpha = 0.001$ est typique pour débuter. \\
+	\vspace{0.5cm}
+	On notera $\epsilon \in \mathbb{R}^+$ la tolérance pour stopper la descente de gradient, par exemple $\epsilon = 10^{-6}$.
+\end{frame}
+
+\begin{frame}{Descente de gradient}
+	L'algorithme de descente de gradient peut être décrit comme suit:
+	\begin{enumerate}
+		\item Prendre une valeur initiale de $\hat{\beta}_{k=0} = 0_{d+1}$
+		\item Boucler jusqu'à convergence:
+		\begin{itemize}
+			\item Calculer les $n$ probabilités $p_k = \sigma(\tilde{X} \beta_{k})$
+			\item Calculer le gradient $\nabla_{\beta}\left(- \frac{1}{n} \ln{\mathcal{L}(\beta)}\right)$
+			\item Calculer l'incrément de $\hat{\beta}$: $\delta_k = - \alpha \nabla_{\beta}\left(- \frac{1}{n} \ln{\mathcal{L}(\beta)}\right)$
+			\item Mettre à jour $\hat{\beta}$: $\hat{\beta}_{k+1} \leftarrow \hat{\beta}_{k} + \delta_k$
+			\item Calculer la norme Euclidienne au carré $\|\delta_k \|_2^2$
+			\item Si $\|\delta_k \|_2^2 < \epsilon$ alors la convergence est atteinte.
+		\end{itemize}
+	\end{enumerate}
+\end{frame}
+
+\subsection[Synthèse]{Synthèse}
+
+\begin{frame}{Synthèse : Linéaire vs Logistique}
+	\begin{table}
+		\renewcommand{\arraystretch}{1.5} % Pour aérer le tableau
+		\begin{tabular}{|l|c|c|}
+			\hline
+			\textbf{Caractéristique} & \textbf{Régression Linéaire} & \textbf{Régression Logistique} \\ \hline
+			\textbf{Nature de $Y$} & Continue ($\mathbb{R}$) & Discrète ($\{0, 1\}$) \\ \hline
+			\textbf{Modèle} & $y \approx \tilde{X}\beta$ & $p \approx \sigma(\tilde{X}\beta)$ \\ \hline
+			\textbf{Fonction de perte} & Erreur Quadratique & Entropie Croisée \\ \hline
+			\textbf{Objectif} & Minimiser & Minimiser \\ \hline
+			\textbf{Résolution} & \textbf{Analytique} (directe) & \textbf{Numérique} (itérative) \\ \hline
+			\textbf{Solution} & $\hat{\beta} = (\tilde{X}^T\tilde{X})^{-1}\tilde{X}^TY$ & Descente de gradient \\ \hline
+		\end{tabular}
+	\end{table}
+	Note: Pour un problème de classification, minimiser une Entropie Croisée est équivalent à maximiser une Log-Vraisemblance. Pour un problème de régression, dans la condition où l'incertitude $\epsilon$ est Gaussienne, minimiser l'erreur quadratique moyenne est équivalent à maximiser la Log-Vraisemblance.
+\end{frame}

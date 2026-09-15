@@ -1,0 +1,338 @@
+\section[Appendices]{Appendices}
+
+\begin{frame}{Appendices}
+	In these appendices, you will primarily find the proofs for gradient propagation derived from tensor contraction:
+	\begin{itemize}
+		\item For activation functions such as logistic, hyperbolic tangent, and ReLU.
+		\item For the linear operator with respect to inputs, weights, and biases.
+		\item For multi-class classification, incorporating the softmax operator for the average categorical cross-entropy loss.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{General Case of the Chain Rule}
+	Within the framework of the chain rule, \textbf{multiplication} behaves as a \textbf{tensor contraction}:
+	
+	\begin{block}{Chain Rule - Tensor Contraction}
+		Let an operator be embedded within a neural network topology (either an activation function or a linear node). We denote its inputs as $U \in \mathcal{M}_{n, u}(\R)$ and its outputs as $V \in \mathcal{M}_{n, v}(\R)$. For an activation function, $u = v$. For a linear operator, the weights and biases satisfy compatibility constraints: $W \in \mathcal{M}_{u, v}(\R)$ and $b \in \mathcal{M}_{1, v}(\R)$. We denote the propagated error gradient as $\delta \in \mathcal{M}_{n, v}(\R)$, which is simply defined as $\frac{\partial{e}}{\partial{V}}$.
+		The general case of the chain rule utilizing tensor contraction is formulated as follows:
+		\begin{equation*}
+			\frac{\partial{e}}{\partial{Q_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{Q_{i,j}}}
+		\end{equation*}
+		Where $Q$ can represent $U$, $W$, or $b$ depending on the requirements of the derivation.
+	\end{block}
+\end{frame}
+
+\subsection{Tensor Contraction: Logistic, Hyperbolic Tangent, and ReLU Activation Functions}
+
+\begin{frame}{Tensor Contraction for an Activation Function}
+	For an activation function, we seek to compute $\frac{\partial{e}}{\partial{U}}$ with $u = v$:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{U_{i,j}}} \quad \text{with} \quad \frac{\partial{V_{\mu,\nu}}}{\partial{U_{i,j}}} = 0 \; \text{if} \; \mu \ne i \; \text{or} \; \nu \ne j
+	\end{equation*}
+	This is the direct consequence of applying the activation function element-wise across the tensor. \\
+	
+	\pause
+	
+	The chain rule thus simplifies to:
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{e}}{\partial{U_{i,j}}} 
+			&= \frac{\partial{e}}{\partial{V_{i,j}}} \frac{\partial{V_{i,j}}}{\partial{U_{i,j}}} \\
+			&= \frac{\partial{e}}{\partial{V_{i,j}}} \sigma'\left(U_{i,j}\right)
+		\end{aligned}
+	\end{equation*}
+	
+	\pause
+	
+	We successfully recover the expression introduced earlier:
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{e}}{\partial{U}} 
+			&= \frac{\partial{e}}{\partial{V}} \odot \sigma'\left(U\right) \\
+			&= \delta \odot \sigma'\left(U\right)
+		\end{aligned}
+	\end{equation*}
+\end{frame}
+
+\subsection{Tensor Contraction: Linear Operator}
+
+\begin{frame}{Tensor Contraction for a Linear Operator with Respect to Inputs}
+	For a linear operator, the tensor contraction evaluated with respect to the inputs yields the following relationship:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{U_{i,j}}}
+	\end{equation*}
+	
+	\pause
+	
+	The rows of the tensors explicitly map to independent data observations. Operations are carried out on each observation independently, therefore:
+	\begin{equation*}
+		\frac{\partial{V_{\mu,\nu}}}{\partial{U_{i,j}}} = 0 \; \text{if} \; \mu \ne i
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Tensor Contraction for a Linear Operator with Respect to Inputs}
+	Consequently, we can simplify the multi-dimensional chain rule expansion:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{i,\nu}}} \frac{\partial{V_{i,\nu}}}{\partial{U_{i,j}}}
+	\end{equation*}
+	\pause
+	Given that the linear operator $V = U W + b$ can also be expressed element-wise as:
+	\begin{equation*}
+		V_{i,\nu} = \sum_{k=1}^u U_{i, k} W_{k, \nu} + b_{1,\nu}
+	\end{equation*}
+	Therefore, it holds that:
+	\begin{equation*}
+		\frac{\partial{V_{i,\nu}}}{\partial{U_{i,j}}} = W_{j, \nu}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Tensor Contraction for a Linear Operator with Respect to Inputs}
+	The chain rule reduces further to:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U_{i,j}}} = \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{i,\nu}}} W_{j, \nu} = \sum_{\nu=1}^v \delta_{i,\nu} W_{j, \nu} = \sum_{\nu=1}^v \delta_{i,\nu} \left(W^T\right)_{\nu, j}
+	\end{equation*}
+	\pause
+	We recognize this summation as the following standard matrix operation:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{U}} = \delta W^T
+	\end{equation*}
+	Where $\delta$ has dimensions $n \times v$ and $W^T$ has dimensions $v \times u$, which correctly evaluates to an output matrix of dimensions $n \times u$, matching exactly the spatial requirements of the input tensor $U$. 
+\end{frame}
+
+\begin{frame}{Tensor Contraction for a Linear Operator with Respect to Weights}
+	For a linear operator, evaluating the tensor contraction with respect to the weight parameter matrix yields:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{W_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{W_{i,j}}}
+	\end{equation*}
+	\pause
+	Expanding the affine transformation $V = U W + b$ element-wise:
+	\begin{equation*}
+		V_{\mu,\nu} = \sum_{k=1}^u U_{\mu, k} W_{k, \nu} + b_{1,\nu}
+	\end{equation*}
+	\pause
+	Therefore, it is clear that:
+	\begin{equation*}
+		\frac{\partial{V_{\mu,\nu}}}{\partial{W_{i,j}}} = 0 \; \text{if} \; \nu \ne j
+	\end{equation*}
+	\pause
+	And specifically:
+	\begin{equation*}
+		\frac{\partial{V_{\mu,j}}}{\partial{W_{i,j}}} = U_{\mu,i}
+	\end{equation*}	
+\end{frame}
+
+\begin{frame}{Tensor Contraction for a Linear Operator with Respect to Weights}
+	The multi-dimensional chain rule expression thus simplifies to:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{W_{i,j}}} = \sum_{\mu=1}^n \frac{\partial{e}}{\partial{V_{\mu,j}}} U_{\mu,i} = \sum_{\mu=1}^n \delta_{\mu,j} U_{\mu,i} = \sum_{\mu=1}^n \left(U^T\right)_{i,\mu} \delta_{\mu,j}
+	\end{equation*}
+	\pause
+	We recognize a classical matrix multiplication product, therefore:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{W}} = U^T \delta
+	\end{equation*}
+	Where $\delta$ spans dimensions $n \times v$ and $U^T$ spans $u \times n$, yielding a resulting parameter gradient tensor of dimensions $u \times v$, matching exactly the spatial allocation of the weight matrix $W$. 
+\end{frame}
+
+\begin{frame}{Tensor Contraction for a Linear Operator with Respect to Biases}
+	For a linear operator, evaluating the tensor contraction with respect to the structural bias vector yields:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{b_{1,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{b_{1,j}}}
+	\end{equation*}
+	\pause
+	With the linear transformation layer written as $V = U W + b$:
+	\begin{equation*}
+		V_{\mu,\nu} = \sum_{k=1}^u U_{\mu, k} W_{k, \nu} + b_{1,\nu}
+	\end{equation*}
+	\pause
+	Therefore, we isolate the condition:
+	\begin{equation*}
+		\frac{\partial{V_{\mu,\nu}}}{\partial{b_{1,j}}} = 0 \; \text{if} \; \nu \ne j
+	\end{equation*}
+	\pause
+	And it holds that:
+	\begin{equation*}
+		\frac{\partial{V_{\mu,j}}}{\partial{b_{1,j}}} = 1
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Tensor Contraction for a Linear Operator with Respect to Biases}
+	The chain rule sum collapses to:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{b_{1,j}}} = \sum_{\mu=1}^n \frac{\partial{e}}{\partial{V_{\mu,j}}} \frac{\partial{V_{\mu,j}}}{\partial{b_{1,j}}} = \sum_{\mu=1}^n \frac{\partial{e}}{\partial{V_{\mu,j}}} = \sum_{\mu=1}^n \delta_{\mu,j}
+	\end{equation*}
+	\pause
+	We observe that this operation simply aggregates all elements residing within the $j$\textsuperscript{th} column of the matrix $\delta$. In vector notation, summing across the complete observation axis (the rows) yields:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{b}} = \sum_{\mu=1}^n \delta_{\mu, \bigdot} = 1_n^T \delta
+	\end{equation*}
+	By accumulating the $n$ distinct rows of matrix $\delta$ (which spans dimensions $n \times v$), we successfully obtain a row vector of dimensions $1 \times v$, matching exactly the spatial allocation of the bias vector $b$. 
+\end{frame}
+
+\subsection{Tensor Contraction: Softmax and Average Categorical Cross-Entropy}
+
+\begin{frame}{Gradient Propagation through the Softmax Function}
+	The partial derivative of the multivariate softmax function with respect to its inputs expands to a 4th-order tensor of dimensions $(n\times K \times n \times K)$. Rather than computing this higher-order Jacobian explicitly, we bypass it completely by evaluating a targeted \textbf{tensor contraction} shortcut:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Z_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^K \frac{\partial{e}}{\partial{\hat{Y}_{\mu,\nu}}} \frac{\partial{\hat{Y}_{\mu,\nu}}}{\partial{Z_{i,j}}}
+	\end{equation*}
+	\pause
+	Because every training instance is processed entirely independently from the rest, we isolate the Kronecker constraint:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{\mu,\nu}}}{\partial{Z_{i,j}}} = 0 \; \text{if} \; \mu \ne i
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Gradient Propagation through the Softmax Function}
+	We can therefore simplify the multi-dimensional tensor contraction summation:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Z_{i,j}}} = \sum_{\nu=1}^K \frac{\partial{e}}{\partial{\hat{Y}_{i,\nu}}} \frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}}
+	\end{equation*}
+	\pause
+	We previously demonstrated that the partial derivative of the cost function (average categorical cross-entropy) with respect to the soft probability predictions $\hat{Y}$ is:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{\hat{Y}}} = - \frac{1}{n} Y \oslash \hat{Y}
+	\end{equation*}
+	Consequently, each localized matrix element evaluates to:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{\hat{Y}_{i,\nu}}} = - \frac{1}{n} \frac{Y_{i,\nu}}{\hat{Y}_{i,\nu}}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Gradient Propagation through the Softmax Function}
+	We must now analyze the remaining derivative term $\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}}$. Recall that:
+	\begin{equation*}
+		\hat{Y}_{i,\nu} = \frac{\exp{(Z_{i,\nu})}}{\sum_{k=1}^K \exp{(Z_{i,k})}}
+	\end{equation*}
+	\pause
+	To resolve this derivative cleanly, we perform a change of notation by introducing two generic functions, $f$ and $g$, mapping from $\R^K$ to $\R$. We set:
+	\begin{equation*}
+		\begin{cases}
+			f(Z_{i,\bigdot}) = \exp{(Z_{i,\nu})} \\
+			g(Z_{i,\bigdot}) = \sum_{k=1}^K \exp{(Z_{i,k})}
+		\end{cases}
+	\end{equation*}
+	\pause
+	Such that, by applying the classical quotient rule:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}} = \frac{\partial{(f / g)}}{\partial{Z_{i,j}}} =  \frac{\frac{\partial{f}}{\partial{Z_{i,j}}} \cdot g - f \cdot \frac{\partial{g}}{\partial{Z_{i,j}}}}{g^2}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Gradient Propagation through the Softmax Function}
+	Evaluating this quotient requires considering two distinct conditional scenarios:
+	\begin{itemize}
+	\item $\nu = j$
+	\item $\nu \ne j$
+	\end{itemize}
+	\pause
+	Let us first analyze the scenario where indices match, meaning $\nu = j$:
+	\begin{equation*}
+	\begin{cases}
+		\frac{\partial{f}}{\partial{Z_{i,j}}} = \exp{(Z_{i,j})} \\
+		\frac{\partial{g}}{\partial{Z_{i,j}}} = \exp{(Z_{i,j})}
+	\end{cases}
+	\end{equation*}
+	\pause
+	The quotient rule expression simplifies as follows:
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}}
+			&= \frac{\exp{(Z_{i,j})} \cdot g(Z_{i,\bigdot}) - \exp{(Z_{i,j})} \exp{(Z_{i,j})}}{g(Z_{i,\bigdot})^2} \\
+			&= \frac{\exp{(Z_{i,j})}}{g(Z_{i,\bigdot})} \frac{g(Z_{i,\bigdot}) - \exp{(Z_{i,j})}}{g(Z_{i,\bigdot})} \\
+			&= \frac{\exp{(Z_{i,j})}}{g(Z_{i,\bigdot})} \left(1 - \frac{\exp{(Z_{i,j})}}{g(Z_{i,\bigdot})}\right)
+		\end{aligned}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Gradient Propagation through the Softmax Function}
+	Observing our original model definition shows that:
+	\begin{equation*}
+		\hat{Y}_{i,j} = \frac{\exp{(Z_{i,j})}}{g(Z_{i,\bigdot})}
+	\end{equation*}
+	\pause
+	Therefore, whenever $\nu = j$, the partial derivative collapses into:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}} = \frac{\partial{\hat{Y}_{i,j}}}{\partial{Z_{i,j}}} = \hat{Y}_{i,j} \left(1 - \hat{Y}_{i,j}\right)
+	\end{equation*}	
+\end{frame}
+
+\begin{frame}{Gradient Propagation through the Softmax Function}
+	Now let us analyze the second scenario where indices diverge, meaning $\nu \ne j$:
+	\begin{equation*}
+	\begin{cases}
+		\frac{\partial{f}}{\partial{Z_{i,j}}} = 0 \\
+		\frac{\partial{g}}{\partial{Z_{i,j}}} = \exp{(Z_{i,j})}
+	\end{cases}
+	\end{equation*}
+	\pause
+	The quotient rule expression simplifies to:
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}}
+			&= \frac{- \exp{(Z_{i,\nu})} \exp{(Z_{i,j})}}{g(Z_{i,\bigdot})^2} \\
+			&= -\frac{\exp{(Z_{i,\nu})}}{g(Z_{i,\bigdot})} \frac{\exp{(Z_{i,j})}}{g(Z_{i,\bigdot})} \\
+			&= - \hat{Y}_{i,\nu} \hat{Y}_{i,j}
+		\end{aligned}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Gradient Propagation through the Softmax Function}
+	Summarizing both operational scenarios yields:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}} =
+		\begin{cases}
+			\hat{Y}_{i,j} \left(1 - \hat{Y}_{i,j}\right) & \text{if} \; \nu = j \\
+			- \hat{Y}_{i,\nu} \hat{Y}_{i,j}              & \text{otherwise}
+		\end{cases}
+	\end{equation*}
+	\pause
+	We can unify these separate conditional blocks into a single equation by deploying the standard indicator function:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}} = \hat{Y}_{i,\nu} \left(\mathbb{1}_{\nu=j} - \hat{Y}_{i,j}\right)
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Gradient Propagation through the Softmax Function}
+	Let us now return to our original multi-dimensional chain rule tensor contraction equation:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Z_{i,j}}} = \sum_{\nu=1}^K \frac{\partial{e}}{\partial{\hat{Y}_{i,\nu}}} 	\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}}
+	\end{equation*}
+	\pause
+	We have analytically established that:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{\hat{Y}_{i,\nu}}} = - \frac{1}{n} \frac{Y_{i,\nu}}{\hat{Y}_{i,\nu}}
+	\end{equation*}	
+	\pause
+	and:
+	\begin{equation*}
+		\frac{\partial{\hat{Y}_{i,\nu}}}{\partial{Z_{i,j}}} = \hat{Y}_{i,\nu} \left(\mathbb{1}_{\nu=j} - \hat{Y}_{i,j}\right)
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Gradient Propagation through the Softmax Function}
+	Assembling these distinct components into our summation framework yields:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Z_{i,j}}} = \sum_{\nu=1}^K - \frac{1}{n} \frac{Y_{i,\nu}}{\hat{Y}_{i,\nu}} \hat{Y}_{i,\nu} \left(\mathbb{1}_{\nu=j} - \hat{Y}_{i,j}\right)
+	\end{equation*}
+	\pause
+	We can now cancel out terms and exploit the fundamental properties of a One-Hot encoded target probability distribution ($\sum_{\nu=1}^K Y_{i,\nu} = 1$):
+	\begin{equation*}
+		\begin{aligned}
+			\frac{\partial{e}}{\partial{Z_{i,j}}} 
+			&= \sum_{\nu=1}^K - \frac{1}{n} Y_{i,\nu} \left(\mathbb{1}_{\nu=j} - \hat{Y}_{i,j}\right)
+			= - \frac{1}{n} \sum_{\nu=1}^K Y_{i,\nu} \left(\mathbb{1}_{\nu=j} - \hat{Y}_{i,j}\right) \\
+			&= - \frac{1}{n} \left(\sum_{\nu=1}^K Y_{i,\nu} \mathbb{1}_{\nu=j} - \sum_{\nu=1}^K Y_{i,\nu} \hat{Y}_{i,j} \right) \\
+			&= - \frac{1}{n} \left(Y_{i,j} - \hat{Y}_{i,j} \sum_{\nu=1}^K Y_{i,\nu} \right) \\
+			&= \frac{1}{n} \left(\hat{Y}_{i,j} - Y_{i,j} \right)
+		\end{aligned}
+	\end{equation*}	
+\end{frame}
+
+\begin{frame}{Gradient Propagation through the Softmax Function}
+	All that remains is to rewrite this localized coordinate result back into its compact tensor matrix form:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Z}} = \frac{1}{n} \left(\hat{Y} - Y \right)
+	\end{equation*}
+	This matches exactly the mathematical expression derived for the gradient propagation of an average binary cross-entropy loss driving a logistic sigmoid activation layer in binary tasks.
+\end{frame}

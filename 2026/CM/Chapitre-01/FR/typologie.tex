@@ -1,0 +1,219 @@
+\section[Typologie]{Typologie des problèmes d'apprentissage}
+
+\begin{frame}{Apprentissage automatique}
+	On distingue 3 grandes familles d'algorithmes en apprentissage automatique:
+	\begin{itemize}
+		\item L'apprentissage \textbf{non-supervisé}
+		\item L'apprentissage \textbf{supervisé}
+		\item L'apprentissage par \textbf{renforcement}
+	\end{itemize}
+\end{frame}
+
+\subsection[Apprentissage non-supervisé]{Apprentissage non-supervisé}
+
+\begin{frame}{Apprentissage non-supervisé}
+	\`A partir d'un échantillon d'observations $\mathcal{D} = \begin{Bmatrix}x^{(1)}, x^{(2)}, \cdots, x^{(n)}\end{Bmatrix}$, un algorithme d'apprentissage non-supervisé a pour objectif de découvrir la \textbf{structure interne} des données. Cela peut être réalisé:
+	
+	\begin{itemize}
+		\item En regroupant ensemble des observations présentant des caractéristiques similaires: le \textbf{partitionnement}
+		\item En trouvant une représentation simplifiée des observations avec une quantité réduite de caractéristiques: la \textbf{réduction de dimension}
+	\end{itemize}
+	\vspace{0.5cm}
+	Il n'y a, a priori, pas de réponse précise attendue de la part de l'algorithme.
+	
+\end{frame}
+
+\begin{frame}{Apprentissage non-supervisé}
+	Voici quelques exemples d'algorithmes:
+	
+	\begin{itemize}
+		\item Partitionnement:
+		\begin{itemize}
+			\item Algorithme des K moyennes: \href{https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html}{\texttt{sklearn.cluster.KMeans}}
+			\item DBSCAN (Partitionnement spatial d'applications fondé sur la densité avec gestion du bruit): \href{https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html}{\texttt{sklearn.cluster.DBSCAN}}
+		\end{itemize}
+		\item Réduction de dimension:
+		\begin{itemize}
+			\item Analyse en composantes principales (ACP): \href{https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html}{\texttt{sklearn.decomposition.PCA}}
+			\item t-SNE (plongement stochastique de voisins basé sur une loi de Student): \href{https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html}{\texttt{sklearn.manifold.TSNE}}
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Exemple d'apprentissage non-supervisé}
+	Considérons les données suivantes de joueurs de rugby:
+	\begin{table}
+		\centering
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			\textbf{Taille} (cm) & \textbf{Poids} (kg) & \textbf{Age} & \textbf{Nombre de sélections} \\ \hline
+			190             & 112            & 29           & 47 \\
+			172             & 85             & 22           & 5  \\
+			186             & 135            & 37           & 0  \\
+			180             & 92             & 30           & 70 \\
+			\hline
+		\end{tabular}
+	\end{table}
+	\begin{itemize}
+		\item Un algorithme de partitionnement pourrait, par exemple, regrouper les joueurs les plus grands et lourds ensemble, ou ceux avec le plus de sélections.
+		\item Un algorithme de réduction de dimension pourrait, par exemple, profiter de la corrélation entre la taille et le poids d'un côté et de l'âge et du nombre de sélections de l'autre pour proposer une représentation simplifiée qui serait basée sur seulement 2 caractéristiques, respectivement, le gabarit et l'expérience.
+	\end{itemize}
+\end{frame}
+
+\subsection[Apprentissage supervisé]{Apprentissage supervisé}
+
+\begin{frame}{Apprentissage supervisé}
+	\`A partir d'un échantillon d'observations $\mathcal{D} = \begin{Bmatrix}(x^{(1)}, y^{(1)}), (x^{(2)}, y^{(2)}), \cdots, (x^{(n)}, y^{(n)})\end{Bmatrix}$, un algorithme d'apprentissage supervisé a pour objectif de découvrir la \textbf{relation} liant les caractéristiques d'entrée ($x$) et celles de sortie ($y$). \\
+	\vspace{0.5cm}
+	Deux familles se détachent basées sur la nature, continue ou discrète, des caractéristiques de sortie:
+	\begin{itemize}
+		\item Les algorithmes de \textbf{régression}: quand les caractéristiques de sortie représentent une grandeur continue
+		\item Les algorithmes de \textbf{classification}: quand les caractéristiques de sortie représentent une grandeur discrète
+	\end{itemize}
+	\vspace{0.5cm}
+	Il y a, a priori, une réponse précise attendue de la part de l'algorithme.
+\end{frame}
+
+\begin{frame}{Exemple de problème de régression}
+	En restant dans notre exemple sur les joueurs de rugby:
+	\begin{table}
+		\centering
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			\textbf{Taille} (cm) & \textbf{Poids} (kg) \\ \hline
+			190             & 112 \\
+			172             & 85  \\
+			186             & 135 \\
+			180             & 92  \\
+			\hline
+		\end{tabular}
+	\end{table}
+	Un algorithme d'apprentissage supervisé pourrait, par exemple, trouver une relation entre la taille et le poids d'un joueur. Ce qui permettrait de \textbf{prédire} le poids d'un joueur de rugby, non répertorié dans cette expérience, à partir de la connaissance de sa taille.
+\end{frame}
+
+\begin{frame}{Exemple de problème de classification}
+	Ne changeons pas une équipe qui gagne:
+	\begin{table}
+		\centering
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			\textbf{Taille} (cm) & \textbf{Poids} (kg) & \textbf{Poste} \\ \hline
+			190             & 112 &  3ème ligne       \\
+			172             & 85  &  demi d'ouverture \\
+			186             & 135 &  pilier           \\
+			180             & 92  &  centre           \\
+			\hline
+		\end{tabular}
+	\end{table}
+	Un algorithme d'apprentissage supervisé pourrait, par exemple, trouver une relation entre la taille et le poids d'un joueur d'un côté et le poste qu'il occupe de l'autre. Ce qui permettrait de \textbf{prédire} le poste d'un joueur de rugby, non répertorié dans cette expérience, à partir de la connaissance de sa taille et de son poids.
+\end{frame}
+
+\subsection[Apprentissage par renforcement]{Apprentissage par renforcement}
+
+\begin{frame}{Apprentissage par renforcement}
+	Contrairement aux modes précédents, l'apprentissage par renforcement ne repose pas sur un échantillon de données fixe mais sur des \textbf{interactions} dynamiques. \\
+	\vspace{0.5cm}
+	Un \textbf{agent} évolue dans un \textbf{environnement} et doit apprendre à prendre des décisions \textbf{séquentielles}:
+	\begin{itemize}
+		\item L'agent observe un \textbf{état} (le contexte actuel)
+		\item Il choisit une \textbf{action} à effectuer
+		\item Il reçoit une \textbf{récompense} (positive ou négative, immédiate ou différée) en retour
+	\end{itemize}
+	\vspace{0.5cm}
+	L'objectif de l'algorithme est de découvrir la \textbf{stratégie optimale} permettant de maximiser la récompense totale à long terme. \\
+	\vspace{0.5cm}
+	Il n'y a pas, a priori, de réponse précise attendue par l'algorithme. Mais il est possible d'évaluer, de manière précise, la qualité de sa réponse.
+\end{frame}
+
+\begin{frame}{Exemple d'apprentissage par renforcement}
+	Dans l'exemple ci-dessous on peut voir comment un agent interagit avec son environnement (la voiture et le circuit) par le biais de ses capteurs et des actions effectuées sur la direction du véhicule ainsi que sa vitesse. L'objectif est de trouver une trajectoire optimale (position et vitesse) afin de minimiser le temps au tour, sans sortir le véhicule du tracé (pénalité):
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.6\linewidth]{Images/autonomous_car1}
+				\label{fig:autonomous-car-1}
+			\end{figure}
+			\vspace{-0.3cm}
+			\centering
+			\small Les interactions de l'agent
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.6\linewidth]{Images/autonomous_car2}
+				\label{fig:autonomous-car-2}
+			\end{figure}
+			\vspace{-0.3cm}
+			\centering
+			\small Les stratégies optimales
+		\end{column}		
+	\end{columns}
+	\vfill  % pousse tout ce qui suit vers le bas
+	\tiny \textcolor{gray}{Source: Comparing deep reinforcement learning architectures for autonomous racing - B.D Evans, H.W. Jordaan, H.A Engelbrecht - Elsevier 2023}
+\end{frame}
+
+%\subsection[Méthodes]{Méthodes}
+%
+%\begin{frame}<0>{Méthodes paramétriques et non-paramétriques}
+%	Il existe une autre façon de catégoriser les algorithmes d'apprentissage automatique:
+%	\begin{itemize}
+	%		\item Les méthodes \textbf{paramétriques}: L'algorithme dispose d'un nombre de paramètres \textbf{fixe}, indépendant de la taille de l'échantillon d'apprentissage. L'algorithme \textbf{résume} les données d'apprentissage.		
+	%		\item Les méthodes \textbf{non-paramétriques}: L'algorithme dispose d'un nombre de paramètres \textbf{variable}, dépendant de la taille de l'échantillon. L'algorithme \textbf{adapte} sa structure aux données d'apprentissage.
+	%	\end{itemize}
+%\end{frame}
+%
+%\begin{frame}<0>{Exemple de méthodes paramétriques et non-paramétriques}
+%	En utilisant les mêmes données que précédemment:
+%	\begin{table}
+	%		\centering
+	%		\begin{tabular}{|c|c|c|c|}
+		%			\hline
+		%			\textbf{Taille} (cm) & \textbf{Poids} (kg) & \textbf{Poste} \\ \hline
+		%			190             & 112 &  3ème ligne       \\
+		%			172             & 85  &  demi d'ouverture \\
+		%			186             & 135 &  pilier           \\
+		%			180             & 92  &  centre           \\
+		%			\hline
+		%		\end{tabular}
+	%	\end{table}
+%	Nous pourrions imaginer un algorithme qui prédirait le poste d'un joueur d'une taille et poids donnés (par exemple 185 cm et 95 kg) en se basant sur l'observation, dans les données d'apprentissage, qui se rapprocherait le plus des caractéristiques de ce joueur. La proximité peut être évaluée à l'aide d'une norme Euclidienne.
+%\end{frame}
+%
+%\begin{frame}<0>{Exemple de méthodes paramétriques et non-paramétriques}
+%	Ici, l'algorithme prédirait le poste comme étant "centre". Pour étayer sa prédiction, l'algorithme se base directement sur les données d'apprentissage, sans avoir recours à la généralisation d'une règle. La structure interne de l'algorithme est directement la donnée d'apprentissage, et elle est d'autant plus complexe que le nombre d'observations croît. Cet algorithme est à la fois \textbf{transductif} (il n'y a pas de fonction de prédiction explicite indépendante des données) et \textbf{non-paramétrique}. \\
+%	\vspace{0.5cm}
+%	Un algorithme extrêmement similaire sera étudié dans le cours: l'algorithme des K plus proches voisins.
+%\end{frame}
+%
+%\begin{frame}<0>{Exemple de méthodes paramétriques et non-paramétriques}
+%	En nous concentrant à présent uniquement sur la taille et le poids:
+%	\begin{table}
+	%		\centering
+	%		\begin{tabular}{|c|c|c|c|}
+		%			\hline
+		%			\textbf{Taille} (cm) & \textbf{Poids} (kg) \\ \hline
+		%			190             & 112 \\
+		%			172             & 85  \\
+		%			186             & 135 \\
+		%			180             & 92  \\
+		%			\hline
+		%		\end{tabular}
+	%	\end{table}
+%	Un algorithme pourrait prédire le poids d'un joueur en connaissant sa taille. C'est typique ce qu'une régression linéaire pourrait réaliser:
+%
+%	\begin{equation}
+	%		\text{poids} = \beta_0 + \beta_1 \times \text{taille}
+	%		\nonumber
+	%	\end{equation}
+%	
+%	Ici l'algorithme ne dispose que de deux paramètres $\beta_0$ et $\beta_1$. Et ce indépendamment du nombre d'observations. Il est à la fois \textbf{inductif} et \textbf{paramétrique}.
+%	
+%\end{frame}
+%
+%\begin{frame}<0>{Exemple de méthodes paramétriques et non-paramétriques}
+%	\begin{itemize}
+	%	\item Un algorithme d'apprentissage peut être à la fois \textbf{inductif} et \textbf{non-paramétrique}. Les processus Gaussiens sont un exemple d'algorithme qui répond à ces deux critères. Un processus Gaussien construit une matrice de covariance à partir des données observées. Le processus Gaussien résume les inter-dépendances des données d'apprentissage dans cette matrice de covariance (nature inductive). Mais le rang de la matrice de covariance croît avec le nombre d'observations et les caractéristiques de sortie des données d'apprentissage restent requise pour la prédiction (nature non-paramétrique).
+	%	\item Il existe des algorithmes à la fois \textbf{transductifs} et \textbf{paramétriques} comme les machines à vecteurs de support transductives. Mais ces algorithmes restent assez rares.
+	%	\end{itemize}
+%\end{frame}

@@ -307,7 +307,7 @@
 		\pause
 		\item Le terme au numérateur est un tenseur de dimension $(n \times K)$, c'est simplement: $\exp{(Z)}$
 		\pause
-		\item Le broadcasting des bibliothèques de calcul matriciel rend cette division d'un tenseur $(n \times K)$ par un tenseur $(1, K)$ possible. Mais pour rendre l'opération rigoureuse d'un point de vue mathématique on utilisera une petite astuce. En multipliant cette somme par $1_K^T$ cela permet de faire la même chose que le broadcasting: $\sum_{k=1}^{K} e^{z_k}$ devient alors $\exp{(Z)} 1_K 1_K^T$.
+		\item Le broadcasting des bibliothèques de calcul matriciel rend cette division d'un tenseur $(n \times K)$ par un tenseur $(n, 1)$ possible. Mais pour rendre l'opération rigoureuse d'un point de vue mathématique on utilisera une petite astuce. En multipliant cette somme par $1_K^T$ cela permet de faire la même chose que le broadcasting: $\sum_{k=1}^{K} e^{z_k}$ devient alors $\exp{(Z)} 1_K 1_K^T$.
 	\end{itemize}
 	La notation tensorielle de la fonction softmax est donc:
 	\begin{equation*}
@@ -382,7 +382,7 @@
 	
 	L'algorithme de descente de gradient peut être décrit comme suit:
 	\begin{enumerate}
-		\item Les paramètres sont initialisés: $P_{k=0}$
+		\item Les paramètres sont initialisés: $P$
 		\pause
 		\item Boucle sur les époques jusqu'à ce qu'un critère d'arrêt soit rencontré (nombre d'époques maximum atteint, erreur sous un certain seuil, erreur ne diminuant plus,...)
 		\pause
@@ -392,7 +392,7 @@
 			\pause
 			\item Application de la rétro-propagation du gradient on calcule $\nabla_P = \frac{\partial{e}}{\partial{P}}$ pour tous les paramètres $P$.
 			\pause
-			\item Mise à jour de chaque paramètre $P$: $P_{k+1} \leftarrow P_k - \alpha \nabla_P$
+			\item Mise à jour de chaque paramètre $P$: $P \leftarrow P - \alpha \nabla_P$
 		\end{itemize}
 		\item Retour à l'étape 2.		
 	\end{enumerate}
@@ -444,7 +444,7 @@
 		\pause
 		\item Boucle sur les époques
 		\pause
-		\item Pour chaque batch de taille $m$:
+		\item Pour chaque batch (généralement aléatoire) de taille $m$:
 		\begin{itemize}
 			\item Calcul de la passe avant et de l'erreur $e$.
 			\pause
@@ -695,8 +695,8 @@
 	Cet algorithme est alors implémenté pour \textbf{améliorer} les algorithmes de descente de gradient:
 	\begin{itemize}
 		\item En dé-bruitant la \textbf{\textit{trajectoire}} des paramètres (premier moment): méthode du \textbf{momentum}.
-		\item En adaptant le pas en fonction des \textbf{\textit{oscillations}} (second moment): algorithme de \textbf{RMSprop}.
-		\item En combinant trajectoire et pas adaptatif: algorithme de \textbf{Adam}.
+		\item En adaptant le pas en fonction des \textbf{\textit{oscillations}} (second moment): algorithme \textbf{RMSprop}.
+		\item En combinant trajectoire et pas adaptatif: algorithme \textbf{Adam}.
 	\end{itemize}
 \end{frame}
 
@@ -711,7 +711,7 @@
 		\pause
 		\item Boucle sur les époques.
 		\pause
-		\item Pour chaque batch de taille $m$:
+		\item Pour chaque batch (généralement aléatoire) de taille $m$:
 		\begin{itemize}
 			\item Calcul de la passe avant et de l'erreur $e$.
 			\pause
@@ -739,13 +739,16 @@
 
 \begin{frame}{Algorithme RMSprop}
 	L'algorithme RMSprop (RMS pour root mean square) utilise un lissage du \textbf{carré des gradients} et propose, dans la mise à jour des paramètres, de \textbf{diviser} le terme $\alpha \nabla_P$ par la racine carrée de l'historique de ses carrés lissés. Cela revient en fait à \textbf{adapter} le taux d'apprentissage:
+	\pause
 	\begin{itemize}
 		\item Dans les zones de \textbf{fort gradients}, les pas sont réduits afin de garantir une stabilité numérique à la descente de gradient: la vitesse \textbf{ralentit}.
 		\item Dans les zones de \textbf{faibles gradients}, les pas sont augmentés afin d'accélérer la convergence: la vitesse \textbf{augmente}.
 	\end{itemize}
+	\pause
 	Le momentum permet de gagner du temps dans l'optimisation parce qu'il lisse la trajectoire et RMSprop permet de gagner du temps parce qu'il nous permet de travailler avec un taux d'apprentissage plus fort tout en gardant une optimisation numériquement stable.
 	
 	\vspace{0.3cm}
+	\pause
 	
 	L'algorithme a été introduit par Geoffrey Hinton dans un de ses cours en ligne en 2012. Il est un des pères fondateur de l'apprentissage profond et l'auteur de l'article sur la rétro-propagation du gradient.
 \end{frame}
@@ -759,13 +762,13 @@
 		\pause
 		\item Boucle sur les époques.
 		\pause
-		\item Pour chaque batch de taille $m$:
+		\item Pour chaque batch (généralement aléatoire) de taille $m$:
 		\begin{itemize}
 			\item Calcul de la passe avant et de l'erreur $e$.
 			\pause
 			\item Application de la rétro-propagation du gradient pour calculer $\nabla_P = \frac{\partial{e}}{\partial{P}}$ pour tous les paramètres $P$.
 			\pause
-			\item Lissage du carré du gradient: $s_P \leftarrow (1 - \beta_2) \nabla_P^2 + \beta_2 s_P$
+			\item Lissage du carré du gradient: $s_P \leftarrow (1 - \beta_2) \nabla_P \odot \nabla_P + \beta_2 s_P$
 			\pause 
 			\item Mise à jour de chaque paramètre $P \leftarrow P - \frac{\alpha}{\sqrt{s_P} + \epsilon} \nabla_P$
 		\end{itemize}
@@ -786,7 +789,7 @@
 \subsection[Algorithme Adam]{Algorithme Adam}
 
 \begin{frame}{Algorithme Adam}
-	L'algorithme Adam (ADAptive Moment estimation) est une \textbf{combinaison} d'un descente de gradient avec momentum ($\beta_1$) et une adaptation du taux d'apprentissage avec de RMSprop ($\beta_2$) incluant des \textbf{corrections de biais}.
+	L'algorithme Adam (ADAptive Moment estimation) est une \textbf{combinaison} d'une descente de gradient avec momentum ($\beta_1$) et d'une adaptation du taux d'apprentissage avec de RMSprop ($\beta_2$) incluant des \textbf{corrections de biais}.
 	
 	\vspace{0.5cm}
 	
@@ -815,7 +818,7 @@
 			\pause
 			\item Lissage du gradient: $v_P \leftarrow (1 - \beta_1) \nabla_P + \beta_1 v_P$
 			\pause 
-			\item Lissage du carré du gradient: $s_P \leftarrow (1 - \beta_2) \nabla_P^2 + \beta_2 s_P$
+			\item Lissage du carré du gradient: $s_P \leftarrow (1 - \beta_2) \nabla_P \odot \nabla_P + \beta_2 s_P$
 			\pause
 			\item Corrections de biais: $\widehat{v_P} = v_P / (1 - \beta_1^t)$ et $\widehat{s_P} = s_P / (1 - \beta_2^t)$
 			\item Mise à jour de chaque paramètre: $P \leftarrow P - \frac{\alpha}{\sqrt{\widehat{s_P}} + \epsilon} \widehat{v_P}$
@@ -849,10 +852,11 @@
 
 \begin{frame}{Le problème de la disparition et de l'explosion du gradient}
 	Jusqu'ici, nous avons simplement dit: on initialise \textit{aléatoirement} les paramètres du réseau de neurones. Dans cette section, nous discuterons  \textit{comment} procéder à cette initialisation. Dans les réseaux de neurones, encore plus quand ils sont profonds, deux phénomènes peuvent survenir qui mettent à mal la rétro-propagation du gradient:
+	\pause
 	\begin{itemize}
 		\item \textbf{L'explosion du gradient} : Si les poids sont initialisés avec des valeurs trop grandes, le gradient est multiplié par des valeurs supérieures à 1 à chaque couche. Il grandit de manière exponentielle jusqu'à ne plus pouvoir être représenté correctement par l'ordinateur (overflow numérique).
 		\pause
-		\item \textbf{La disparition du gradient} (\textit{vanishing gradient}) : Si les poids sont trop petits, ou si les fonctions d'activation saturent, le gradient est multiplié par des valeurs proches de 0 à chaque couche. Il s'éteint avant d'atteindre les premières couches. Si les gradients sont nuls dans les premières couches alors ils ne sont jamais mis à jour par l'algorithme d'optimisation.
+		\item \textbf{La disparition du gradient} (\textit{vanishing gradient}) : Si les poids sont trop petits, ou si les fonctions d'activation saturent, le gradient est multiplié par des valeurs proches de 0 à chaque couche. Il s'éteint avant d'atteindre les premières couches. Si les gradients sont nuls dans les premières couches, alors leurs paramètres ne sont jamais mis à jour par l'algorithme d'optimisation.
 	\end{itemize}
 \end{frame}
 
@@ -917,7 +921,7 @@
 \end{frame}
 
 \begin{frame}{Initialisation de Xavier / Glorot (Logistique et Tanh)}
-	Pour la fonction tangente hyperbolique, un terme de gain $\gamma = \frac{5}{3}$, il vient corriger l'effet de la non-linéarité sur la variance:
+	Pour la fonction tangente hyperbolique, un terme de gain $\gamma = \frac{5}{3}$ vient corriger l'effet de la non-linéarité sur la variance:
 	
 	\begin{block}{Initialisation de Xavier (Fonction tangente hyperbolique)}
 		Pour une couche ayant $n_{\text{in}}$ entrées et $n_{\text{out}}$ sorties, on initialise les poids selon une loi normale centrée :

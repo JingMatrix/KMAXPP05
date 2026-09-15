@@ -1,0 +1,182 @@
+\section[Simple Text Data Processing]{Simple Text Data Processing}
+
+\subsection[Introduction]{Introduction}
+
+\begin{frame}{Content}
+	This course is not intended to be highly advanced regarding text data processing. However, we will introduce the following core concepts:
+	\begin{itemize}
+		\item Tokenization and stop words
+		\item Lemmatization and Part-of-Speech (POS) tagging
+		\item Vectorization
+		\item TF-IDF (term frequency, inverse document frequency)
+	\end{itemize}
+	We will illustrate these elements using the \href{https://www.kaggle.com/datasets/yasserh/imdb-movie-ratings-sentiment-analysis}{IMDb} sentiment analysis dataset. There are specialized libraries featuring functions to process English text, such as \href{https://www.nltk.org/}{NLTK (Natural Language Toolkit)}.
+\end{frame}
+
+\subsection[Tokenization]{Tokenization}
+
+\begin{frame}[fragile]{Tokenization}
+	Tokenization consists of splitting a sentence into basic elements called \textbf{tokens}. Typically, this step is also used to convert the text to lowercase and remove punctuation.\\
+	
+	For example:
+	\begin{lstlisting}
+		reviews = [
+		"I loved every second of this masterpiece!",
+		"The actors were terrible and the story was boring.",
+		"Amazing music and great special effects!",
+		"I would rather watch paint dry than see this movie.",
+		"A complete waste of time and money!",
+		"Don't miss this masterpiece!"
+		]
+	\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{Tokenization}
+	Would yield the following tokens:
+	\begin{lstlisting}
+		['i', 'loved', 'every', 'second', 'of', 'this', 'masterpiece']
+		['the', 'actors', 'were', 'terrible', 'and', 'the', 'story', 'was', 'boring']
+		['amazing', 'music', 'and', 'great', 'special', 'effects']
+		['i', 'would', 'rather', 'watch', 'paint', 'dry', 'than', 'see', 'this', 'movie']
+		['a', 'complete', 'waste', 'of', 'time', 'and', 'money']
+		['do', "n't", 'miss', 'this', 'masterpiece']
+	\end{lstlisting}
+	\vfill
+	Methods: \href{https://www.nltk.org/api/nltk.tokenize.html\#nltk-tokenize-package}{\texttt{nltk.word\_tokenize}}
+\end{frame}
+
+\begin{frame}[fragile]{Tokenization - Stop Words}
+	NLTK provides a built-in list of stop words that add little to no semantic meaning to a sentence. Alternatively, these words are so common that they would be found simultaneously in both positive and negative reviews:
+	\begin{lstlisting}
+		['loved', 'every', 'second', 'masterpiece']
+		['actors', 'terrible', 'story', 'boring']
+		['amazing', 'music', 'great', 'special', 'effects']
+		['would', 'rather', 'watch', 'paint', 'dry', 'see', 'movie']
+		['complete', 'waste', 'time', 'money']
+		["n't", 'miss', 'masterpiece']
+	\end{lstlisting}
+	\vfill
+	Methods: \href{https://www.nltk.org/howto/corpus.html\#word-lists-and-lexicons}{\texttt{nltk.corpus.stopwords}}
+\end{frame}
+
+\subsection[Lemmatization]{Lemmatization}
+
+\begin{frame}[fragile]{Lemmatization}
+	\begin{itemize}
+		\item \textbf{Lemmatization} is a technique that consists of replacing a word with its base form as found in a dictionary (its lemma). For example, a plural noun becomes singular, a conjugated verb takes its infinitive form...
+		\pause
+		\item While tokenization and stop words removal appeared simpler, lemmatization requires using databases to identify the various \textbf{lemmas} and their morphological variants.
+		\pause
+		\item Another difficulty is that lemmatization can depend heavily on the grammatical context—and therefore on the language! For this reason, we rely on libraries that implement all of this for us, such as NLTK.
+		\pause
+		\item Part-of-Speech (\textbf{POS}) tagging is performed by a dedicated tool. In fact, this tagger itself can be a machine learning model, such as a neural network or a Markov chain!
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Lemmatization - POS}
+	Part of Speech applied to our example:
+	\begin{lstlisting}
+		[('i', 'NN'), ('loved', 'VBD'), ('every', 'DT'), ('second', 'NN'), ('of', 'IN'), ('this', 'DT'), ('masterpiece', 'NN'), ('!', '.')]
+		[('the', 'DT'), ('actors', 'NNS'), ('were', 'VBD'), ('terrible', 'JJ'), ('and', 'CC'), ('the', 'DT'), ('story', 'NN'), ('was', 'VBD'), ('boring', 'VBG'), ('.', '.')]
+	\end{lstlisting}
+	Where we find singular nouns (NN) or plural nouns (NNS), verbs (VBD) — sometimes gerunds (VBG) —, determiners (DT), punctuation (.), adjectives (JJ), and coordinating conjunctions (CC). \\
+	\vfill
+	Methods: \href{https://www.nltk.org/api/nltk.stem.wordnet.html#nltk.stem.wordnet.WordNetLemmatizer}{\texttt{nltk.stem.wordnet.WordNetLemmatizer}}
+\end{frame}
+
+\begin{frame}[fragile]{Lemmatization - POS}
+	After lemmatization using POS tagging:
+	\begin{lstlisting}
+		['love', 'second', 'masterpiece']
+		['actor', 'terrible', 'story', 'bore']
+		['amazing', 'music', 'great', 'special', 'effect']
+		['rather', 'watch', 'paint', 'dry', 'see', 'movie']
+		['complete', 'waste', 'time', 'money']
+		["n't", 'miss', 'masterpiece']
+	\end{lstlisting}
+	Words are now strictly singular, and verbs have been replaced by their infinitive form.
+\end{frame}
+
+\subsection[Vectorization]{Vectorization}
+
+\begin{frame}{Vectorization - General Idea}
+	Once the reviews are tokenized and lemmatized, it is necessary to convert this data into \textbf{numerical data} so it can be processed by a machine learning algorithm. This operation can be achieved through a simple process called \textbf{count vectorization}:
+	\begin{itemize}
+		\item The core idea is to establish a list of $d$ tokens that will define a shared \textbf{vocabulary}.
+		\item Each unique word in the vocabulary is mapped to an index $i$ of a vector.
+		\item With each review converted into a list of tokens, we count how many times each vocabulary token appears in the review's token list.
+	\end{itemize}	
+\end{frame}
+
+\begin{frame}{Vocabulary and Corpus}
+	\begin{block}{Definition: Vocabulary}
+		We call \textbf{vocabulary} the set $V$ of $d$ \textbf{unique} tokens (or words) present in the training data $\mathcal{D}$:
+		\begin{equation}
+			V = \{m_1, m_2, \cdots, m_d\}
+			\text{\quad or \quad} V = \{m_1, m_2, \dots, m_d\}
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	\begin{block}{Definition: Corpus}
+		We call \textbf{corpus} the set $\mathcal{D}$ of $n$ text documents $t \in \mathcal{T}$ present in the training data:
+		\begin{equation}
+			\mathcal{D} = \{t^{(1)}, t^{(2)}, \cdots, t^{(n)}\}
+			\text{\quad or \quad} \mathcal{D} = \{t^{(1)}, t^{(2)}, \dots, t^{(n)}\}
+			\nonumber
+		\end{equation}
+	\end{block}	
+\end{frame}
+
+\begin{frame}{Count Vectorization - Formulation}
+	\begin{block}{Count Vectorization}
+		\textbf{Count vectorization} consists of a function $\Phi: \mathcal{T} \to \mathbb{N}^d$ that determines, for a given text $i$, a vector $x^{(i)} \in \mathbb{N}^d$:
+		\begin{equation}
+			x^{(i)} = \Phi(t^{(i)}) = \begin{pmatrix}
+				\text{tf}^{(i)}_1 &	\text{tf}^{(i)}_2 &	\cdots & \text{tf}^{(i)}_d
+			\end{pmatrix}
+			\nonumber
+		\end{equation}
+		Where $\text{tf}^{(i)}_j$ represents the number of times (i.e., \textbf{term frequency}) the word $m_j$ appears in the text document $t^{(i)}$. $\text{tf}^{(i)}_j$ can also be described using an \textbf{indicator function}:
+		\begin{equation}
+			\text{tf}^{(i)}_j = \underset{w \in t^{(i)}}{\sum} 1(w = m_j)
+			\nonumber
+		\end{equation}
+		The function $1(u)$ equals 1 if condition $u$ is true and 0 otherwise.
+	\end{block}
+	\vfill
+	Methods: \href{https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.CountVectorizer.html}{\texttt{sklearn.feature\_extraction.text.CountVectorizer}}
+\end{frame}
+
+\begin{frame}{Vectorization with TF-IDF}
+	Simple counting gives too much weight to highly frequent words. \textbf{TF-IDF} makes it possible to penalize words that are common across the entire corpus $\mathcal{D}$:
+	\begin{block}{TF-IDF Score Computation}
+		The score for a word $m_j$ in a document $t^{(i)}$ is computed as:
+		\begin{equation}
+			\text{tf-idf}_j^{(i)} = \text{tf}_j^{(i)} \times \log\left( \frac{n}{n_{m_j}} \right)
+			\nonumber
+		\end{equation}
+		Where $n_{m_j}$ is the total number of documents containing the word $m_j$.
+	\end{block}
+	\begin{itemize}
+		\item \textbf{TF}: Term Frequency of the word within the single document ($\text{tf}^{(i)}_j$).
+		\item \textbf{IDF}: Logarithme of the inverse document frequency. Equals zero if $n_{m_j} = n$.
+	\end{itemize}
+	\vfill
+	Methods: \href{https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfTransformer.html}{\texttt{sklearn.feature\_extraction.text.TfidfTransformer}} and \href{https://scikit-learn.org/stable/modules/generated/sklearn.feature_extraction.text.TfidfVectorizer.html}{\texttt{sklearn.feature\_extraction.text.TfidfVectorizer}}.
+\end{frame}
+
+\subsection[Probability Calculation]{Probability Calculation}
+
+\begin{frame}{Probability Calculation}
+	The vocabulary $V$ remains the \textbf{same} across all classes. Vectorization is performed for each class $k$ separately from the specific data belonging to class $\mathcal{D}_k$. Probabilities are then computed by the \href{https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.MultinomialNB.html}{\texttt{sklearn.naive\_bayes.MultinomialNB}} algorithm:
+	\begin{block}{Probability Computation with Laplace Smoothing}
+		The probabilities of the multinomial distribution are calculated separately for each class $k$:
+		\begin{equation}
+			P(m_j \mid C = k) = \frac{1 + \underset{t^{(i)} \in \mathcal{D}_k}{\sum} \text{tf}^{(i)}_j}{d + \underset{t^{(i)} \in \mathcal{D}_k}{\sum} \sum_{j=1}^d \text{tf}^{(i)}_j}
+			\nonumber
+		\end{equation}
+		In cases where TF-IDF is used, $\text{tf}^{(i)}_j$ is replaced by $\text{tf-idf}^{(i)}_j$.
+	\end{block}
+	\textit{Note: Smoothing virtually adds an extra document containing $d$ tokens, representing every word exactly once.}
+\end{frame}

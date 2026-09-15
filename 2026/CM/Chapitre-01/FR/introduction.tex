@@ -1,0 +1,155 @@
+\section[Introduction]{Introduction}
+
+\subsection[Organisation du cours]{Organisation du cours}
+
+\begin{frame}{Organisation du cours}
+	Le cours est organisé autour de:
+	\begin{itemize}
+		\item Cours magistraux: 20 heures (2h x 10 sessions)
+		\item Travaux dirigés: 16 heures (2h x 8 sessions)
+		\item Travaux pratiques: 20 heures (2h x 10 sessions)
+	\end{itemize}
+	\vspace{0.5cm}
+	Les créneaux horaires suivants seront utilisés:
+	\begin{itemize}
+		\item Mardi 15h45 - 17h45: TD / TP
+		\item Mardi 18h - 20h: Contrôles
+		\item Jeudi 13h30 - 15h30: Cours / TP
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Évaluations}
+	\begin{tabular}{|l|l|l|l|l|}
+		\hline
+		\textbf{Item} & \textbf{\%} & \textbf{Durée} & \textbf{Format} & \textbf{Date} \\
+		\hline
+		CC1 & 33\% & 20 min & En cours, QCM & 19/03 \\
+		\hline
+		TD \& TP & 33\% & - & Présence, complétion TP, projet & - \\
+		\hline
+		CC3 & 34\% & 1h30 & Conditions d'examen & 19/05 \\
+		\hline
+		CC4 & - & 1h30 & Conditions d'examen & 11/06 \\
+		\hline
+	\end{tabular} \\
+	\vspace{0.5cm}
+	Note: Le contrôle CC3 sera réalisé sur le créneau du mardi de 18h à 20h.
+\end{frame}
+
+\begin{frame}{Plan}
+	\begin{itemize}
+		\item Bases de l'apprentissage [6h]
+		\begin{itemize}
+			\item Introduction
+			\item Typologie des problèmes d'apprentissage
+			\item Problématiques de l'apprentissage artificiel
+			\item Modèles linéaires
+			\item Validation d'algorithme d'apprentissage
+		\end{itemize}
+		\item Algorithmes d'apprentissage [13h30]
+		\begin{itemize}
+			\item Algorithme Bayésien naïf [1h30]
+			\item Analyse en composantes principales [2h]
+			\item Arbres de décision [2h]
+			\item Perceptrons et perceptrons multicouches [4h]
+			\item K moyennes [2h]
+			\item K plus proches voisins [2h]
+			%\item Machines à vecteurs de support [4h]%
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\subsection[Paradigmes]{Paradigmes}
+
+\begin{frame}{Paradigmes et systèmes de pensée}
+	Daniel Kahneman (prix Nobel d'économie 2002) a théorisé 2 modes de fonctionnement du cerveau humain:
+	\begin{itemize}
+		\item \textbf{La pensée lente}: consciente, logique, nécessitant un effort
+		\item \textbf{La pensée rapide}: inconsciente, intuitive, sans effort
+	\end{itemize}
+	\vspace{0.5cm}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.5\linewidth]{Images/velo_centrifuge}
+				\label{fig:velo-centrifuge}
+			\end{figure}
+			%\vspace{-0.5cm}
+			\centering
+			\small Approche logique
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.5\linewidth]{Images/velo-t-es-capable}
+				%\caption[source: http://naitreetgrandir.com]{approche intuitive}
+				\label{fig:velo-t-es-capable}
+			\end{figure}
+			%\vspace{-0.5cm}
+			\centering
+			\small Approche intuitive
+		\end{column}
+	\end{columns}
+	\vfill 
+	\tiny \textcolor{gray}{Source: Thinking, fast and slow - D. Kahneman - 2012 - Penguin}
+\end{frame}
+
+\begin{frame}{Paradigmes et systèmes de pensée}
+	On peut établir un lien avec les paradigmes de programmation:
+	\begin{itemize}
+		\item La pensée lente $\rightarrow$ La programmation \textbf{déductive}: basée sur des règles logiques et explicites, issues des connaissances humaines. Le programme applique les règles aux données qui lui sont fournies.
+		\item La pensée rapide $\rightarrow$ La programmation \textbf{inductive}: basée sur des données, l'expérience, les règles sont implicites et sont découvertes par l'algorithme. Le programme applique les règles qu'il a découvert à de nouvelles données, il généralise.
+	\end{itemize}
+\end{frame}
+
+%\begin{frame}{Paradigmes et systèmes de pensée}
+%	Un autre paradigme existe néanmoins:
+%	\begin{itemize}
+	%		\item Le mimétisme $\rightarrow$ La programmation \textbf{transductive}: il n'y a pas de règle, implicite ou explicite, indépendante des données d'apprentissage. L'algorithme ne généralise pas, il copie.
+	%	\end{itemize}
+%	\begin{figure}
+	%		\centering
+	%		\includegraphics[height=0.3\linewidth]{Images/mimétisme}
+	%		\label{fig:mimétisme}
+	%	\end{figure}
+%	%\vspace{-0.5cm}
+%	\centering
+%	\small Approche mimétique
+%\end{frame}
+
+\subsection[Définitions]{Définitions}
+
+\begin{frame}{Définitions de l'apprentissage automatique}
+	\begin{block}{Définition 1}
+		Champ d'étude qui donne aux ordinateurs la capacité d'apprendre sans être explicitement programmés. \\
+		\hfill
+		\textit{--- Arthur Samuel (1959)}
+	\end{block}
+	\vfill
+	\tiny \textcolor{gray}{Source: Some Studies in Machine Learning Using the Game of Checkers - A.L. Samuel - 1959 - IBM Journal}
+\end{frame}
+
+\begin{frame}{Définitions de l'apprentissage automatique}
+	\begin{block}{Définition 2}
+		Un programme apprend d'une \textbf{expérience $E$} pour une \textbf{tâche $T$} avec une \textbf{performance $P$}, si $P$ s'améliore avec $E$. \\
+		\hfill 
+		\textit{--- Tom Mitchell (1997)}
+	\end{block}
+	%\pause
+	\begin{itemize}
+		\item \textbf{Expérience ($E$)} = Les données.
+		\item \textbf{Tâche ($T$)} = Prédire, classer, regrouper, agir, générer.
+		\item \textbf{Performance ($P$)} = La fonction de perte mathématique.
+	\end{itemize}
+	\vfill 
+	\tiny \textcolor{gray}{Source: Machine Learning - T.M. Mitchell - 1997 - McGraw-Hill}
+\end{frame}
+
+\begin{frame}{Tout est nombre !}
+	\begin{figure}
+		\centering
+		\includegraphics[width=1.0\linewidth]{Images/tout_est_nombre}
+		\label{fig:tout-est-nombre}
+	\end{figure}
+\end{frame}

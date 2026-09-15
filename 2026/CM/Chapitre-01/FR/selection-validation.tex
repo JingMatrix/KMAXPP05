@@ -1,0 +1,773 @@
+\section[Sélection et Validation de modèles]{Sélection et Validation de modèles}
+
+\begin{frame}{Sélection et Validation de modèles}
+	Dans cette section nous discuterons de la sélection et de la validation de modèles pour un problème d'apprentissage supervisé: \\
+	\vspace{0.5cm}
+	\begin{itemize}
+		\item \textbf{Sélection}: quel est le meilleur modèle parmi plusieurs espaces d'hypothèses ?
+		\item \textbf{Validation}: comment s'assurer que notre modèle a une performance suffisante ?
+	\end{itemize}
+\end{frame}
+
+\subsection{Décomposition de l'erreur}
+
+\begin{frame}{Décomposition de l'erreur}
+	Pour mieux comprendre comment faire une sélection et une validation du modèle, nous devons passer un peu plus de temps sur la \textbf{décomposition de l'erreur} d'un modèle.
+\end{frame}
+
+\begin{frame}{Risque empirique}
+	Minimiser la fonction de perte $L$ sur les données d'apprentissage $\mathcal{D}$ revient à minimiser le risque \textbf{empirique} défini comme suit:
+	\begin{block}{Définition: Risque empirique}
+		Le risque empirique est une fonction $R_n: \mathcal{H} \to \mathbb{R}^+$ qui mesure la performance de toute hypothèse $h \in \mathcal{H}$ sur les données d'apprentissage $\mathcal{D}$:
+		\begin{equation}
+			R_n = \frac{1}{n} \sum_{i=1}^n L\left(y^{(i)}, h\left(x^{(i)}\right)\right)
+			\nonumber
+		\end{equation}
+		\hfill
+	\end{block}
+\end{frame}
+
+\begin{frame}{Risque empirique}
+	L'apprentissage de l'algorithme supervisé permet d'obtenir l'estimateur $\hat{f}$ qui minimise le risque empirique à partir des données $\mathcal{D}$:
+	\begin{equation}
+		\hat{f} = \underset{h \in \mathcal{H}}{\text{arg min  }}R_n(h)
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Risque empirique pour la régression linéaire}
+	Dans le cas de la régression linéaire, la fonction de perte est la fonction d'erreur quadratique. Chercher un estimateur $\hat{f}$ correspond donc à minimiser:
+	\begin{equation}
+		\hat{f} = \underset{h \in \mathcal{H}}{\text{arg min  }} \frac{1}{n} \sum_{i=1}^n \left( y^{(i)} - \hat{y}^{(i)}\right)^2
+		\nonumber
+	\end{equation}
+	Ce qui est équivalent à ce que l'algorithme des moindres carrés réalise (au coefficient $1/n$ près).
+\end{frame}
+
+\begin{frame}{Risque empirique pour la régression logistique}
+	Dans le cas de la régression logistique, la fonction de perte est l'entropie croisée moyenne (log-vraisemblance négative moyenne). Chercher un estimateur $\hat{f}$ correspond donc à minimiser:
+	\begin{equation}
+		\hat{f} = \underset{h \in \mathcal{H}}{\text{arg min  }} - \frac{1}{n} \sum_{i=1}^n y^{(i)} \ln{\left(p^{(i)}\right)} + (1 - y^{(i)}) \ln{\left(1 - p^{(i)}\right)}
+		\nonumber
+	\end{equation}
+	C'est la quantité que nous avons minimisé plus tôt grâce à la descente de gradient.
+\end{frame}
+
+\begin{frame}{Comparaison de modèles et d'hypothèses}
+	Reprenons le problème de régression linéaire pour prédire le poids d'un joueur à partir de sa taille et considérons deux espaces des hypothèses:
+	\begin{itemize}
+		\item $\mathcal{H}_1$: l'espace des hypothèses pour des polynômes mono-variés de degré 1.
+		\item $\mathcal{H}_3$: l'espace des hypothèses pour des polynômes mono-variés de degré 3.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Quel est le meilleur modèle ? ou la meilleure hypothèse ?}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/comparaison_modeles_1}
+				\label{fig:comparaison-modeles-1}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/comparaison_modeles_2}
+				\label{fig:comparaison-modeles-2}
+			\end{figure}
+		\end{column}		
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Quel est le meilleur modèle ? ou la meilleure hypothèse ?}
+	\begin{itemize}
+		\item Pour une régression linéaire on cherche à minimiser l'erreur quadratique...
+		\pause
+		\item ...mais ce n'est pas le \textbf{but}, c'est un \textbf{moyen}. Le but, c'est de trouver une \textbf{relation} entre les caractéristiques d'entrées et de sortie qui soit la plus proche possible de la fonction vraie $f(x)$ et du processus générateur $g(u)$.
+		\pause
+		\item Pour l'espace des hypothèses $\mathcal{H}_1$, $\hat{\beta}_0$ n'a pas d'interprétation tangible: un joueur qui mesurerait 0 cm pèserait -291 kg ? En revanche $\hat{\beta}_1$ nous informe qu'en prenant 1 cm, le poids augmente en moyenne de 2 kg. Ce qui ne paraît pas absurde.
+		\pause
+		\item Pour l'espace des hypothèses $\mathcal{H}_3$, le modèle montre qu'on perd du poids jusqu'à 175 cm, puis on gagne du poids jusqu'à 185 cm, avant, à nouveau, de reperdre du poids au-delà de 185 cm. Cela semble peu plausible !
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Quel est le meilleur modèle ? ou la meilleure hypothèse ?}
+	\begin{itemize}
+		\item L'hypothèse $\mathcal{H}_1$ est meilleure ici.
+		\pause
+		\item Notre \textbf{connaissance a priori} du problème nous permet de discriminer la meilleure hypothèse. Que faire quand nous n'avons pas de connaissances a priori ?
+		\pause
+		\item On échange avec des \textbf{experts} du problème.
+		\pause
+		\item Mais on ne peut vraiment \textit{rien} faire avec les mathématiques ?
+		\pause
+		\item \textit{Si}, on peut ! (cela ne dispense pas de s'entourer des experts du domaine).
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Quel est le meilleur modèle ? ou la meilleure hypothèse ?}
+	Que se passe-t-il avec notre hypothèse $\mathcal{H}_3$ ?
+	\begin{itemize}
+		\item Il est probable que nous n'ayons pas accès à toutes les variables explicatives dans nos données. Donc il est impossible d'obtenir un modèle qui explique correctement le problème.
+		\pause
+		\item C'est pourtant l'hypothèse prise en travaillant avec $\mathcal{H}_3$. Le modèle a la \textbf{capacité} à expliquer entièrement le poids avec la taille, en lui donnant une importance démesurée par rapport à l'importance qu'elle a réellement.
+		\pause
+		\item C'est ce que l'on appelle le \textbf{sur-apprentissage}: on accorde trop d'importance à certaines variables observées.
+		\pause
+		\item On dit aussi que le modèle issu de $\mathcal{H}_3$ ne \textbf{généralise} pas correctement: la règle qui est \textbf{induite} lors de l'apprentissage ne correspond pas à la réalité.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Quel est le meilleur modèle ? ou la meilleure hypothèse ?}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/comparaison_modeles_3}
+				\label{fig:comparaison-modeles-3}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/comparaison_modeles_4}
+				\label{fig:comparaison-modeles-4}
+			\end{figure}
+		\end{column}		
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Quel est le meilleur modèle ? ou la meilleure hypothèse ?}
+	Dans l'exemple précédent, en utilisant un jeu de données plus conséquent:
+	\begin{itemize}
+		\item Le polynôme de degré 3 semble désormais monotone mais reste peu plausible.
+		\item La droite présente une pente $\hat{\beta}_1$  différente du modèle précédent. 
+	\end{itemize}
+	\pause
+	\vspace{0.5cm}
+	Le sur-apprentissage n'est pas qu'une conséquence d'une complexité (ou capacité) de modèle trop importante, mais plutôt d'un rapport entre la complexité du modèle et la quantité de données observées pour l'apprentissage. \\
+	\vspace{0.5cm}
+	Le modèle entrainé $\hat{f}$ \textbf{varie} avec des données d'apprentissage $\mathcal{D}$ différentes.
+	\pause
+\end{frame}
+
+\begin{frame}{Quel est le meilleur modèle ? ou la meilleure hypothèse ?}
+	Que peut-on faire en tant que mathématiciens ?
+	\begin{itemize}
+		\item On doit donner un \textbf{contre-pouvoir} au risque empirique.
+		\pause
+		\item Ce contre-pouvoir est une nouvelle métrique: le \textbf{risque vrai}.
+		\pause
+		\item L'idée, très simple, consiste à \textbf{vérifier} le modèle avec des observations qui n'ont pas été utilisées pendant l'apprentissage et à \textbf{évaluer} cette métrique sur cet \textbf{échantillon de test}. 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Risque vrai}
+	Le risque \textbf{vrai} généralise la notion de risque empirique aux espaces $\mathcal{X}$ et $\mathcal{Y}$:
+	\begin{block}{Définition: Risque vrai}
+		Le risque vrai est une fonction $R: \mathcal{H} \to \mathbb{R}^+$ qui mesure la performance de toute hypothèse $h$ sur les espaces $\mathcal{X}$ et $\mathcal{Y}$:
+		\begin{equation}
+			R = \mathbb{E}_{(\mathcal{X}, \mathcal{Y}) \sim \mathcal{P}}\left[L\left(y^{(i)}, h\left(x^{(i)}\right)\right)\right]
+			\nonumber
+		\end{equation}
+		\hfill
+	\end{block}
+	\pause
+	Au lieu de moyenner la fonction de perte sur les données explorées, le risque vrai moyenne la fonction de perte sur l'ensemble complet des observations possibles. \\
+	\pause
+	Dans la pratique, il est difficile voire impossible de calculer le risque vrai. On peut obtenir une estimation grâce à un \textbf{échantillon de test}.
+\end{frame}
+
+\begin{frame}{Écart de généralisation}
+	\begin{block}{Définition: Écart de généralisation}
+		L'écart de généralisation est une fonction $\mathcal{H} \to \mathbb{R}$ qui mesure la différence entre le risque vrai et le risque empirique:
+		\begin{equation}
+			\text{Écart} = R - R_n
+			\nonumber
+		\end{equation}
+		\hfill
+	\end{block}
+	\pause
+	Un écart de généralisation positif signifie que l'algorithme est moins performant sur son espace d'application que sur l'espace sur lequel il a été entrainé. C'est un marqueur de sur-apprentissage, ou d'un défaut de généralisation de l'algorithme.
+\end{frame}
+
+\begin{frame}{Risque vrai ponctuel}
+	\begin{block}{Définition: Risque vrai ponctuel}
+		Le \textbf{risque vrai ponctuel} est une fonction $R_{xy}: \mathcal{H} \to \mathbb{R}^+$ qui mesure la performance de toute hypothèse $h$ en \textbf{un point} des espaces $\mathcal{X}$ et $\mathcal{Y}$ tout en considérant \textbf{plusieurs} jeux de données d'apprentissage:
+		\begin{equation}
+			R_{xy} = \mathbb{E}_{\mathcal{D}}\left[L\left(y^{(i)}, h\left(x^{(i)}\right)\right)\right]
+			\nonumber
+		\end{equation}
+		\hfill
+	\end{block}
+	\vspace{0.5cm}
+	\pause
+	Des jeux de données différents peuvent conduire à des estimateurs $h$ différents. Il est donc intéressant de voir, pour un espace des hypothèses $\mathcal{H}$ donné, comment se comportent \textbf{en moyenne} les estimateurs $h$ en un point des espaces $\mathcal{X}$ et $\mathcal{Y}$.
+\end{frame}
+
+\begin{frame}{Décomposition biais variance}
+	Pour un problème de régression, utiliser l'erreur quadratique comme fonction de perte permet de décomposer le risque vrai ponctuel de la manière suivante:
+	\begin{equation}
+		R_{xy} = \left(\mathbb{E}_{\mathcal{D}}\left[f(x) - \hat{f}(x)\right]\right)^2 + \mathbb{E}_{\mathcal{D}}\left[\left(\hat{f}(x) - \mathbb{E}_{\mathcal{D}}\left[\hat{f}(x)\right]\right)^2\right] + \sigma_{\epsilon}^2
+		\nonumber
+	\end{equation}
+	Cette décomposition est nommée \textbf{décomposition biais variance} de l'erreur.
+\end{frame}
+
+\begin{frame}{Décomposition biais variance}
+	\begin{itemize}
+		\item $\mathbb{E}_{\mathcal{D}}\left[f(x) - \hat{f}(x)\right]$ est appelé \textbf{biais} du modèle. C'est une erreur d'approximation.
+		\item $\mathbb{E}_{\mathcal{D}}\left[\left(\hat{f}(x) - \mathbb{E}_{\mathcal{D}}\left[\hat{f}(x)\right]\right)^2\right]$ est appelé \textbf{variance} du modèle. C'est une erreur d'estimation.
+		\item $\sigma_{\epsilon}^2$ est la variance des incertitudes sur les données observées. C'est une erreur \textbf{irréductible}, appelée erreur de Bayes.
+	\end{itemize}
+	\pause
+	\vspace{0.5cm}
+	Le modèle a un risque ponctuel faible, à la condition qu'il dispose, à la fois d'un faible biais et d'une faible variance. \\
+	Le biais mesure la différence moyenne entre le modèle et la fonction vraie. La variance mesure comment la prédiction du modèle change quand les données d'apprentissage changent.
+\end{frame}
+
+\begin{frame}{Décomposition biais variance}
+	Exemple de décomposition de biais et variance. Plusieurs modèles sont construits à partir de différents jeux de données d'apprentissage. Un intervalle de confiance à 95\% est utilisé pour illustrer la variance:
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/biais_variance_1}
+				\label{fig:biais-variance-1}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/biais_variance_2}
+				\label{fig:biais-variance-2}
+			\end{figure}
+		\end{column}		
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Décomposition de l'erreur}
+	% On utilise hspace pour manger la marge de gauche et recentrer visuellement
+	\hspace*{-0.5cm}
+	\begin{tikzpicture}[
+		% Style des blocs du funnel (largeurs légèrement réduites)
+		stage/.style={
+			fill=#1,
+			draw=none, 
+			rounded corners=8pt, 
+			text=white, 
+			font=\small\bfseries,
+			align=center,
+			minimum height=1.0cm,
+			inner sep=5pt,
+		},
+		% Style des flèches à gauche
+		flowarrow/.style={
+			->,
+			>=latex,
+			thick,
+			gray!70,
+			rounded corners=3pt
+		},
+		% Style des étiquettes à droite
+		labelstyle/.style={
+			font=\footnotesize,
+			text=black,
+			anchor=west
+		}
+		]
+		% --- DÉFINITION DES BLOCS ---
+		% Largeurs ajustées : 8cm / 6.4cm / 4.8cm / 3.2cm
+		\node[stage=blue!85, text width=8cm] (s1) at (0,0) {L'espace de l'ensemble des \mbox{caractéristiques} d'entrée $\mathcal{U}$};
+		
+		\node[stage=blue!70, text width=6.4cm, below=10pt of s1] (s2) {L'espace des \mbox{caractéristiques} observées $\mathcal{X}$};
+		
+		\node[stage=blue!55, text width=4.8cm, below=10pt of s2] (s3) {L'espace des hypothèses $\mathcal{H}$};
+		
+		\node[stage=blue!40, text width=3.2cm, below=10pt of s3] (s4) {Les données d'\mbox{apprentissage} $\mathcal{D}$};
+		
+		% --- COORDONNÉES D'ALIGNEMENT ---
+		% L décalé à -4.4 pour coller au bloc de 8cm
+		% R décalé à 4.2 pour ne pas sortir de la slide
+		\coordinate (L) at (-4.4,0); 
+		\coordinate (R) at (4.2,0);  
+		
+		% --- COMMENTAIRES À DROITE ---
+		\node[labelstyle] at (R |- s1) {$g(u)$};
+		\node[labelstyle] at (R |- s2) {$f(x)$};
+		\node[labelstyle] at (R |- s3) {$h^*(x)$};
+		\node[labelstyle] at (R |- s4) {$\hat{f}(x)$};
+		
+		% --- FLÈCHES À GAUCHE ---
+		
+		% Flèche 1 -> 2
+		\draw[flowarrow] ([yshift=-4pt]s1.west) -- ([yshift=-4pt]s1.west -| L) |- 
+		node[pos=0.25, left, font=\tiny, text=red!70!black, align=right] {Erreur de\\Bayes} 
+		([yshift=4pt]s2.west);
+		
+		% Flèche 2 -> 3
+		\draw[flowarrow] ([yshift=-4pt]s2.west) -- ([yshift=-4pt]s2.west -| L) |- 
+		node[pos=0.25, left, font=\tiny, text=red!70!black, align=right] {Erreur\\d'approximation} 
+		([yshift=4pt]s3.west);
+		
+		% Flèche 3 -> 4
+		\draw[flowarrow] ([yshift=-4pt]s3.west) -- ([yshift=-4pt]s3.west -| L) |- 
+		node[pos=0.25, left, font=\tiny, text=red!70!black, align=right] {Erreur\\d'estimation} 
+		([yshift=4pt]s4.west);
+		
+	\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Le rasoir d'Ockham}
+	L'espace des hypothèses $\mathcal{H}$ doit représenter des fonctions suffisamment complexes (faible biais) pour représenter les relations entre les variables d'entrées et de sortie. Mais pas trop complexe pour ne pas laisser la possibilité à l'algorithme d'accorder une importance trop grande à certaines variables d'entrée (faible variance). \\
+	\vspace{0.5cm}
+	Le risque empirique doit être minimisé mais en maintenant un écart de généralisation faible. \\
+	\vspace{0.5cm}
+	Si deux espaces d'hypothèses permettent d'arriver à des modèles de performance semblable, privilégier l'hypothèse la plus simple.
+\end{frame}
+
+\begin{frame}{Le rasoir d'Ockham}
+	\begin{columns}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.9\linewidth]{Images/plan_toulouse_2}
+				\label{fig:plan-toulouse-2}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.3\textwidth}
+			\pause
+			Les deux chemins mènent au même endroit. Le chemin bleu est plus rapide. Mais le chemin rouge est beaucoup plus facile à expliquer à un touriste. Et le touriste aura moins de chance de se perdre.
+		\end{column}		
+	\end{columns}	
+\end{frame}
+
+\subsection[Métriques de performance]{Métriques de performance}
+
+\begin{frame}{Métriques de performance}
+	Dans cette section, nous introduirons les métriques de performance essentielles pour les problèmes de régression et de classification. Il en existe bien plus que ce qui est mentionné ici !
+\end{frame}
+
+\begin{frame}{Métriques de régression: le résidu}
+	La première métrique, centrale au problème de régression, est le \textbf{résidu}. Littéralement, cette métrique mesure ce qui n'a pas pu être expliqué par le modèle, ce qui \textbf{reste} à expliquer:
+	\begin{block}{Définition: Résidu}
+		Dans un problème de régression, le \textbf{résidu} pour une observation $i$ est la différence entre les caractéristiques de sorties observées et celles estimées par le modèle $\hat{f}: \mathcal{X} \to \mathcal{Y}$:
+		\begin{equation}
+			r^{(i)} = y^{(i)} - \hat{f}(x^{(i)})
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	Le résidu $r$ ne doit pas être confondu, ni avec l'incertitude $\epsilon^{(i)} = y^{(i)} - f(x^{(i)})$, ni avec l'erreur de modèle $f(x^{(i)}) - \hat{f}(x^{(i)})$ qui combine à la fois l'erreur d'approximation et l'erreur d'estimation. Comme l'incertitude $\epsilon^{(i)}$ ne peut en général pas être mesurée, $r^{(i)}$ en est la meilleure estimation possible.
+\end{frame}
+
+\begin{frame}{Métriques de régression: le coefficient de détermination}
+	Le coefficient de détermination est défini en fonction de la somme des carrés des résidus, notée $\text{SS}_{\text{res}}$ et de la somme des carrés totale, notée $\text{SS}_{\text{tot}}$ 
+	\begin{block}{Définition: Coefficient de détermination}
+		Dans un problème de régression, le \textbf{coefficient de détermination} $R^2$ est une métrique mesurant la fraction de variance expliquée:
+		\begin{equation}
+			R^2 = 1 - \frac{\text{SS}_{\text{res}}}{\text{SS}_{\text{tot}}} = 1 - \frac{\sum_{i=1}^n \left(y^{(i)} - \hat{y}^{(i)}\right)^2}{\sum_{i=1}^n \left(y^{(i)} - \bar{y}\right)^2}
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	Note: Dans le contexte de la régression linéaire, quelle que soit la fonction d'augmentation $\Phi$ disposant d'une constante $\beta_0$, le coefficient de détermination est aussi le carré du coefficient de corrélation de Pearson entre les caractéristiques de sortie estimées $\hat{y}$ et les caractéristiques de sorties observées $y$.
+\end{frame}
+
+\begin{frame}{Métriques de régression: le coefficient de détermination}
+	\begin{itemize}
+		\item Si le modèle prédit $\bar{y}$ pour toute entrée $x$, alors $R^2 = 0$.
+		\pause
+		\item Si le modèle prédit $y^{(i)}$ pour l'entrée $x^{(i)}$ pour toute observation $i$, alors $R^2 = 1$.
+		\pause
+		\item Si les résidus $r^{(i)}$ sont nuls pour toute observation $i$, alors $R^2 = 1$.
+		\pause
+		\item Attention ! Un coefficient de détermination proche de 1 peut masquer un problème de sur-apprentissage. On évalue donc cette métrique à la fois sur les données d'apprentissage et sur des données de test.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Métrique de classification: la matrice de confusion}
+	Pour un problème de classification à $m$ classes ($\mathcal{Y} = \{0, 1, \cdots, m-1\}$), la matrice de confusion permet de \textbf{compter} les prédictions réalisées par le modèle par rapport à la classe réelle pour chaque observation $k$ des $n$ données observées $\mathcal{D}$:
+	\begin{block}{Définition: Matrice de confusion}
+		En classification à $m$ classes, la matrice de confusion $C \in \mathcal{M}_{m,m}$ est définie comme suit en fonction des classes \textbf{réelles} $y^{(k)}$ et des classes \textbf{prédites} $\hat{y}^{(k)}$ pour chaque observation $k$:
+		\begin{equation}
+			C_{i,j} = \text{card} \left( \{k \in \{1, 2, \cdots, n\}\} \mid y^{(k)} = i \, \text{et} \, \hat{y}^{(k)} = j \right)
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	Note: $\text{card}$ est l'opérateur \textbf{cardinal} qui indique le nombre d'éléments d'un ensemble.
+\end{frame}
+
+\begin{frame}{Métrique de classification: la matrice de confusion}
+	\begin{alertblock}{Absence de convention pour $C$}
+		Il n'existe pas de convention globale pour la disposition de la matrice. Dans la définition fournie, les classes réelles sont représentées en ligne et les classes prédites en colonnes (convention de \href{https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html}{\texttt{sklearn.metrics.confusion\_matrix}}). \\
+		\vspace{0.5cm}
+		Il vaut mieux toujours préciser (ou vérifier) la convention utilisée en communiquant une matrice de confusion. \\
+		\vspace{0.5cm}
+		La matrice de confusion porte son nom pour une raison ;)
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}{Métrique de classification: la matrice de confusion}
+	C'est beaucoup plus simple qu'il n'y paraît. Illustrons avec un problème de classification binaire ($m = 2$) où nous cherchons à prédire la position (avant = 1 ou trois-quart = 0) d'un joueur de rugby:
+	\begin{equation}
+		C = 
+		\begin{bNiceMatrix}[first-row, last-col]
+			\text{prédiction: trois-quart} & \text{prédiction: avant} & \\
+			\textcolor{blue}{5} & \textcolor{orange}{2} & \text{réelle: trois-quart} \\
+			\textcolor{orange}{1} & \textcolor{blue}{7} & \text{réelle: avant}
+		\end{bNiceMatrix}
+		\nonumber
+	\end{equation}
+	\pause
+	\begin{itemize}
+		\item Il y a \textcolor{blue}{5} + \textcolor{blue}{7} prédictions correctes et \textcolor{orange}{1} + \textcolor{orange}{2} prédictions incorrectes.
+		\pause 
+		\item Une matrice de confusion \textcolor{blue}{diagonale} ne comporte que des prédictions \textcolor{blue}{correctes}.
+		\pause 
+		\item Les prédictions \textcolor{orange}{erronées} se retrouvent dans les termes \textcolor{orange}{extra-diagonaux}.
+		\pause
+		\item Comme $\text{avant} = 1$, \textcolor{blue}{7} est le nombre de \textbf{\textcolor{blue}{vrais} positifs}(VP).
+		\pause
+		\item \textcolor{blue}{5} est le nombre de \textbf{\textcolor{blue}{vrais} négatifs}(VN), \textcolor{orange}{2} le nombre de \textbf{\textcolor{orange}{faux} positifs}(FP) et \textcolor{orange}{1} le nombre de \textbf{\textcolor{orange}{faux} négatifs}(FN).
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Métrique de classification: la matrice de confusion}
+	\begin{block}{Définition: VP, FP, VN, FN}
+		Dans la matrice de confusion $C$ pour une classification \textbf{binaire}, pour les $n$ données observées $\mathcal{D}$, les termes de la matrice ont l'appellation suivante:
+		\begin{equation}
+			C = 
+			\begin{bNiceMatrix}[first-row, last-col]
+				\text{prédiction: } \{0\} & \text{prédiction: } \{1\} & \\
+				\text{Vrais négatifs (VN)} & \text{Faux positifs (FP)} & \text{réelle: } \{0\} \\
+				\text{Faux négatifs (FN)} & \text{Vrais positifs (VP)} & \text{réelle: } \{1\} \\
+			\end{bNiceMatrix}
+			\nonumber
+		\end{equation}
+		Ces valeurs sont des \textbf{compteurs} tels que:
+		\begin{equation}
+			\text{VN} + \text{FN} + \text{FP} + \text{VP} = n
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	\textbf{Vrai} signifie que l'algorithme a effectué la bonne prédiction. \textbf{Négatif} signifie que l'algorithme a prédit la classe \{0\}, alors que positif signifie que l'algorithme a prédit la classe \{1\}.
+\end{frame}
+
+\begin{frame}{Métrique de classification: la matrice de confusion}
+	On associe souvent des \textbf{taux} à la matrice de confusion $C$:
+	\begin{equation}
+		\begin{cases}
+			\displaystyle \frac{\text{VP}}{\text{VP} + \text{FP}} & \text{Précision} \\[10pt]
+			\displaystyle \frac{\text{VP}}{\text{VP} + \text{FN}} & \text{Rappel} \\[10pt]
+			\displaystyle \frac{\text{VN}}{\text{VN} + \text{FN}} & \text{Valeur prédictive négative} \\[10pt]
+			\displaystyle \frac{\text{VN}}{\text{VN} + \text{FP}} & \text{Spécificité}
+		\end{cases}
+		\nonumber
+	\end{equation}
+	\pause
+	Note: Le rappel est un terme d'apprentissage automatique. Les statisticiens appellent aussi cette métrique \textbf{sensibilité} ou encore \textbf{puissance statistique}.
+\end{frame}
+
+\begin{frame}{Métrique de classification: la matrice de confusion}
+	Voici les différentes questions auxquelles ces termes répondent:
+	\begin{itemize}
+		\item Précision: \textit{est-ce que le joueur que j'ai classé comme avant en était bien un ?}
+		\item Rappel: \textit{ai-je bien réussi à classer les avants de mes données en tant que tel ?}
+		\item Valeur prédictive négative: \textit{est-ce que le joueur que j'ai classé comme trois-quart en était bien un ?}
+		\item Spécificité: \textit{ai-je bien réussi à classer les trois-quart de mes données en tant que tel ?}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Métrique de classification: la courbe ROC}
+	Dans la section sur la régression logistique, nous avions le modèle suivant:
+	\begin{equation}
+		\begin{aligned}
+			h: &\mathcal{X} \to ]0, 1[ \\
+			&x \mapsto \sigma\left(\Phi(X) \beta\right)
+		\end{aligned}
+		\nonumber
+	\end{equation}
+	\pause
+	Implicitement, nous avons considéré que si le modèle prédit une probabilité proche de 1, alors la classe prédite était \{1\}. Inversement si la probabilité était proche de 0, alors la classe prédite était \{0\}. \\
+	\pause
+	\vspace{0.3cm}
+	En fait, il est possible de considérer n'importe quel \textbf{seuil}, noté $\theta$, afin de prendre une \textbf{décision} pour une observation $i$:
+	\begin{equation}
+		\hat{y}^{(i)} = 
+		\begin{cases}
+			1 & \text{si} \, h(x^{(i)}) \ge \theta \\
+			0 & \text{sinon}
+		\end{cases}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Métrique de classification: la courbe ROC}
+	Cette flexibilité dans le choix de $\theta$ permet de faire des \textbf{compromis} différents dans la matrice de confusion. La \textbf{courbe ROC} permet de visualiser ces compromis entre le taux de vrais positifs (rappel ou sensibilité), noté $\text{TVP}$, et le taux de faux positifs, noté $\text{TFP}$:
+	\begin{equation}
+		\begin{cases}
+			\text{TVP} = \displaystyle \frac{\text{VP}}{\text{VP} + \text{FN}} \\[10pt]
+			\text{TFP} = \displaystyle \frac{\text{FP}}{\text{FP} + \text{VN}}
+		\end{cases}
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Métrique de classification: la courbe ROC}
+	\begin{block}{Définition: Courbe ROC}
+		La courbe ROC (Receiver Operating Characteristic), notée $\mathcal{C}_{\text{ROC}}$ représente la relation entre le taux de vrais positifs $\text{TVP}$ et le taux de faux positifs $\text{TFP}$ quand le seuil de décision $\theta$ change:
+		\begin{equation}
+			\mathcal{C}_{\text{ROC}} = \{ \left(\text{TFP}, \text{TVP}\right) \in [0, 1]^2 \mid \theta \in [0, 1]\}
+			\nonumber
+		\end{equation}
+	\end{block}
+\end{frame}
+
+\begin{frame}{Métrique de classification: la courbe ROC}
+	Supposons qu'un modèle de régression logistique calcule les probabilités suivantes pour des observations $\mathcal{D}$:
+	\begin{table}
+		\centering
+		\begin{tabular}{|c|c|}
+			\hline
+			\textbf{Probabilité} & \textbf{Classe vraie} \\ \hline
+			0.98 & 1 \\ \hline
+			0.2  & 0 \\ \hline
+			0.05 & 0 \\ \hline
+			0.60 & 0 \\ \hline
+			0.79 & 1 \\ \hline
+			0.83 & 1 \\ \hline
+			0.47 & 1 \\ \hline
+		\end{tabular}
+	\end{table}
+\end{frame}
+
+\begin{frame}{Métrique de classification: la courbe ROC}
+	Prenons par exemple $\theta = 1$:
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			\begin{table}
+				\centering
+				\begin{tabular}{|c|c|c|}
+					\hline
+					\textbf{Prob.} & \textbf{Vraie} & \textbf{Préd.} \\ \hline
+					0.98 & 1 & 0 \\ \hline
+					0.2  & 0 & 0 \\ \hline
+					0.05 & 0 & 0 \\ \hline
+					0.60 & 0 & 0 \\ \hline
+					0.79 & 1 & 0 \\ \hline
+					0.83 & 1 & 0 \\ \hline
+					0.47 & 1 & 0 \\ \hline
+				\end{tabular}
+			\end{table}
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{Images/roc_theta1}
+				\label{fig:roc-theta1}
+			\end{figure}			
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Métrique de classification: la courbe ROC}
+	Prenons par exemple $\theta = 0$:
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			\begin{table}
+				\centering
+				\begin{tabular}{|c|c|c|}
+					\hline
+					\textbf{Prob.} & \textbf{Vraie} & \textbf{Préd.} \\ \hline
+					0.98 & 1 & 1 \\ \hline
+					0.2  & 0 & 1 \\ \hline
+					0.05 & 0 & 1 \\ \hline
+					0.60 & 0 & 1 \\ \hline
+					0.79 & 1 & 1 \\ \hline
+					0.83 & 1 & 1 \\ \hline
+					0.47 & 1 & 1 \\ \hline
+				\end{tabular}
+			\end{table}
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{Images/roc_theta0}
+				\label{fig:roc-theta0}
+			\end{figure}			
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Métrique de classification: la courbe ROC}
+	Prenons par exemple $\theta = 0.5$:
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			\begin{table}
+				\centering
+				\begin{tabular}{|c|c|c|}
+					\hline
+					\textbf{Prob.} & \textbf{Vraie} & \textbf{Préd.} \\ \hline
+					0.98 & 1 & 1 \\ \hline
+					0.2  & 0 & 0 \\ \hline
+					0.05 & 0 & 0 \\ \hline
+					0.60 & 0 & 1 \\ \hline
+					0.79 & 1 & 1 \\ \hline
+					0.83 & 1 & 1 \\ \hline
+					0.47 & 1 & 0 \\ \hline
+				\end{tabular}
+			\end{table}
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{Images/roc_theta05}
+				\label{fig:roc-theta05}
+			\end{figure}			
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Métriques de classification: synthèse}
+	Cela fait beaucoup de métriques différentes pour la classification !
+	\begin{itemize}
+		\item Maitriser ces différentes métriques demande du temps et de la pratique.
+		\item Plutôt que d'essayer de mémoriser les différentes définitions et termes, je conseille de partir de la matrice de confusion et de dériver les autres termes à partir de là.
+		\item Les dénominations vrais positifs, faux positifs... sont les plus intuitives (par rapport à précision, rappel, ...). Commencez par maitriser ces termes ;)
+		\item Gardez à l'esprit que le seuil de décision $\theta$ peut en fait varier. La courbe ROC découle alors naturellement.
+	\end{itemize}
+\end{frame}
+
+\subsection[Méthodes de validation croisée]{Méthodes de validation croisée}
+
+\begin{frame}{Méthodes de validation croisée}
+	Nous avons vu précédemment que:
+	\begin{itemize}
+		\item Pour vérifier la capacité du modèle à \textbf{généraliser} il est nécessaire d'évaluer sa performance sur des données différentes de celles utilisées pour l'apprentissage.
+		\item L'estimation $\hat{f}$ dépend des données d'apprentissage. Des données différentes peuvent conduire à un modèle différent. C'est la \textbf{variance} du modèle.
+	\end{itemize}
+	\pause
+	\vspace{0.5cm}
+	En apprentissage automatique il est commun d'utiliser plusieurs échantillons de données:
+	\begin{itemize}
+		\item Données d'\textbf{apprentissage}: pour l'entraînement du modèle.
+		\item Données de \textbf{validation}: pour tester différents espaces des hypothèses $\mathcal{H}$.
+		\item Données de \textbf{test}: pour l'évaluation finale et \textit{indépendante} du modèle.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Méthodes de validation croisée}
+	Dans la pratique, une équipe développant un modèle d'apprentissage automatique, ne \textit{devrait} pas avoir accès aux données de test. Un échantillon de \textbf{validation} \textit{fixe} présente des avantages dès qu'il s'agit de comparer des estimateurs différents sur les mêmes données. Mais il est aussi courant de \textbf{générer} les données de validations à partir des données d'apprentissage. \\
+	\pause
+	\vspace{0.5cm}
+	Nous explorerons dans cette section différentes méthodes des \textbf{validation croisée} qui permettent de générer ces données de validation:
+	\begin{itemize}
+		\item Leave-One-Out
+		\item Validation croisée à K plis
+		\item Bootstrapping
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Leave-One-Out}
+	Pour des données d'apprentissage $\mathcal{D} = \{(x^{(i)}, y^{(i)}) \mid i=1, 2, \cdots, n\}$, la méthode de \textbf{Leave-One-Out} consiste à créer $n$ échantillons de taille $n-1$ tel que:
+	\begin{equation}
+		\mathcal{D}^{(-k)} = \{(x^{(i)}, y^{(i)}) \quad \forall i \ne k\} \quad \forall k = 1, 2, \cdots, n
+		\nonumber
+	\end{equation}
+	\pause
+	L'estimateur $\hat{f}^{(-k)}$ est donc entraîné à partir des données $\mathcal{D}^{(-k)}$ et une métrique d'erreur peut être calculée sur le point $(x^{(k)}, y^{(k)})$. On calcule ensuite des métriques moyennes sur les $n$ différents modèles entraînés. \\
+	\vspace{0.3cm}
+	Cette méthode est principalement utilisée pour des données d'apprentissage avec très peu d'observations ($n \sim 10-100$). \\
+	\vspace{0.3cm}
+	Voir: \href{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.LeaveOneOut.html}{\texttt{sklearn.model\_selection.LeaveOneOut}}.
+\end{frame}
+
+\begin{frame}{Leave-One-Out}
+	Un exemple de Leave-One-Out:
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Images/leaveoneout}
+		\label{fig:leave-one-out}
+	\end{figure}	
+\end{frame}
+
+\begin{frame}{Validation croisée à $K$ plis ($K$-Fold)}
+	La méthode de \textbf{validation croisée à $K$ plis} consiste à partitionner aléatoirement les données $\mathcal{D}$ en $K$ sous-ensembles (appelés \textbf{plis} ou \textbf{blocs}) de tailles égales. \\
+	\pause
+	\vspace{0.5cm}
+	Soit $\mathcal{I} = \{1, \dots, n\}$ l'ensemble des indices de $\mathcal{D}$. On définit une \textbf{partition} de $\mathcal{I}$ en $K$ sous-ensembles disjoints $\mathcal{I}_1, \dots, \mathcal{I}_K$ tels que:
+	\begin{equation}
+		\bigcup_{k=1}^K \mathcal{I}_k = \mathcal{I} \quad \text{et} \quad \mathcal{I}_j \cap \mathcal{I}_m = \emptyset \, \text{ pour } \, j \neq m
+		\nonumber
+	\end{equation}	
+	Pour chaque pli $k$, on définit l'estimateur $\hat{f}^{(-k)}$ entraîné sur $\mathcal{I} \setminus \mathcal{I}_k$. Les métriques de performance étant alors évaluées sur $\mathcal{I}_k$. On moyenne ensuite ces métriques pour l'ensemble des $K$ plis. \\
+	\pause
+	\vspace{0.3cm}
+	Typiquement, on choisit $K=5$ ou $K=10$. Pour $K = n$, on retrouve la méthode Leave-One-Out. \\
+	\vspace{0.3cm}
+	Voir: \href{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html}{\texttt{sklearn.model\_selection.KFold}}.
+\end{frame}
+
+\begin{frame}{Validation croisée à $K$ plis ($K$-Fold)}
+	Un exemple de validation croisée à 5 plis:
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Images/kfold}
+		\label{fig:k-fold}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Bootstrapping}
+	La méthode du \textbf{bootstrapping} consiste à ré-échantillonner, avec remise, $n$ observations aléatoires de l'ensemble des données $\mathcal{D}$. On notera $\mathcal{D}^{(b)}$ un échantillon ainsi créé. On génère $B$ échantillons de la sorte. \\
+	\pause
+	\vspace{0.5cm}
+	Soit $\mathcal{I} = \{1, \dots, n\}$ l'ensemble des indices de $\mathcal{D}$. Un échantillon bootstrap $\mathcal{D}^{(b)}$ est une suite de $n$ variables aléatoires $I_1^*, I_2^*, \cdots, I_n^*$ indépendantes et identiquement distribuées. Chaque variable aléatoire suit une loi uniforme discrète sur $\mathcal{I}$:
+	\begin{equation}
+		P(I_j^* = k) = \frac{1}{n}, \quad \forall k \in \mathcal{I}, \quad \forall j = 1, 2, \cdots, n
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Bootstrapping}
+	Un échantillon bootstrap est donc défini comme:
+	\begin{equation}
+		\mathcal{D}^{(b)} = \left\{ \left(x^{(I_j^*)}, y^{(I_j^*)}\right) \right\}_{j=1}^n
+		\nonumber
+	\end{equation}
+	\pause
+	\vspace{0.5cm}
+	On peut alors en déduire un échantillon pour la validation (out-of-bag): 
+	\begin{equation}
+		\mathcal{D}_{\text{oob}}^{(b)} = \mathcal{D} \setminus \mathcal{D}^{(b)}
+		\nonumber
+	\end{equation} \\
+	\vspace{0.5cm}
+	Typiquement, on choisit $B \sim 10-1000$ et on moyenne les métriques sur les $B$ échantillons de validation.
+\end{frame}
+
+\begin{frame}{Bootstrapping}
+	Un exemple de bootstrapping:
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Images/bootstrapping}
+		\label{fig:bootstrapping}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Méthodes de validation croisée}
+	\begin{itemize}
+		\item Ces méthodes de validation croisée sont très couramment utilisées en pratique pour réaliser une estimation du biais et de la variance du modèle, en générant, directement à partir des données d'apprentissage des données indépendantes pour valider les modèles. L'échantillon de test reste donc complètement indépendant du processus d'apprentissage du modèle.
+		\pause
+		\item Une variation \textit{trop} importante des métriques de performance entre les données d'apprentissage (risque empirique) et les données de validation (estimation du risque vrai) permet d'identifier un défaut de généralisation, aussi appelé sur-apprentissage ou variance élevée.
+		\pause
+		\item Des métriques d'erreurs \textit{trop} élevées sur les données de validation peuvent illustrer un biais de modèle important.
+		\pause
+		\item \textit{Trop} sera à définir, en fonction du contexte, avec des experts du domaine.
+		\pause
+		\item Un modèle d'apprentissage supervisé doit garantir un \textbf{faible biais} et une \textbf{faible variance}.
+	\end{itemize}
+\end{frame}

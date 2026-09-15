@@ -1,0 +1,466 @@
+\section[Linear Models]{Linear Models}
+
+\begin{frame}{Linear Models}
+	In this section, we will study 2 linear models for regression and classification problems:
+	\begin{itemize}
+		\item \textbf{Linear regression} for regression problems.
+		\item \textbf{Logistic regression} for classification problems.
+	\end{itemize}
+\end{frame}
+
+\subsection[Linear Regression]{Linear Regression}
+
+\begin{frame}{Linear Regression}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/regression_lineaire_3}
+				\label{fig:regression-lineaire-3}
+			\end{figure}			
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{table}
+				\centering
+				\begin{tabular}{|c|c|}
+					\hline
+					\textbf{Height} (cm) & \textbf{Weight} (kg) \\ \hline
+					190              & 112 \\
+					172              & 85  \\
+					186              & 135 \\
+					180              & 92  \\
+					\hline
+				\end{tabular}
+			\end{table}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Examples}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/regression_lineaire_1}
+				\label{fig:regression-lineaire-1}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/regression_lineaire_2}
+				\label{fig:regression-lineaire-2}
+			\end{figure}
+		\end{column}		
+	\end{columns}
+	\pause
+	The idea is to construct a straight line that passes as close as possible to the observations $\mathcal{D}$. The algorithm attempts to minimize the total distance between the observations and the predictions.
+\end{frame}
+
+\begin{frame}{Model}
+	The linear regression model can be written in a simple form:
+	\begin{equation}
+		\text{weight}^{(i)} \approx \beta_0 + \beta_1 \times \text{height}^{(i)}
+		\nonumber
+	\end{equation}
+	An equivalent vector form would be:
+	\begin{equation}
+		\text{weight}^{(i)} \approx \begin{pmatrix}1 & \text{height}^{(i)}\end{pmatrix} \begin{pmatrix}\beta_0 \\ \beta_1\end{pmatrix}
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Model}
+	The advantage of this vector form is that it can scale into a matrix form, allowing us to make multiple predictions at once by stacking:
+	\begin{equation}
+		\begin{pmatrix}\text{weight}^{(1)} \\ \text{weight}^{(2)} \\ \text{weight}^{(3)} \\ \text{weight}^{(4)}\end{pmatrix} \approx \begin{pmatrix}1 & \text{height}^{(1)} \\ 1 & \text{height}^{(2)} \\ 1 & \text{height}^{(3)} \\ 1 & \text{height}^{(4)} \end{pmatrix} \begin{pmatrix}\beta_0 \\ \beta_1\end{pmatrix}
+		\nonumber
+	\end{equation}
+	\pause
+	And in a more condensed form:
+	\begin{equation}
+		Y \approx \tilde{X} \beta
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Formulation}
+	Let $\mathcal{X} \subseteq \mathbb{R}^d$ be the input feature space, $\mathcal{Y} \subseteq \mathbb{R}$ the output feature space, and $\mathcal{D} = \begin{Bmatrix}(x^{(i)}, y^{(i)})\end{Bmatrix}_{i=1}^n$ the training data. We define the mapping $\Phi$ that performs the transition to the augmented space $\tilde{\mathcal{X}} \subseteq \mathbb{R}^{d+1}$:
+	\begin{equation}
+		\begin{aligned}
+			\Phi: \mathcal{X} &\to \tilde{\mathcal{X}} \\
+			x^{(i)} &\mapsto \tilde{x}^{(i)} = \begin{pmatrix}1 & x^{(i)}\end{pmatrix}
+			\nonumber
+		\end{aligned}
+	\end{equation}
+	The hypothesis space $\mathcal{H}: \mathcal{X} \to \mathcal{Y}$ in the context of linear regression is:
+	\begin{equation}
+		\mathcal{H} = \begin{Bmatrix}h: x \mapsto \Phi(x) \beta \mid \beta \in \mathbb{R}^{d+1}\end{Bmatrix}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Matrix Stacking}
+	For the training data $\mathcal{D}$, a design matrix $\tilde{X}$ is constructed by vertically stacking the augmented observations $\tilde{x}^{(i)}$:
+	\begin{equation}
+		\tilde{X} = \begin{pmatrix}\tilde{x}^{(1)} \\ \tilde{x}^{(2)} \\ \vdots \\ \tilde{x}^{(n)} \end{pmatrix} \in \mathcal{M}_{n, d+1}(\mathbb{R})
+		\nonumber
+	\end{equation}
+	We denote by $Y$ the vertical stack of the observed output features:
+	\begin{equation}
+		Y = \begin{pmatrix}y^{(1)} \\ y^{(2)} \\ \vdots \\ y^{(n)} \end{pmatrix} \in \mathcal{M}_{n, 1}(\mathbb{R})
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Method of Least Squares}
+	The method of least squares seeks to minimize the sum of squared errors:
+	\begin{equation}
+		\begin{aligned}
+			J(\beta) &= \sum_{i=1}^n \left(y^{(i)} - \tilde{x}^{(i)} \beta\right)^2 \\
+			&= \left(Y - \tilde{X} \beta\right)^T \left(Y - \tilde{X} \beta\right)
+		\end{aligned}
+		\nonumber
+	\end{equation}
+	$\hat{\beta}$ is an estimator of $\beta$ that minimizes this sum of squared errors:
+	\begin{equation}
+		\hat{\beta} = \underset{\beta \in \mathbb{R}^{d+1}}{\text{arg min}}\left(\left(Y - \tilde{X} \beta\right)^T \left(Y - \tilde{X} \beta\right)\right)
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Method of Least Squares}
+	An analytical solution exists for this optimization problem:
+	\begin{equation}
+		\begin{aligned}
+			&\hat{\beta} = \left( \tilde{X}^T \tilde{X}\right)^{-1} \tilde{X}^T Y \\
+			&\hat{\beta} \in \mathcal{M}_{d+1, 1}(\mathbb{R}) \\
+			\nonumber
+		\end{aligned}
+	\end{equation}
+	To exist, this solution requires the matrix $\left(\tilde{X}^T \tilde{X}\right)$ to be invertible. This means that the columns of $\tilde{X}$ must be linearly independent.
+	The estimation function $\hat{f}$ is therefore:
+	\begin{equation}
+		\begin{aligned}
+			\hat{f}: \mathcal{X} &\to \mathcal{Y} \\
+			x &\mapsto \Phi(x) \hat{\beta}
+			\nonumber
+		\end{aligned}
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Assumptions of the Method of Least Squares}
+	The method of least squares relies on a certain number of assumptions regarding the uncertainty $\epsilon$ in order to derive the covariance matrix of $\hat{\beta}$. As a reminder, in supervised learning we seek a function estimating the true function $f$ defined as:
+	\begin{equation}
+		y = f(x) + \epsilon
+		\nonumber
+	\end{equation}
+	Let $X$ be the matrix stack of the observed input features. $\epsilon$ must satisfy the following conditions:
+	\begin{itemize}
+		\item The \textbf{exogeneity} condition: $\mathbb{E}[\epsilon \mid X] = 0$.
+		\begin{itemize}
+			\item This condition guarantees that $\mathbb{E}[\hat{\beta}] = \beta$. Here, $\beta$ is the one from $h^*$.
+			\item There is no functional link between the expectation of $\epsilon$ and the input data.
+		\end{itemize}
+		\item The \textbf{homoscedasticity} condition: $\text{Var}[\epsilon \mid X] = \sigma_{\epsilon}^2$.
+		\begin{itemize}
+			\item There is no functional link between the variance of $\epsilon$ and the input data.
+		\end{itemize}
+		\item The \textbf{independence} condition implies: $\text{Cov}[\epsilon^{(i)}, \epsilon^{(j)}] =0 \quad \forall i \ne j$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Learning Space Hierarchy and Linear Regression}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=1.0\linewidth]{Images/regression_lineaire}
+				\label{fig:poids-taille}
+			\end{figure}			
+		\end{column}
+		\begin{column}{0.6\textwidth}
+			The linear model is far from perfect:
+			\begin{itemize}
+				\item Either the linearity assumption is incorrect. The hypothesis space $\mathcal{H}$ is not the most appropriate.
+				\item Or some features are missing, such as density, hip circumference, muscle-to-fat mass ratio...
+				\item Or there is significant measurement noise in the height and/or weight.
+				\item Or any combination of the elements above!
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}	
+
+\begin{frame}{Hypothesis Spaces and Linear Regression}
+	It would have been possible to consider another mapping $\Phi'$ to transition from the input space $\mathcal{X} \subseteq \mathbb{R}$ to the augmented space $\tilde{\mathcal{X}}' \subseteq \mathbb{R}^3$, for example:
+	\begin{equation}
+		\begin{aligned}
+			\Phi': \mathcal{X} &\rightarrow \tilde{\mathcal{X}}' \\
+			x^{(i)} &\mapsto \tilde{x}^{(i)} = \begin{pmatrix}1 & x^{(i)} & \left(x^{(i)}\right)^2\end{pmatrix}
+			\nonumber
+		\end{aligned}		
+	\end{equation}
+	The linear regression effectively becomes a degree-2 polynomial regression. Thus, a new hypothesis space $\mathcal{H}'$ is explored:
+	\begin{equation}
+		\mathcal{H}' = \begin{Bmatrix}h: x \mapsto \Phi'(x) \beta \mid \beta \in \mathbb{R}^3\end{Bmatrix}
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Hypothesis Spaces and Linear Regression}
+	Within the context of linear regression, the nature of the mapping $\Phi$ is a \textbf{hyperparameter} of the machine learning algorithm. \\
+	\vspace{0.5cm}
+	The coefficients $\beta$ of the polynomial are the \textbf{parameters} of the algorithm. These are the parameters explored by the hypothesis space $\mathcal{H}$.\\
+	\vspace{0.5cm}
+	The method of least squares provides an estimation $\hat{f}$ of the true function $f$ among the functions $h$ in space $\mathcal{H}$.
+\end{frame}
+
+\subsection[Logistic Regression]{Logistic Regression}
+
+\begin{frame}{Logistic Regression}
+	\begin{table}
+		\centering
+		\begin{tabular}{|c|c|}
+			\hline
+			\textbf{Weight} (kg) & \textbf{Position} \\ \hline
+			112 &  forward = 1       \\
+			85  &  back = 0 \\
+			135 &  forward = 1       \\
+			92  &  back = 0 \\
+			\hline
+		\end{tabular}
+	\end{table}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Images/regression_logistique_1}
+		\label{fig:regression-logistique-1}
+	\end{figure}			
+\end{frame}
+
+\begin{frame}{Logistic Function}
+	\begin{columns}
+		\begin{column}{0.6\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=1.0\linewidth]{Images/regression_logistique_3}
+				\label{fig:regression-logistique-3}
+			\end{figure}			
+		\end{column}
+		\begin{column}{0.4\textwidth}
+			\begin{equation}
+				\begin{aligned}
+					\sigma: \mathbb{R} &\to ]0, 1[ \\
+					t &\mapsto \frac{1}{1 + e^{-t}}
+				\end{aligned}
+				\nonumber
+			\end{equation}
+			\pause
+			The idea is to map the forwards to the upper plateau of this function ($\sigma(t) = 1$) and to map the backs to the lower plateau ($\sigma(t) = 0$).
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Examples}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/regression_logistique_4}
+				\label{fig:regression-logistique-4}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/regression_logistique_5}
+				\label{fig:regression-logistique-5}
+			\end{figure}
+		\end{column}		
+	\end{columns}
+	\pause
+	This logistic regression actually calculates a probability $p$, specifically the probability that a player of a given weight is a forward.
+\end{frame}
+
+\begin{frame}{Model}
+	The logistic regression model can be written in a relatively simple form:
+	\begin{equation}
+		p^{(i)} \approx \frac{1}{1 + e^{\displaystyle -\left(\beta_0 + \beta_1 \times \text{weight}^{(i)} \right)}}
+		\nonumber
+	\end{equation}
+	It can be viewed as a linear model inside the exponential, combined with a function that maps the outputs into the probability space $]0, 1[$. \\
+\end{frame}
+
+\begin{frame}{Model}
+	And in matrix notation:
+	\begin{equation}
+		p \approx \frac{1}{1 + e^{\displaystyle -\tilde{X} \beta}}
+		\nonumber
+	\end{equation} \\
+	\vspace{0.5cm}
+	Condensing it using the logistic function $\sigma$:
+	\begin{equation}
+		p \approx \sigma\left(\tilde{X} \beta\right)
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Formulation}
+	Let $\mathcal{X} \subseteq \mathbb{R}^d$ be the input feature space, $\mathcal{Y} = \{0, 1\}$ the output feature space, and $\mathcal{D} = \begin{Bmatrix}(x^{(i)}, y^{(i)})\end{Bmatrix}_{i=1}^n$ the training data. We define the mapping $\Phi$ that performs the transition to the augmented space $\tilde{\mathcal{X}} \subseteq \mathbb{R}^{d+1}$:
+	\begin{equation}
+		\begin{aligned}
+			\Phi: \mathcal{X} &\to \tilde{\mathcal{X}} \\
+			x^{(i)} &\mapsto \tilde{x}^{(i)} = \begin{pmatrix}1 & x^{(i)}\end{pmatrix}
+			\nonumber
+		\end{aligned}
+	\end{equation}
+	The hypothesis space $\mathcal{H}: \mathcal{X} \to ]0, 1[$ in the context of logistic regression is:
+	\begin{equation}
+		\mathcal{H} = \begin{Bmatrix}h: x \mapsto \displaystyle \frac{1}{1 + e^{-\Phi(x) \beta}} \mid \beta \in \mathbb{R}^{d+1}\end{Bmatrix}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Assumptions and Iterative Approach}
+	Unlike linear regression, there is no analytical solution to this problem. To determine $\hat{\beta}$, we will therefore need to use an \textbf{iterative} approach. \\
+\end{frame}
+
+\begin{frame}{Bernoulli Distribution}
+	One approach to solving the problem is to consider each observation $y^{(i)}$ as the realization of a random variable $Y^{(i)}$ following a \textbf{Bernoulli distribution} with parameter $p^{(i)}$. The observations are independent but not identically distributed.\\
+	\vspace{0.5cm}
+	\pause
+	As a reminder, a random variable $Y^{(i)}$ following a Bernoulli distribution with parameter $p^{(i)}$ is such that:
+	\begin{equation*}
+		\begin{cases}
+			P(Y^{(i)} = 1) = p^{(i)} \\
+			P(Y^{(i)} = 0) = 1 - p^{(i)}
+		\end{cases}
+	\end{equation*}
+	Or in a condensed form with $y \in \{0, 1\}$:
+	\begin{equation*}
+		P(Y^{(i)} = y^{(i)}) = \left(p^{(i)}\right)^{y^{(i)}} \left(1 - p^{(i)}\right)^{1 - y^{(i)}}
+	\end{equation*}
+\end{frame}
+	
+\begin{frame}{Maximum Likelihood Estimation}
+	The likelihood of our sample $\mathcal{D}$ is then:
+	\begin{equation}
+		\mathcal{L}(\beta) = P(Y = \begin{Bmatrix}y^{(i)}\end{Bmatrix}_{i=1}^n \mid \beta, \tilde{X})
+		\nonumber
+	\end{equation} \\
+	\vspace{0.5cm}
+	\pause
+	The idea consists in finding $\hat{\beta}$ such that it maximizes the likelihood of the observations:
+	\begin{equation}
+		\hat{\beta} = \underset{\beta \in \mathbb{R}^{d+1}}{\text{arg max}} \, \mathcal{L}(\beta)
+		\nonumber
+	\end{equation} \\
+	\vspace{0.5cm}
+	\pause
+	This maximum likelihood method assumes that the exogeneity and independence conditions of $\epsilon^{(i)}$ are satisfied in order to obtain the best possible estimator.
+\end{frame}
+
+\begin{frame}{Intuition}
+	Let us consider a "forward", to whom we have assigned the value $y^{(i)}=1$. The random variable is $Y^{(i)}$. If the associated Bernoulli distribution is well calibrated, we should have $P(Y^{(i)} = 1)$ very close to 1 and $P(Y^{(i)} = 0)$ very close to 0. \\
+	\vspace{0.5cm}
+	\pause
+	For a "back", to whom we have assigned the value $y^{(i)}=0$, the reverse holds true. We want to have $P(Y^{(i)} = 1)$ very close to 0 and $P(Y^{(i)} = 0)$ very close to 1. \\
+	\vspace{0.5cm}
+	\pause
+	This is equivalent to saying that for a "forward" we want the parameter $p^{(i)}$ of the Bernoulli distribution to be close to 1, and for a back, we want this same parameter to be close to 0. \\
+\end{frame}
+
+\begin{frame}{Intuition}
+	Since $p^{(i)}$ is the prediction of our logistic regression—meaning the probability that observation $i$ is a forward—maximizing the likelihood of the set of Bernoulli variables amounts to having a well-calibrated logistic regression! \\
+	\vspace{0.5cm}
+	\pause
+	The set of these Bernoulli distributions is actually controlled by a parameter vector $\beta$ that is \textbf{shared} across all distributions. Our problem is therefore over-constrained, just as linear regression was in the previous example.	
+\end{frame}
+
+\begin{frame}{Mean Negative Log-Likelihood}
+	In practice, it is preferred to minimize a mean negative log-likelihood rather than maximizing a likelihood:
+	\begin{equation}
+		\hat{\beta} = \underset{\beta \in \mathbb{R}^{d+1}}{\text{arg min}} \, - \frac{1}{n} \ln{\left(\mathcal{L}(\beta)\right)}
+		\nonumber
+	\end{equation} \\
+	\vspace{0.5cm}
+	\pause
+	Since the observations are independent, this mean negative log-likelihood is in fact:
+	\begin{equation}
+		- \frac{1}{n}\ln{\left(\mathcal{L}(\beta)\right)} = - \frac{1}{n} \sum_{i=1}^n \ln{\left(P(y^{(i)} \mid \tilde{x}^{(i)}, \beta)\right)}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Mean Cross-Entropy}
+	This mean negative log-likelihood takes a very specific and characteristic value. As a reminder, $p^{(i)} = \sigma(\tilde{x}^{(i)} \beta)$:
+	\begin{equation}
+		\begin{aligned}
+			-\frac{1}{n} \ln{\left(\mathcal{L}(\beta)\right)} 
+			&= - \frac{1}{n} \sum_{i=1}^n \ln{P(y^{(i)} \mid \tilde{x}^{(i)}, \beta)} \\
+			&= - \frac{1}{n} \sum_{i=1}^n \ln{\left(\left(p^{(i)}\right)^{y^{(i)}} \left(1 - p^{(i)}\right)^{1 - y^{(i)}}\right)} \\
+			&= - \frac{1}{n} \sum_{i=1}^n y^{(i)} \ln{\left(p^{(i)}\right)} + (1 - y^{(i)}) \ln{\left(1 - p^{(i)}\right)}
+		\end{aligned}
+		\nonumber
+	\end{equation}
+	This quantity is called the \textbf{mean cross-entropy}!
+\end{frame}
+
+\begin{frame}{Cross-Entropy Gradient}
+	It can be shown that the derivative of the mean negative log-likelihood with respect to $\beta$ is written as:
+	\begin{equation}
+		\begin{aligned}
+			\nabla_{\beta}\left(- \frac{1}{n} \ln{\left(\mathcal{L}(\beta)\right)}\right) 
+			&= - \frac{1}{n} \sum_{i=1}^n \left(y^{(i)} - \sigma(\tilde{x}^{(i)} \beta)\right) \tilde{x}^{(i)T} \\
+			&= - \frac{1}{n} \tilde{X}^T \left(Y - \sigma\left(\tilde{X} \beta\right)\right)
+		\end{aligned}
+		\nonumber
+	\end{equation}
+	This gradient brings forward 2 terms:
+	\begin{itemize}
+		\item $\left(Y - \sigma\left(\tilde{X} \beta\right)\right)$ which is the difference between the probability associated with the observed value and the probability predicted by the logistic regression for a given parameter vector $\beta$.
+		\item $\tilde{X}^T$ which represents simply the observed (and augmented) input features.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Gradient Descent}
+	The minimization of the mean negative log-likelihood can be performed using a gradient descent method. The function to minimize is strictly convex (provided the columns of $\tilde{X}$ are linearly independent). Thus, gradient descent is guaranteed to find a \textbf{global} minimum. \\
+	\vspace{0.5cm}
+	We denote by $\alpha \in \mathbb{R}^+$ the learning rate. A value that is too large can lead to numerical instability in the gradient descent, while a value that is too small can result in overly slow convergence. A value of $\alpha = 0.001$ is typical to start with. \\
+	\vspace{0.5cm}
+	We denote by $\epsilon \in \mathbb{R}^+$ the tolerance threshold to stop the gradient descent, for example $\epsilon = 10^{-6}$.
+\end{frame}
+
+\begin{frame}{Gradient Descent}
+	The gradient descent algorithm can be described as follows:
+	\begin{enumerate}
+		\item Set an initial value of $\hat{\beta}_{k=0} = 0_{d+1}$
+		\item Loop until convergence:
+		\begin{itemize}
+			\item Compute the $n$ probabilities $p_k = \sigma(\tilde{X} \beta_{k})$
+			\item Compute the gradient $\nabla_{\beta}\left(- \frac{1}{n} \ln{\mathcal{L}(\beta)}\right)$
+			\item Compute the increment of $\hat{\beta}$: $\delta_k = - \alpha \nabla_{\beta}\left(- \frac{1}{n} \ln{\mathcal{L}(\beta)}\right)$
+			\item Update $\hat{\beta}$: $\hat{\beta}_{k+1} \leftarrow \hat{\beta}_{k} + \delta_k$
+			\item Compute the squared Euclidean norm $\|\delta_k \|_2^2$
+			\item If $\|\delta_k \|_2^2 < \epsilon$, then convergence is reached.
+		\end{itemize}
+	\end{enumerate}
+\end{frame}
+
+\subsection[Summary]{Summary}
+
+\begin{frame}{Summary: Linear vs Logistic}
+	\begin{table}
+		\renewcommand{\arraystretch}{1.5} % Pour aérer le tableau
+		\begin{tabular}{|l|c|c|}
+			\hline
+			\textbf{Property} & \textbf{Linear Regression} & \textbf{Logistic Regression} \\ \hline
+			\textbf{Nature of $Y$} & Continuous ($\mathbb{R}$) & Discrete ($\{0, 1\}$) \\ \hline
+			\textbf{Model} & $y \approx \tilde{X}\beta$ & $p \approx \sigma(\tilde{X}\beta)$ \\ \hline
+			\textbf{Loss Function} & Squared Error & Cross-Entropy \\ \hline
+			\textbf{Objective} & Minimize & Minimize \\ \hline
+			\textbf{Resolution} & \textbf{Analytical} (direct) & \textbf{Numerical} (iterative) \\ \hline
+			\textbf{Solution} & $\hat{\beta} = (\tilde{X}^T\tilde{X})^{-1}\tilde{X}^TY$ & Gradient descent \\ \hline
+		\end{tabular}
+	\end{table}
+	Note: For a classification problem, minimizing Cross-Entropy is equivalent to maximizing Log-Likelihood. For a regression problem, under the condition where the uncertainty $\epsilon$ is Gaussian, minimizing the mean squared error is equivalent to maximizing the Log-Likelihood.
+\end{frame}

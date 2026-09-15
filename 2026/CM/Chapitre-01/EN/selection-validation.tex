@@ -1,0 +1,771 @@
+\section[Model Selection and Validation]{Model Selection and Validation}
+
+\begin{frame}{Model Selection and Validation}
+	In this section, we will discuss model selection and validation for a supervised learning problem: \\
+	\vspace{0.5cm}
+	\begin{itemize}
+		\item \textbf{Selection}: which model is the best among several hypothesis spaces?
+		\item \textbf{Validation}: how can we ensure that our model achieves sufficient performance?
+	\end{itemize}
+\end{frame}
+
+\subsection{Error Decomposition}
+
+\begin{frame}{Error Decomposition}
+	To better understand how to perform model selection and validation, we need to spend some more time on a model's \textbf{error decomposition}.
+\end{frame}
+
+\begin{frame}{Empirical Risk}
+	Minimizing the loss function $L$ over the training data $\mathcal{D}$ is equivalent to minimizing the \textbf{empirical} risk defined as follows:
+	\begin{block}{Definition: Empirical Risk}
+		The empirical risk is a function $R_n: \mathcal{H} \to \mathbb{R}^+$ that measures the performance of any hypothesis $h \in \mathcal{H}$ on the training data $\mathcal{D}$:
+		\begin{equation}
+			R_n = \frac{1}{n} \sum_{i=1}^n L\left(y^{(i)}, h\left(x^{(i)}\right)\right)
+			\nonumber
+		\end{equation}
+		\hfill
+	\end{block}
+\end{frame}
+
+\begin{frame}{Empirical Risk}
+	Training the supervised algorithm yields the estimator $\hat{f}$ that minimizes the empirical risk from the data $\mathcal{D}$:
+	\begin{equation}
+		\hat{f} = \underset{h \in \mathcal{H}}{\text{arg min  }}R_n(h)
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Empirical Risk for Linear Regression}
+	In the case of linear regression, the loss function is the squared error function. Searching for an estimator $\hat{f}$ therefore corresponds to minimizing:
+	\begin{equation}
+		\hat{f} = \underset{h \in \mathcal{H}}{\text{arg min  }} \frac{1}{n} \sum_{i=1}^n \left( y^{(i)} - \hat{y}^{(i)}\right)^2
+		\nonumber
+	\end{equation}
+	Which is equivalent to what the least squares algorithm achieves (up to a factor of $1/n$).
+\end{frame}
+
+\begin{frame}{Empirical Risk for Logistic Regression}
+	In the case of logistic regression, the loss function is the mean cross-entropy (mean negative log-likelihood). Searching for an estimator $\hat{f}$ therefore corresponds to minimizing:
+	\begin{equation}
+		\hat{f} = \underset{h \in \mathcal{H}}{\text{arg min  }} - \frac{1}{n} \sum_{i=1}^n y^{(i)} \ln{\left(p^{(i)}\right)} + (1 - y^{(i)}) \ln{\left(1 - p^{(i)}\right)}
+		\nonumber
+	\end{equation}
+	This is the quantity we minimized earlier using gradient descent.
+\end{frame}
+
+\begin{frame}{Model and Hypothesis Comparison}
+	Let us return to the linear regression problem of predicting a player's weight from their height, and consider two hypothesis spaces:
+	\begin{itemize}
+		\item $\mathcal{H}_1$: the hypothesis space for univariate polynomials of degree 1.
+		\item $\mathcal{H}_3$: the hypothesis space for univariate polynomials of degree 3.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Which Model Is Better? Or Which Hypothesis?}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/comparaison_modeles_1}
+				\label{fig:comparaison-modeles-1}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/comparaison_modeles_2}
+				\label{fig:comparaison-modeles-2}
+			\end{figure}
+		\end{column}		
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Which Model Is Better? Or Which Hypothesis?}
+	\begin{itemize}
+		\item For a linear regression, we seek to minimize the squared error...
+		\pause
+		\item ...but this is not the \textbf{goal}, it is a \textbf{means to an end}. The goal is to find a \textbf{relationship} between the input and output features that is as close as possible to the true function $f(x)$ and the generative process $g(u)$.
+		\pause
+		\item For the hypothesis space $\mathcal{H}_1$, $\hat{\beta}_0$ has no tangible interpretation: a player who is 0 cm tall would weigh -291 kg? On the other hand, $\hat{\beta}_1$ informs us that for each additional 1 cm, the weight increases on average by 2 kg. This does not seem absurd.
+		\pause
+		\item For the hypothesis space $\mathcal{H}_3$, the model shows that weight is lost up to 175 cm, then gained up to 185 cm, before losing weight again beyond 185 cm. This seems highly implausible!
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Which Model Is Better? Or Which Hypothesis?}
+	\begin{itemize}
+		\item Hypothesis $\mathcal{H}_1$ is better here.
+		\pause
+		\item Our \textbf{a priori knowledge} of the problem allows us to distinguish the better hypothesis. What should we do when we have no a priori knowledge?
+		\pause
+		\item We consult with domain \textbf{experts}.
+		\pause
+		\item But can we really do \textit{nothing} with mathematics?
+		\pause
+		\item \textit{Yes}, we can! (though this does not dispense with surrounding oneself with domain experts).
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Which Model Is Better? Or Which Hypothesis?}
+	What is happening with our hypothesis $\mathcal{H}_3$?
+	\begin{itemize}
+		\item It is likely that we do not have access to all the explanatory variables in our data. Therefore, it is impossible to obtain a model that correctly explains the problem.
+		\pause
+		\item Yet this is the assumption made when working with $\mathcal{H}_3$. The model has the \textbf{capacity} to fully explain weight using height, giving it a disproportionate amount of importance compared to its actual relevance.
+		\pause
+		\item This is what we call \textbf{overfitting}: too much importance is placed on certain observed variables.
+		\pause
+		\item We also say that the model derived from $\mathcal{H}_3$ does not \textbf{generalize} correctly: the rule \textbf{induced} during training does not match reality.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Which Model Is Better? Or Which Hypothesis?}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/comparaison_modeles_3}
+				\label{fig:comparaison-modeles-3}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/comparaison_modeles_4}
+				\label{fig:comparaison-modeles-4}
+			\end{figure}
+		\end{column}		
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Which Model Is Better? Or Which Hypothesis?}
+	In the previous example, when using a larger dataset:
+	\begin{itemize}
+		\item The degree-3 polynomial now appears monotonic but remains implausible.
+		\item The straight line exhibits a slope $\hat{\beta}_1$ that differs from the previous model. 
+	\end{itemize}
+	\pause
+	\vspace{0.5cm}
+	Overfitting is not solely a consequence of a model complexity (or capacity) being too high, but rather a consequence of the ratio between model complexity and the amount of training data observed. \\
+	\vspace{0.5cm}
+	The trained model $\hat{f}$ \textbf{varies} with different sets of training data $\mathcal{D}$.
+	\pause
+\end{frame}
+
+\begin{frame}{Which Model Is Better? Or Which Hypothesis?}
+	What can we do as mathematicians?
+	\begin{itemize}
+		\item We must provide a \textbf{counterweight} to the empirical risk.
+		\pause
+		\item This counterweight is a new metric: the \textbf{true risk}.
+		\pause
+		\item The idea, quite simple, is to \textbf{verify} the model with observations that were not used during training and to \textbf{evaluate} this metric on this \textbf{test sample}. 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{True Risk}
+	The \textbf{true} risk generalizes the notion of empirical risk to the spaces $\mathcal{X}$ and $\mathcal{Y}$:
+	\begin{block}{Definition: True Risk}
+		The true risk is a function $R: \mathcal{H} \to \mathbb{R}^+$ that measures the performance of any hypothesis $h$ over the spaces $\mathcal{X}$ and $\mathcal{Y}$:
+		\begin{equation}
+			R = \mathbb{E}_{(\mathcal{X}, \mathcal{Y}) \sim \mathcal{P}}\left[L\left(y^{(i)}, h\left(x^{(i)}\right)\right)\right]
+			\nonumber
+		\end{equation}
+		\hfill
+	\end{block}
+	\pause
+	Instead of averaging the loss function over the explored data, the true risk averages the loss function over the complete set of all possible observations. \\
+	\pause
+	In practice, it is difficult or even impossible to compute the true risk. We can obtain an estimation using a \textbf{test sample}.
+\end{frame}
+
+\begin{frame}{Generalization Gap}
+	\begin{block}{Definition: Generalization Gap}
+		The generalization gap is a function $\mathcal{H} \to \mathbb{R}$ that measures the difference between the true risk and the empirical risk:
+		\begin{equation*}
+			\text{Gap} = R - R_n
+		\end{equation*}
+		\hfill
+	\end{block}
+	\pause
+	A positive generalization gap means that the algorithm performs worse on its application space than on the space on which it was trained. This is a sign of overfitting, or a failure of the algorithm to generalize.
+\end{frame}
+	
+\begin{frame}{Pointwise True Risk}
+	\begin{block}{Definition: Pointwise True Risk}
+		The \textbf{pointwise true risk} is a function $R_{xy}: \mathcal{H} \to \mathbb{R}^+$ that measures the performance of any hypothesis $h$ at \textbf{a single point} of the spaces $\mathcal{X}$ and $\mathcal{Y}$ while considering \textbf{multiple} training datasets:
+		\begin{equation*}
+			R_{xy} = \mathbb{E}_{\mathcal{D}}\left[L\left(y^{(i)}, h\left(x^{(i)}\right)\right)\right]
+		\end{equation*}
+			\hfill
+	\end{block}
+	\vspace{0.5cm}
+	\pause
+	Different datasets can lead to different estimators $h$. It is therefore interesting to see, for a given hypothesis space $\mathcal{H}$, how the estimators $h$ behave \textbf{on average} at a single point of the spaces $\mathcal{X}$ and $\mathcal{Y}$.
+\end{frame}
+		
+\begin{frame}{Bias-Variance Decomposition}
+	For a regression problem, using the squared error as the loss function allows the pointwise true risk to be decomposed as follows:
+	\begin{equation*}
+		R_{xy} = \left(\mathbb{E}_{\mathcal{D}}\left[f(x) - \hat{f}(x)\right]\right)^2 + \mathbb{E}_{\mathcal{D}}\left[\left(\hat{f}(x) - \mathbb{E}_{\mathcal{D}}\left[\hat{f}(x)\right]\right)^2\right] + \sigma_{\epsilon}^2
+	\end{equation*}
+	This decomposition is called the \textbf{bias-variance decomposition} of the error.
+\end{frame}
+			
+\begin{frame}{Bias-Variance Decomposition}
+	\begin{itemize}
+		\item $\mathbb{E}_{\mathcal{D}}\left[f(x) - \hat{f}(x)\right]$ is called the \textbf{bias} of the model. This is an approximation error.
+		\item $\mathbb{E}_{\mathcal{D}}\left[\left(\hat{f}(x) - \mathbb{E}_{\mathcal{D}}\left[\hat{f}(x)\right]\right)^2\right]$ is called the \textbf{variance} of the model. This is an estimation error.
+		\item $\sigma_{\epsilon}^2$ is the variance of the uncertainties on the observed data. This is an \textbf{irreducible} error, called the Bayes error.
+	\end{itemize}
+	
+	\pause
+	\vspace{0.5cm}
+	
+	The model has a low pointwise risk, provided it has both low bias and low variance. \\
+	The bias measures the average difference between the model and the true function. The variance measures how much the model's prediction changes when the training data changes.
+\end{frame}
+			
+\begin{frame}{Bias-Variance Decomposition}
+	Example of bias and variance decomposition. Multiple models are built from different training datasets. A 95\% confidence interval is used to illustrate the variance:
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/biais_variance_1}
+				\label{fig:biais-variance-1}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.8\linewidth]{Images/biais_variance_2}
+				\label{fig:biais-variance-2}
+			\end{figure}
+		\end{column}		
+	\end{columns}
+\end{frame}
+
+\begin{frame}[fragile]{Error Decomposition}
+	% On utilise hspace pour manger la marge de gauche et recentrer visuellement
+	\hspace*{-0.5cm}
+	\begin{tikzpicture}[
+		% Style des blocs du funnel (largeurs légèrement réduites)
+		stage/.style={
+			fill=#1,
+			draw=none, 
+			rounded corners=8pt, 
+			text=white, 
+			font=\small\bfseries,
+			align=center,
+			minimum height=1.0cm,
+			inner sep=5pt,
+		},
+		% Style des flèches à gauche
+		flowarrow/.style={
+			->,
+			>=latex,
+			thick,
+			gray!70,
+			rounded corners=3pt
+		},
+		% Style des étiquettes à droite
+		labelstyle/.style={
+			font=\footnotesize,
+			text=black,
+			anchor=west
+		}
+		]
+		% --- DÉFINITION DES BLOCS ---
+		% Largeurs ajustées : 8cm / 6.4cm / 4.8cm / 3.2cm
+		\node[stage=blue!85, text width=8cm] (s1) at (0,0) {The space of all input \mbox{features} $\mathcal{U}$};
+		
+		\node[stage=blue!70, text width=6.4cm, below=10pt of s1] (s2) {The observed \mbox{feature} space $\mathcal{X}$};
+		
+		\node[stage=blue!55, text width=4.8cm, below=10pt of s2] (s3) {The hypothesis space $\mathcal{H}$};
+		
+		\node[stage=blue!40, text width=3.2cm, below=10pt of s3] (s4) {The training \mbox{data} $\mathcal{D}$};
+		
+		% --- COORDONNÉES D'ALIGNEMENT ---
+		% L décalé à -4.4 pour coller au bloc de 8cm
+		% R décalé à 4.2 pour ne pas sortir de la slide
+		\coordinate (L) at (-4.4,0); 
+		\coordinate (R) at (4.2,0);  
+		
+		% --- COMMENTS ON THE RIGHT ---
+		\node[labelstyle] at (R |- s1) {$g(u)$};
+		\node[labelstyle] at (R |- s2) {$f(x)$};
+		\node[labelstyle] at (R |- s3) {$h^*(x)$};
+		\node[labelstyle] at (R |- s4) {$\hat{f}(x)$};
+		
+		% --- FLÈCHES À GAUCHE ---
+		
+		% Flèche 1 -> 2
+		\draw[flowarrow] ([yshift=-4pt]s1.west) -- ([yshift=-4pt]s1.west -| L) |- 
+		node[pos=0.25, left, font=\tiny, text=red!70!black, align=right] {Bayes\\error} 
+		([yshift=4pt]s2.west);
+		
+		% Flèche 2 -> 3
+		\draw[flowarrow] ([yshift=-4pt]s2.west) -- ([yshift=-4pt]s2.west -| L) |- 
+		node[pos=0.25, left, font=\tiny, text=red!70!black, align=right] {Approximation\\error} 
+		([yshift=4pt]s3.west);
+		
+		% Flèche 3 -> 4
+		\draw[flowarrow] ([yshift=-4pt]s3.west) -- ([yshift=-4pt]s3.west -| L) |- 
+		node[pos=0.25, left, font=\tiny, text=red!70!black, align=right] {Estimation\\error} 
+		([yshift=4pt]s4.west);
+		
+	\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Occam's Razor}
+	The hypothesis space $\mathcal{H}$ must represent functions that are complex enough (low bias) to capture the relationships between the input and output variables, but not too complex, so as not to allow the algorithm to place excessive importance on certain input variables (low variance). \\
+	\vspace{0.5cm}
+	The empirical risk must be minimized while maintaining a small generalization gap. \\
+	\vspace{0.5cm}
+	If two hypothesis spaces lead to models with similar performance, prefer the simpler hypothesis.
+\end{frame}
+
+\begin{frame}{Occam's Razor}
+	\begin{columns}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[height=0.9\linewidth]{Images/plan_toulouse_2}
+				\label{fig:plan-toulouse-2}
+			\end{figure}
+		\end{column}
+		\begin{column}{0.3\textwidth}
+			\pause
+			Both paths lead to the same destination. The blue path is faster. However, the red path is much easier to explain to a tourist, and the tourist will be less likely to get lost.
+		\end{column}		
+	\end{columns}	
+\end{frame}
+
+\subsection[Performance Metrics]{Performance Metrics}
+
+\begin{frame}{Performance Metrics}
+	In this section, we will introduce the essential performance metrics for regression and classification problems. There are many more than what is mentioned here!
+\end{frame}
+
+\begin{frame}{Regression Metrics: The Residual}
+	The first metric, central to the regression problem, is the \textbf{residual}. Literally, this metric measures what could not be explained by the model—what \textbf{remains} to be explained:
+	\begin{block}{Definition: Residual}
+		In a regression problem, the \textbf{residual} for an observation $i$ is the difference between the observed output features and those estimated by the model $\hat{f}: \mathcal{X} \to \mathcal{Y}$:
+		\begin{equation}
+			r^{(i)} = y^{(i)} - \hat{f}(x^{(i)})
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	The residual $r$ should not be confused with either the uncertainty $\epsilon^{(i)} = y^{(i)} - f(x^{(i)})$ or the model error $f(x^{(i)}) - \hat{f}(x^{(i)})$, which combines both approximation error and estimation error. Since the uncertainty $\epsilon^{(i)}$ generally cannot be measured, $r^{(i)}$ is the best possible estimate of it.
+\end{frame}
+
+\begin{frame}{Regression Metrics: The Coefficient of Determination}
+	The coefficient of determination is defined in terms of the residual sum of squares, denoted as $\text{SS}_{\text{res}}$, and the total sum of squares, denoted as $\text{SS}_{\text{tot}}$.
+	\begin{block}{Definition: Coefficient of Determination}
+		In a regression problem, the \textbf{coefficient of determination} $R^2$ is a metric measuring the fraction of variance explained:
+		\begin{equation}
+			R^2 = 1 - \frac{\text{SS}_{\text{res}}}{\text{SS}_{\text{tot}}} = 1 - \frac{\sum_{i=1}^n \left(y^{(i)} - \hat{y}^{(i)}\right)^2}{\sum_{i=1}^n \left(y^{(i)} - \bar{y}\right)^2}
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	Note: In the context of linear regression, regardless of the augmentation mapping $\Phi$ featuring a constant $\beta_0$, the coefficient of determination is also the square of the Pearson correlation coefficient between the estimated output features $\hat{y}$ and the observed output features $y$.
+\end{frame}
+			
+\begin{frame}{Regression Metrics: The Coefficient of Determination}
+	\begin{itemize}
+		\item If the model predicts $\bar{y}$ for any input $x$, then $R^2 = 0$.
+		\pause
+		\item If the model predicts $y^{(i)}$ for the input $x^{(i)}$ for every observation $i$, then $R^2 = 1$.
+		\pause
+		\item If the residuals $r^{(i)}$ are zero for every observation $i$, then $R^2 = 1$.
+		\pause
+		\item Warning! A coefficient of determination close to 1 can hide an overfitting problem. Therefore, this metric should be evaluated on both the training data and test data.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Classification Metric: The Confusion Matrix}
+	For an $m$-class classification problem ($\mathcal{Y} = \{0, 1, \cdots, m-1\}$), the confusion matrix allows us to \textbf{count} the predictions made by the model relative to the true class for each observation $k$ out of the $n$ observed data points $\mathcal{D}$:
+	\begin{block}{Definition: Confusion Matrix}
+		In $m$-class classification, the confusion matrix $C \in \mathcal{M}_{m,m}$ is defined as follows, based on the \textbf{true} classes $y^{(k)}$ and the \textbf{predicted} classes $\hat{y}^{(k)}$ for each observation $k$:
+		\begin{equation}
+			C_{i,j} = \text{card} \left( \{k \in \{1, 2, \cdots, n\}\} \mid y^{(k)} = i \, \text{and} \, \hat{y}^{(k)} = j \right)
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	Note: $\text{card}$ is the \textbf{cardinality} operator indicating the number of elements in a set.
+\end{frame}
+
+\begin{frame}{Classification Metric: The Confusion Matrix}
+	\begin{alertblock}{Lack of a Global Convention for $C$}
+		There is no global convention for the layout of the matrix. In the definition provided, true classes are represented by rows and predicted classes by columns (the convention used by \href{https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html}{\texttt{sklearn.metrics.confusion\_matrix}}). \\
+		\vspace{0.5cm}
+		It is always best to specify (or check) the convention used when communicating a confusion matrix. \\
+		\vspace{0.5cm}
+		The confusion matrix is named for a reason ;)
+	\end{alertblock}
+\end{frame}
+
+\begin{frame}{Classification Metric: The Confusion Matrix}
+	It is much simpler than it appears. Let us illustrate with a binary classification problem ($m = 2$) where we seek to predict the position (forward = 1 or back = 0) of a rugby player:
+	\begin{equation}
+		C = 
+		\begin{bNiceMatrix}[first-row, last-col]
+			\text{predicted: back} & \text{predicted: forward} & \\
+			\textcolor{blue}{5} & \textcolor{orange}{2} & \text{true: back} \\
+			\textcolor{orange}{1} & \textcolor{blue}{7} & \text{true: forward}
+		\end{bNiceMatrix}
+		\nonumber
+	\end{equation}
+	\pause
+	\begin{itemize}
+		\item There are \textcolor{blue}{5} + \textcolor{blue}{7} correct predictions and \textcolor{orange}{1} + \textcolor{orange}{2} incorrect predictions.
+		\pause 
+		\item A \textcolor{blue}{diagonal} confusion matrix contains only \textcolor{blue}{correct} predictions.
+		\pause 
+		\item The \textcolor{orange}{erroneous} predictions are found in the \textcolor{orange}{off-diagonal} terms.
+		\pause
+		\item Since $\text{forward} = 1$, \textcolor{blue}{7} is the number of \textbf{\textcolor{blue}{true} positives} (TP).
+		\pause
+		\item \textcolor{blue}{5} is the number of \textbf{\textcolor{blue}{true} negatives} (TN), \textcolor{orange}{2} is the number of \textbf{\textcolor{orange}{false} positives} (FP), and \textcolor{orange}{1} is the number of \textbf{\textcolor{orange}{false} negatives} (FN).
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Classification Metric: The Confusion Matrix}
+	\begin{block}{Definition: TN, FP, FN, TP}
+		In the confusion matrix $C$ for a \textbf{binary} classification, for the $n$ observed data points $\mathcal{D}$, the terms of the matrix have the following designations:
+		\begin{equation}
+			C = 
+			\begin{bNiceMatrix}[first-row, last-col]
+				\text{predicted: } \{0\} & \text{predicted: } \{1\} & \\
+				\text{True negatives (TN)} & \text{False positives (FP)} & \text{true: } \{0\} \\
+				\text{False negatives (FN)} & \text{True positives (TP)} & \text{true: } \{1\} \\
+			\end{bNiceMatrix}
+			\nonumber
+		\end{equation}
+		These values are \textbf{counters} such that:
+		\begin{equation}
+			\text{TN} + \text{FN} + \text{FP} + \text{TP} = n
+			\nonumber
+		\end{equation}
+	\end{block}
+	\pause
+	\textbf{True} means the algorithm made the correct prediction. \textbf{Negative} means the algorithm predicted class \{0\}, whereas positive means the algorithm predicted class \{1\}.
+\end{frame}
+
+\begin{frame}{Classification Metric: The Confusion Matrix}
+	We often associate \textbf{rates} with the confusion matrix $C$:
+	\begin{equation}
+		\begin{cases}
+			\displaystyle \frac{\text{TP}}{\text{TP} + \text{FP}} & \text{Precision} \\[10pt]
+			\displaystyle \frac{\text{TP}}{\text{TP} + \text{FN}} & \text{Recall} \\[10pt]
+			\displaystyle \frac{\text{TN}}{\text{TN} + \text{FN}} & \text{Negative predictive value} \\[10pt]
+			\displaystyle \frac{\text{TN}}{\text{TN} + \text{FP}} & \text{Specificity}
+		\end{cases}
+		\nonumber
+	\end{equation}
+	\pause
+	Note: Recall is a machine learning term. Statisticians also call this metric \textbf{sensitivity} or \textbf{statistical power}.
+\end{frame}
+
+\begin{frame}{Classification Metric: The Confusion Matrix}
+	Here are the different questions these terms answer:
+	\begin{itemize}
+		\item Precision: \textit{is the player I classified as a forward actually one?}
+		\item Recall: \textit{did I successfully classify the forwards in my data as such?}
+		\item Negative predictive value: \textit{is the player I classified as a back actually one?}
+		\item Specificity: \textit{did I successfully classify the backs in my data as such?}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Classification Metric: The ROC Curve}
+	In the section on logistic regression, we had the following model:
+	\begin{equation}
+		\begin{aligned}
+			h: &\mathcal{X} \to ]0, 1[ \\
+			&x \mapsto \sigma\left(\Phi(X) \beta\right)
+		\end{aligned}
+		\nonumber
+	\end{equation}
+	\pause
+	Implicitly, we considered that if the model predicts a probability close to 1, then the predicted class was \{1\}. Conversely, if the probability was close to 0, then the predicted class was \{0\}. \\
+	\pause
+	\vspace{0.3cm}
+	In fact, it is possible to consider any \textbf{threshold}, denoted as $\theta$, in order to make a \textbf{decision} for an observation $i$:
+	\begin{equation}
+		\hat{y}^{(i)} = 
+		\begin{cases}
+			1 & \text{if} \, h(x^{(i)}) \ge \theta \\
+			0 & \text{otherwise}
+		\end{cases}
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Classification Metric: The ROC Curve}
+	This flexibility in choosing $\theta$ allows for different \textbf{trade-offs} within the confusion matrix. The \textbf{ROC curve} helps visualize these trade-offs between the true positive rate (recall or sensitivity), denoted as $\text{TPR}$, and the false positive rate, denoted as $\text{FPR}$:
+	\begin{equation}
+		\begin{cases}
+			\text{TPR} = \displaystyle \frac{\text{TP}}{\text{TP} + \text{FN}} \\[10pt]
+			\text{FPR} = \displaystyle \frac{\text{FP}}{\text{FP} + \text{TN}}
+		\end{cases}
+		\nonumber
+	\end{equation}	
+\end{frame}
+
+\begin{frame}{Classification Metric: The ROC Curve}
+	\begin{block}{Definition: ROC Curve}
+		The ROC (Receiver Operating Characteristic) curve, denoted as $\mathcal{C}_{\text{ROC}}$, represents the relationship between the true positive rate $\text{TPR}$ and the false positive rate $\text{FPR}$ as the decision threshold $\theta$ varies:
+		\begin{equation*}
+			\mathcal{C}_{\text{ROC}} = \{ \left(\text{FPR}, \text{TPR}\right) \in [0, 1]^2 \mid \theta \in [0, 1]\}
+		\end{equation*}
+	\end{block}
+\end{frame}
+
+\begin{frame}{Classification Metric: The ROC Curve}
+	Suppose a logistic regression model computes the following probabilities for observations $\mathcal{D}$:
+	\begin{table}
+		\centering
+		\begin{tabular}{|c|c|}
+			\hline
+			\textbf{Probability} & \textbf{True class} \\ \hline
+			0.98 & 1 \\ \hline
+			0.2  & 0 \\ \hline
+			0.05 & 0 \\ \hline
+			0.60 & 0 \\ \hline
+			0.79 & 1 \\ \hline
+			0.83 & 1 \\ \hline
+			0.47 & 1 \\ \hline
+		\end{tabular}
+	\end{table}
+\end{frame}
+
+\begin{frame}{Classification Metric: The ROC Curve}
+	Let us take $\theta = 1$ as an example:
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			\begin{table}
+				\centering
+				\begin{tabular}{|c|c|c|}
+					\hline
+					\textbf{Prob.} & \textbf{True} & \textbf{Pred.} \\ \hline
+					0.98 & 1 & 0 \\ \hline
+					0.2  & 0 & 0 \\ \hline
+					0.05 & 0 & 0 \\ \hline
+					0.60 & 0 & 0 \\ \hline
+					0.79 & 1 & 0 \\ \hline
+					0.83 & 1 & 0 \\ \hline
+					0.47 & 1 & 0 \\ \hline
+				\end{tabular}
+			\end{table}
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{Images/roc_theta1}
+				\label{fig:roc-theta1}
+			\end{figure}			
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Classification Metric: The ROC Curve}
+	Let us take $\theta = 0$ as an example:
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			\begin{table}
+				\centering
+				\begin{tabular}{|c|c|c|}
+					\hline
+					\textbf{Prob.} & \textbf{True} & \textbf{Pred.} \\ \hline
+					0.98 & 1 & 1 \\ \hline
+					0.2  & 0 & 1 \\ \hline
+					0.05 & 0 & 1 \\ \hline
+					0.60 & 0 & 1 \\ \hline
+					0.79 & 1 & 1 \\ \hline
+					0.83 & 1 & 1 \\ \hline
+					0.47 & 1 & 1 \\ \hline
+				\end{tabular}
+			\end{table}
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{Images/roc_theta0}
+				\label{fig:roc-theta0}
+			\end{figure}			
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Classification Metric: The ROC Curve}
+	Let us take $\theta = 0.5$ as an example:
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			\begin{table}
+				\centering
+				\begin{tabular}{|c|c|c|}
+					\hline
+					\textbf{Prob.} & \textbf{True} & \textbf{Pred.} \\ \hline
+					0.98 & 1 & 1 \\ \hline
+					0.2  & 0 & 0 \\ \hline
+					0.05 & 0 & 0 \\ \hline
+					0.60 & 0 & 1 \\ \hline
+					0.79 & 1 & 1 \\ \hline
+					0.83 & 1 & 1 \\ \hline
+					0.47 & 1 & 0 \\ \hline
+				\end{tabular}
+			\end{table}
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.9\linewidth]{Images/roc_theta05}
+				\label{fig:roc-theta05}
+			\end{figure}			
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Classification Metrics: Summary}
+	That is a lot of different metrics for classification!
+	\begin{itemize}
+		\item Mastering these different metrics takes time and practice.
+		\item Rather than trying to memorize the various definitions and terms, I recommend starting from the confusion matrix and deriving the other terms from there.
+		\item The designations true positives, false positives... are the most intuitive (compared to precision, recall, ...). Start by mastering these terms ;)
+		\item Keep in mind that the decision threshold $\theta$ can vary. The ROC curve then follows naturally.
+	\end{itemize}
+\end{frame}
+
+\subsection[Cross-Validation Methods]{Cross-Validation Methods}
+
+\begin{frame}{Cross-Validation Methods}
+	We have seen previously that:
+	\begin{itemize}
+		\item To verify the model's ability to \textbf{generalize}, it is necessary to evaluate its performance on data different from that used for training.
+		\item The estimation $\hat{f}$ depends on the training data. Different data can lead to a different model. This is the \textbf{variance} of the model.
+	\end{itemize}
+	\pause
+	\vspace{0.5cm}
+	In machine learning, it is common to use multiple data samples:
+	\begin{itemize}
+		\item \textbf{Training} data: for training the model.
+		\item \textbf{Validation} data: for testing different hypothesis spaces $\mathcal{H}$.
+		\item \textbf{Test} data: for the final and \textit{independent} evaluation of the model.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Cross-Validation Methods}
+	In practice, a team developing a machine learning model \textit{should} not have access to the test data. A \textit{fixed} \textbf{validation} sample offers advantages when it comes to comparing different estimators on the same data. However, it is also common to \textbf{generate} validation data directly from the training data. \\
+	\pause
+	\vspace{0.5cm}
+	In this section, we will explore different \textbf{cross-validation} methods that allow us to generate this validation data:
+	\begin{itemize}
+		\item Leave-One-Out
+		\item K-Fold Cross-Validation
+		\item Bootstrapping
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Leave-One-Out}
+	For training data $\mathcal{D} = \{(x^{(i)}, y^{(i)}) \mid i=1, 2, \cdots, n\}$, the \textbf{Leave-One-Out} method consists in creating $n$ samples of size $n-1$ such that:
+	\begin{equation}
+		\mathcal{D}^{(-k)} = \{(x^{(i)}, y^{(i)}) \quad \forall i \ne k\} \quad \forall k = 1, 2, \cdots, n
+		\nonumber
+	\end{equation}
+	\pause
+	The estimator $\hat{f}^{(-k)}$ is thus trained using the data $\mathcal{D}^{(-k)}$, and an error metric can be computed on the point $(x^{(k)}, y^{(k)})$. We then average the metrics across the $n$ different trained models. \\
+	\vspace{0.3cm}
+	This method is primarily used for training data with very few observations ($n \sim 10-100$). \\
+	\vspace{0.3cm}
+	See: \href{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.LeaveOneOut.html}{\texttt{sklearn.model\_selection.LeaveOneOut}}.
+\end{frame}
+
+\begin{frame}{Leave-One-Out}
+	An example of Leave-One-Out:
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Images/leaveoneout}
+		\label{fig:leave-one-out}
+	\end{figure}	
+\end{frame}
+
+\begin{frame}{$K$-Fold Cross-Validation}
+	The \textbf{$K$-fold cross-validation} method consists in randomly partitioning the data $\mathcal{D}$ into $K$ subsets (called \textbf{folds} or \textbf{blocks}) of equal size. \\
+	\pause
+	\vspace{0.5cm}
+	Let $\mathcal{I} = \{1, \dots, n\}$ be the set of indices of $\mathcal{D}$. We define a \textbf{partition} of $\mathcal{I}$ into $K$ disjoint subsets $\mathcal{I}_1, \dots, \mathcal{I}_K$ such that:
+	\begin{equation}
+		\bigcup_{k=1}^K \mathcal{I}_k = \mathcal{I} \quad \text{and} \quad \mathcal{I}_j \cap \mathcal{I}_m = \emptyset \, \text{ for } \, j \neq m
+		\nonumber
+	\end{equation}	
+	For each fold $k$, we define the estimator $\hat{f}^{(-k)}$ trained on $\mathcal{I} \setminus \mathcal{I}_k$. The performance metrics are then evaluated on $\mathcal{I}_k$. We then average these metrics across all $K$ folds. \\
+	\pause
+	\vspace{0.3cm}
+	Typically, we choose $K=5$ or $K=10$. For $K = n$, we return to the Leave-One-Out method. \\
+	\vspace{0.3cm}
+	See: \href{https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html}{\texttt{sklearn.model\_selection.KFold}}.
+\end{frame}
+
+\begin{frame}{$K$-Fold Cross-Validation}
+	An example of 5-fold cross-validation:
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Images/kfold}
+		\label{fig:k-fold}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Bootstrapping}
+	The \textbf{bootstrapping} method consists in resampling, with replacement, $n$ random observations from the dataset $\mathcal{D}$. We denote a sample created this way as $\mathcal{D}^{(b)}$. We generate $B$ such samples. \\
+	\pause
+	\vspace{0.5cm}
+	Let $\mathcal{I} = \{1, \dots, n\}$ be the set of indices of $\mathcal{D}$. A bootstrap sample $\mathcal{D}^{(b)}$ is a sequence of $n$ independent and identically distributed random variables $I_1^*, I_2^*, \cdots, I_n^*$. Each random variable follows a discrete uniform distribution over $\mathcal{I}$:
+	\begin{equation}
+		P(I_j^* = k) = \frac{1}{n}, \quad \forall k \in \mathcal{I}, \quad \forall j = 1, 2, \cdots, n
+		\nonumber
+	\end{equation}
+\end{frame}
+
+\begin{frame}{Bootstrapping}
+	A bootstrap sample is therefore defined as:
+	\begin{equation}
+		\mathcal{D}^{(b)} = \left\{ \left(x^{(I_j^*)}, y^{(I_j^*)}\right) \right\}_{j=1}^n
+		\nonumber
+	\end{equation}
+	\pause
+	\vspace{0.5cm}
+	We can then derive a validation sample from it (out-of-bag): 
+	\begin{equation}
+		\mathcal{D}_{\text{oob}}^{(b)} = \mathcal{D} \setminus \mathcal{D}^{(b)}
+		\nonumber
+	\end{equation} \\
+	\vspace{0.5cm}
+	Typically, we choose $B \sim 10-1000$ and average the metrics across the $B$ validation samples.
+\end{frame}
+
+\begin{frame}{Bootstrapping}
+	An example of bootstrapping:
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.9\linewidth]{Images/bootstrapping}
+		\label{fig:bootstrapping}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Cross-Validation Methods}
+	\begin{itemize}
+		\item These cross-validation methods are very commonly used in practice to estimate model bias and variance by generating independent data to validate the models directly from the training data. The test sample thus remains completely independent of the model's training process.
+		\pause
+		\item A variation that is \textit{too} large in performance metrics between the training data (empirical risk) and the validation data (true risk estimation) helps identify a failure to generalize, also known as overfitting or high variance.
+		\pause
+		\item Error metrics that are \textit{too} high on the validation data can indicate a significant model bias.
+		\pause
+		\item \textit{"Too"} will have to be defined based on the context, in collaboration with domain experts.
+		\pause
+		\item A supervised learning model must guarantee a \textbf{low bias} and a \textbf{low variance}.
+	\end{itemize}
+\end{frame}

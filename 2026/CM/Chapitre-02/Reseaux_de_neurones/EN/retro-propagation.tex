@@ -1,0 +1,1089 @@
+\section[Gradient Backpropagation]{Gradient Backpropagation}
+
+\begin{frame}{Gradient Backpropagation}
+	In this section, we will explore the \textbf{gradient backpropagation} algorithm, which historically marked the resurgence of interest in neural networks in the late 1980s. This algorithm, also commonly referred to as \textit{\textbf{backpropagation}}, lies at the very heart of training modern neural networks.
+	
+	\pause
+	\vspace{0.3cm}
+	
+	In this section:
+	\begin{itemize}
+		\item We will introduce another graphical representation for a neural network: the \textbf{computational graph}.
+		\pause
+		\item We will use this graph to discover the general concept underlying the backpropagation algorithm.
+		\pause
+		\item We will derive the gradients for the operators encountered in dense layers:
+		\begin{itemize}
+			\item The various activation functions (logistic function, hyperbolic tangent, rectified linear unit).
+			\item The linear operator.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\subsection[Computational Graph]{Computational Graph}
+
+\begin{frame}{Computational Graph}
+	
+	The \textbf{computational graph} is not only a practical \textbf{visual} tool for understanding the backpropagation algorithm, but it is also the fundamental way industry-standard deep learning libraries (such as PyTorch and TensorFlow) \textbf{implement} this algorithm.
+	
+	\pause
+	\vspace{0.3cm}
+	
+	In this section, we will use a simple neural network architecture to illustrate these concepts, but the technique naturally applies to all dense neural networks covered in this course. It will even apply to the more complex networks you will encounter later!
+	
+\end{frame}
+
+\begin{frame}{General Concept - Function Composition}
+	Consider the \textbf{composition} of the following functions $f$, $g$, and $h$:
+	\begin{center}
+		\begin{tikzpicture}[
+			% --- Locally defined styles ---
+			link_st/.style={->, thick, gray!40}, % Standard style
+			link_hl/.style={->, ultra thick, lime!80!black}, % Highlight style
+			node_math/.style={inner sep=2pt, font=\large}
+			]
+			
+			% --- 1. Node Definitions ---
+			\node[node_math] (x)    at (0,0)    {$x$};
+			\node[node_math] (fx)   [below=1.2cm of x]  {$f(x)$};
+			\node[node_math] (gfx)  [below=1.2cm of fx] {$g(f(x))$};
+			\node[node_math] (hgfx) [below=1.2cm of gfx]{$h(g(f(x)))$};
+			
+			% --- 2. Link Definitions (Forward Pass) ---
+			\draw[link_st] (x)    -- (fx)   node[midway, right=0.1cm, text=gray] {$f$};
+			\draw[link_st] (fx)   -- (gfx)  node[midway, right=0.1cm, text=gray] {$g$};
+			\draw[link_st] (gfx)  -- (hgfx) node[midway, right=0.1cm, text=gray] {$h$};
+			
+		\end{tikzpicture}
+	\end{center}
+\end{frame}
+
+\begin{frame}{General Concept - Differentiation of Composed Functions}
+	The final output evaluated by this computational chain is:
+	
+	\begin{equation*}
+		h(g(f(x))) = (h \circ g \circ f)(x)
+	\end{equation*}
+	
+	\pause
+	
+	We can compute the derivative of this output $h(g(f(x)))$ with respect to the input $x$ by utilizing the composite derivative rule, universally known as the \textbf{chain rule} in the context of machine learning:
+	
+	\begin{equation*}
+		\frac{d}{dx} \Big[ h(g(f(x))) \Big] = h'(g(f(x))) \cdot g'(f(x)) \cdot f'(x)
+	\end{equation*}
+	
+\end{frame}
+
+\begin{frame}{General Concept - Differentiation along the Graph}
+	Let us return to the computational graph:
+	\begin{columns}
+		\begin{column}{0.3\textwidth}
+			\begin{center}
+				\begin{tikzpicture}[
+					% --- Locally defined styles ---
+					link_st/.style={->, thick, gray!40}, % Standard style
+					link_hl/.style={->, ultra thick, lime!80!black}, % Highlight style
+					node_math/.style={inner sep=2pt, font=\large}
+					]
+					
+					% --- 1. Node Definitions ---
+					\node[node_math] (x)    at (0,0)    {$x$};
+					\node[node_math] (fx)   [below=1.2cm of x]  {$f(x)$};
+					\node[node_math] (gfx)  [below=1.2cm of fx] {$g(f(x))$};
+					\node[node_math] (hgfx) [below=1.2cm of gfx]{$h(g(f(x)))$};
+					
+					% --- 2. Link Definitions (Forward Pass) ---
+					\draw[link_hl] (x)    -- (fx)   node[midway, right=0.1cm, text=gray] {$f$};
+					\draw[link_hl] (fx)   -- (gfx)  node[midway, right=0.1cm, text=gray] {$g$};
+					\draw[link_hl] (gfx)  -- (hgfx) node[midway, right=0.1cm, text=gray] {$h$};
+					
+				\end{tikzpicture}
+			\end{center}			
+		\end{column}
+		\begin{column}{0.7\textwidth}
+			Computing the derivative $\frac{d}{dx} \Big[ h(g(f(x))) \Big]$ is mathematically equivalent to \textbf{multiplying} the individual derivatives of the functions along the explicit \textbf{\textcolor{lime!80!black}{path}} connecting the inputs to the output. This operational chaining is precisely why it is named the \textbf{chain rule}:
+			\begin{equation*}
+				h'(g(f(x))) \cdot g'(f(x)) \cdot f'(x) 
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Concrete Example - One-Hidden-Layer Network}
+	\begin{columns}
+		\begin{column}{0.25\textwidth}
+			\begin{center}
+				\resizebox{0.40\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Standard style
+						link_hl/.style={->, ultra thick, lime!80!black},% Highlight style
+						link_param/.style={->, thick, gray!50},        % For params/targets
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L is red
+						]
+						
+						% --- 1. Main Path (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{[0]}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{[1]}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{[1]}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{[2]}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; % Prediction \hat{y}
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Forward Pass Links ---
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)    -- (x1)     node[midway, left=0.1cm] {$\sigma^{[1]}$};
+						\draw[link_st] (x1)    -- (z2);
+						\draw[link_st] (z2)    -- (x2)     node[midway, left=0.1cm] {$\sigma^{[2]}$};
+						\draw[link_st] (x2) -- (e);
+						
+						% --- 3. Parameters and Targets (Y-shape structure) ---
+						% Layer 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{[1]}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{[1]}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Layer 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{[2]}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{[2]}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Loss (Target y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_param] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.75\textwidth}
+			This computational graph models a neural network with a single hidden layer, consisting of:
+			\begin{itemize}
+				\item the \textbf{inputs}: $X^{[0]}$,
+				\item the \textbf{linear} operator of the hidden layer with its weight matrix $W^{[1]}$, bias vector $b^{[1]}$, and its output $Z^{[1]}$,
+				\item the hidden layer \textbf{activation} function: $\sigma^{[1]}$, yielding output $X^{[1]}$,
+				\item the \textbf{linear} operator of the output layer with its weight matrix $W^{[2]}$, bias vector $b^{[2]}$, and its output $Z^{[2]}$,
+				\item the output layer \textbf{activation} function: $\sigma^{[2]}$,
+				\item the final \textbf{prediction} of the neural network: $\hat{Y}$,
+				\item the ground-truth \textbf{target} values: $Y$,
+				\item the global \textbf{error} $e$ computed by the network's \textbf{loss function}.
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Usefulness of the Graph}
+	What is the fundamental purpose of constructing this graph?
+	\pause
+	\begin{itemize}
+		\item Neural networks (much like logistic regression) rely on an \textbf{incremental} optimization framework for learning.
+		\pause
+		\item Starting from random \textbf{initial} values assigned to the network \textbf{parameters} ($W^{[1]}$, $b^{[1]}$, $W^{[2]}$, and $b^{[2]}$), the learning algorithm iteratively \textbf{optimizes} them.
+		\pause
+		\item Just as in logistic regression, standard \textbf{gradient descent} algorithms are deployed.
+		\pause
+		\item It is therefore necessary to compute the \textbf{gradients} of the prediction \textbf{error} with respect to \textbf{each} individual parameter within the model!
+		\pause
+		\item In logistic regression, this was straightforward because we only dealt with a single linear operator, and the bias was implicitly embedded via feature expansion, giving us a single linear \textit{path} through the graph.
+		\pause
+		\item In a neural network, the graph is structurally \textbf{branched}, which introduces additional complexity. Furthermore, it stacks multiple layers. 
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Usefulness of the Graph - Example 1}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Standard style
+						link_hl/.style={->, ultra thick, lime!80!black},% Highlight style
+						link_param/.style={->, thick, gray!50},        % For params/targets
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L is red
+						]
+						
+						% --- 1. Main Path (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{[0]}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{[1]}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{[1]}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{[2]}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; 
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Forward Pass Links ---
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_hl] (z1)    -- (x1)     node[midway, left=0.1cm] {$\sigma^{[1]}$};
+						\draw[link_hl] (x1)    -- (z2);
+						\draw[link_hl] (z2)    -- (x2)     node[midway, left=0.1cm] {$\sigma^{[2]}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Parameters and Targets ---
+						% Layer 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{[1]}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{[1]}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_hl] (b1) -- (z1);
+						
+						% Layer 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{[2]}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{[2]}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Loss (Target y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_param] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			The computational graph helps us \textbf{navigate} the application of the \textbf{chain rule}. In the adjacent diagram, we see the explicit \textbf{path} traversed by the chain rule to compute the partial derivative:
+			\begin{equation*}
+				\frac{\partial{e}}{\partial{b^{[1]}}} = \frac{\partial{e}}{\partial{\hat{Y}}} \frac{\partial{\hat{Y}}}{\partial{Z^{[2]}}} \frac{\partial{Z^{[2]}}}{\partial{X^{[1]}}} \frac{\partial{X^{[1]}}}{\partial{Z^{[1]}}} \frac{\partial{Z^{[1]}}}{\partial{b^{[1]}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Usefulness of the Graph - Example 2}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Standard style
+						link_hl/.style={->, ultra thick, lime!80!black},% Highlight style
+						link_param/.style={->, thick, gray!50},        % For params/targets
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L is red
+						]
+						
+						% --- 1. Main Path (Vertical, X^{(k)}, z^{(k)}) ---
+						\node[node_math] (x0)  at (0,0)      {$X^{[0]}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{[1]}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{[1]}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{[2]}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; 
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Forward Pass Links ---
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)    -- (x1)     node[midway, left=0.1cm] {$\sigma^{[1]}$};
+						\draw[link_st] (x1)    -- (z2);
+						\draw[link_hl] (z2)    -- (x2)     node[midway, left=0.1cm] {$\sigma^{[2]}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Parameters and Targets ---
+						% Layer 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{[1]}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{[1]}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Layer 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{[2]}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{[2]}$};
+						\draw[link_hl] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Loss (Target y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_param] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			The computational graph helps us \textbf{navigate} the application of the \textbf{chain rule}. In the adjacent diagram, we see the explicit \textbf{path} traversed by the chain rule to isolate the gradient:
+			\begin{equation*}
+				\frac{\partial{e}}{\partial{W^{[2]}}} = \frac{\partial{e}}{\partial{\hat{Y}}} \frac{\partial{\hat{Y}}}{\partial{Z^{[2]}}} \frac{\partial{Z^{[2]}}}{\partial{W^{[2]}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Applying the Chain Rule}
+	While executing the chain rule is significantly eased by this visual graph, the core challenge lies in the actual evaluation of the intermediate derivatives at each step:
+	\begin{itemize}
+		\pause
+		\item The derivatives give rise to high-dimensional \textbf{tensors}.
+		\pause
+		\item Along the derivative chain, operations are strictly non-commutative because we must ensure matching internal dimensions for the intermediate tensors.
+		\pause
+		\item We must therefore evaluate these derivatives sequentially by starting from the very \textbf{end} of the graph.
+		\pause
+		\item This reverse traversal is precisely why this optimization framework is named the gradient \textbf{back}propagation algorithm.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{The Gradient Backpropagation Algorithm}
+	To successfully execute the backpropagation algorithm, we must be capable of computing several fundamental tensor derivatives:
+	\begin{itemize}
+		\item The derivative of the loss function.
+		\item The derivative of the activation functions.
+		\item The derivative of the linear matrix operator.
+	\end{itemize}
+	\vspace{0.3cm}
+	\pause
+	The global algorithmic workflow is summarized as follows:
+	\begin{itemize}
+		\item We execute a forward pass to compute all intermediate layer representations and the final scalar error $e$.
+		\pause
+		\item We initiate gradient computations from the end: starting with the derivative of the loss function.
+		\pause
+		\item We then progressively propagate backward through the graph, following the path until we reach the target parameter.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Neural Network Learning Algorithm}
+	\begin{enumerate}
+		\item Initialize all weights and biases within the network randomly.
+		\pause
+		\item Perform an iteration over the entire training dataset:
+		\pause
+		\begin{itemize}
+			\item Compute the forward pass.
+			\pause
+			\item Evaluate the final prediction error $e$.
+			\pause
+			\item Compute the partial derivatives of $e$ with respect to every single network parameter using the gradient backpropagation algorithm.
+			\pause
+			\item Update the weights and biases utilizing a gradient descent optimization algorithm.
+		\end{itemize}
+		\pause 
+		\item Repeat Step 2 until a specified stopping criterion is met.
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}{Parameter Initialization}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Standard style
+						link_hl/.style={->, ultra thick, lime!80!black},% Highlight style
+						link_param/.style={->, thick, gray!50},        % For params/targets
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} % L is red
+						]
+						
+						% --- 1. Main Path ---
+						\node[node_math] (x0)  at (0,0)      {$X^{[0]}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{[1]}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{[1]}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{[2]}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; 
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Forward Pass Links ---
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)    -- (x1)     node[midway, left=0.1cm] {$\sigma^{[1]}$};
+						\draw[link_st] (x1)    -- (z2);
+						\draw[link_st] (z2)    -- (x2)     node[midway, left=0.1cm] {$\sigma^{[2]}$};
+						\draw[link_st] (x2) -- (e);
+						
+						% --- 3. Parameters and Targets ---
+						% Layer 1
+						\node[node_param, color=lime!80!black] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{[1]}$};
+						\node[node_param, color=lime!80!black] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{[1]}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Layer 2
+						\node[node_param, color=lime!80!black] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{[2]}$};
+						\node[node_param, color=lime!80!black] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{[2]}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Loss (Target y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_param] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Later in this course, we will detail how these parameters are rigorously \textbf{\textcolor{lime!80!black}{initialized}}. For the moment, we will assume this initial configuration is purely \textbf{random}.
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Forward Pass Evaluation}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Standard style
+						link_hl/.style={->, ultra thick, lime!80!black},% Highlight style
+						link_param/.style={->, thick, gray!50},        % For params/targets
+						node_math/.style={inner sep=2pt, font=\large, text=lime!80!black},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=lime!80!black} 
+						]
+						
+						% --- 1. Main Path ---
+						\node[node_math] (x0)  at (0,0)      {$X^{[0]}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{[1]}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{[1]}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{[2]}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; 
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Forward Pass Links ---
+						\draw[link_hl] (x0)    -- (z1);
+						\draw[link_hl] (z1)    -- (x1)     node[midway, left=0.1cm, text=gray!80!black] {$\sigma^{[1]}$};
+						\draw[link_hl] (x1)    -- (z2);
+						\draw[link_hl] (z2)    -- (x2)     node[midway, left=0.1cm, text=gray!80!black] {$\sigma^{[2]}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Parameters and Targets ---
+						% Layer 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{[1]}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{[1]}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Layer 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{[2]}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{[2]}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Loss (Target y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_param] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Evaluating the \textbf{\textcolor{lime!80!black}{forward pass}} across all training instances maps out every intermediate layer activation and yields the final prediction error needed to compute the global gradients.
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Evaluating the Loss Gradient}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Standard style
+						link_hl/.style={->, ultra thick, lime!80!black},% Highlight style
+						link_param/.style={->, thick, gray!50},        % For params/targets
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} 
+						]
+						
+						% --- 1. Main Path ---
+						\node[node_math] (x0)  at (0,0)      {$X^{[0]}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{[1]}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{[1]}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{[2]}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; 
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Forward Pass Links ---
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)    -- (x1)     node[midway, left=0.1cm] {$\sigma^{[1]}$};
+						\draw[link_st] (x1)    -- (z2);
+						\draw[link_st] (z2)    -- (x2)     node[midway, left=0.1cm] {$\sigma^{[2]}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Parameters and Targets ---
+						% Layer 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{[1]}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{[1]}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Layer 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{[2]}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{[2]}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Loss (Target y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_st] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			First, we isolate the \textbf{\textcolor{lime!80!black}{gradient of the error}}. We will denote the error signal flowing backward through the computational graph as $\delta$, which is sequentially updated at each node:
+			\begin{equation*}
+				\delta_0 = \frac{\partial{e}}{\partial{\hat{Y}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Propagating through the Second Activation Function}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Standard style
+						link_hl/.style={->, ultra thick, lime!80!black},% Highlight style
+						link_param/.style={->, thick, gray!50},        % For params/targets
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} 
+						]
+						
+						% --- 1. Main Path ---
+						\node[node_math] (x0)  at (0,0)      {$X^{[0]}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{[1]}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{[1]}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{[2]}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; 
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Forward Pass Links ---
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)    -- (x1)     node[midway, left=0.1cm] {$\sigma^{[1]}$};
+						\draw[link_st] (x1)    -- (z2);
+						\draw[link_hl] (z2)    -- (x2)     node[midway, left=0.1cm] {$\sigma^{[2]}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Parameters and Targets ---
+						% Layer 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{[1]}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{[1]}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Layer 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{[2]}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{[2]}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Loss (Target y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_st] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Moving backward through the activation operator, we scale the incoming error signal by the localized \textbf{\textcolor{lime!80!black}{gradient of the activation function}}:
+			\begin{equation*}
+				\delta_1 = \frac{\partial{e}}{\partial{Z^{[2]}}} = \frac{\partial{e}}{\partial{\hat{Y}}} \frac{\partial{\hat{Y}}}{\partial{Z^{[2]}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Propagating through the Linear Operator}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Standard style
+						link_hl/.style={->, ultra thick, lime!80!black},% Highlight style
+						link_param/.style={->, thick, gray!50},        % For params/targets
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} 
+						]
+						
+						% --- 1. Main Path ---
+						\node[node_math] (x0)  at (0,0)      {$X^{[0]}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{[1]}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{[1]}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{[2]}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; 
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Forward Pass Links ---
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_st] (z1)    -- (x1)     node[midway, left=0.1cm] {$\sigma^{[1]}$};
+						\draw[link_hl] (x1)    -- (z2);
+						\draw[link_hl] (z2)    -- (x2)     node[midway, left=0.1cm] {$\sigma^{[2]}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Parameters and Targets ---
+						% Layer 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{[1]}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{[1]}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Layer 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{[2]}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{[2]}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Loss (Target y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_st] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Traversing back through the linear operator node, the existing gradient is modulated by the localized \textbf{\textcolor{lime!80!black}{gradient of the linearity}}:
+			\begin{equation*}
+				\delta_2 = \frac{\partial{e}}{\partial{X^{[1]}}} = \frac{\partial{e}}{\partial{Z^{[2]}}} \frac{\partial{Z^{[2]}}}{\partial{X^{[1]}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Propagating through the First Activation Function}
+	\begin{columns}
+		\begin{column}{0.5\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Standard style
+						link_hl/.style={->, ultra thick, lime!80!black},% Highlight style
+						link_param/.style={->, thick, gray!50},        % For params/targets
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} 
+						]
+						
+						% --- 1. Main Path ---
+						\node[node_math] (x0)  at (0,0)      {$X^{[0]}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{[1]}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{[1]}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{[2]}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; 
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Forward Pass Links ---
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_hl] (z1)    -- (x1)     node[midway, left=0.1cm] {$\sigma^{[1]}$};
+						\draw[link_hl] (x1)    -- (z2);
+						\draw[link_hl] (z2)    -- (x2)     node[midway, left=0.1cm] {$\sigma^{[2]}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Parameters and Targets ---
+						% Layer 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{[1]}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{[1]}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_param] (b1) -- (z1);
+						
+						% Layer 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{[2]}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{[2]}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Loss (Target y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_st] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.5\textwidth}
+			Reaching further back through the first activation function, we multiply the accumulating error signal by the localized \textbf{\textcolor{lime!80!black}{gradient of the activation function}}:
+			\begin{equation*}
+				\delta_3 = \frac{\partial{e}}{\partial{Z^{[1]}}} = \frac{\partial{e}}{\partial{X^{[1]}}} \frac{\partial{X^{[1]}}}{\partial{Z^{[1]}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\begin{frame}{Isolating the Target Parameter $b^{[1]}$}
+	\begin{columns}
+		\begin{column}{0.4\textwidth}
+			\begin{center}
+				\resizebox{0.5\textheight}{!}{
+					\begin{tikzpicture}[
+						node distance = 0.9cm,
+						>=Stealth,
+						% --- Styles ---
+						link_st/.style={->, thick, gray!50},            % Standard style
+						link_hl/.style={->, ultra thick, lime!80!black},% Highlight style
+						link_param/.style={->, thick, gray!50},        % For params/targets
+						node_math/.style={inner sep=2pt, font=\large},
+						node_param/.style={font=\small, text=gray!80!black},
+						node_target/.style={font=\small, text=gray!80!black},
+						node_loss/.style={node_math, text=red!70!black} 
+						]
+						
+						% --- 1. Main Path ---
+						\node[node_math] (x0)  at (0,0)      {$X^{[0]}$};
+						\node[node_math] (z1)  [below=of x0]   {$Z^{[1]}$};
+						\node[node_math] (x1)  [below=of z1]   {$X^{[1]}$};
+						\node[node_math] (z2)  [below=of x1]   {$Z^{[2]}$};
+						\node[node_math] (x2)  [below=of z2]   {$\hat{Y}$}; 
+						\node[node_loss] (e)   [below=of x2]   {$e$};
+						
+						% --- 2. Forward Pass Links ---
+						\draw[link_st] (x0)    -- (z1);
+						\draw[link_hl] (z1)    -- (x1)     node[midway, left=0.1cm] {$\sigma^{[1]}$};
+						\draw[link_hl] (x1)    -- (z2);
+						\draw[link_hl] (z2)    -- (x2)     node[midway, left=0.1cm] {$\sigma^{[2]}$};
+						\draw[link_hl] (x2) -- (e);
+						
+						% --- 3. Parameters and Targets ---
+						% Layer 1
+						\node[node_param] (w1) at ([xshift=-1.5cm, yshift=1cm]z1.north west) {$W^{[1]}$};
+						\node[node_param] (b1) at ([xshift=1.5cm, yshift=1cm]z1.north east) {$b^{[1]}$};
+						\draw[link_param] (w1) -- (z1);
+						\draw[link_hl] (b1) -- (z1);
+						
+						% Layer 2
+						\node[node_param] (w2) at ([xshift=-1.5cm, yshift=1cm]z2.north west) {$W^{[2]}$};
+						\node[node_param] (b2) at ([xshift=1.5cm, yshift=1cm]z2.north east) {$b^{[2]}$};
+						\draw[link_param] (w2) -- (z2);
+						\draw[link_param] (b2) -- (z2);
+						
+						% Loss (Target y)
+						\node[node_target] (y) at ([xshift=1.5cm, yshift=1cm]e.north east) {$Y$};
+						\draw[link_st] (y) -- (e);
+						
+					\end{tikzpicture}
+				}
+			\end{center}
+		\end{column}
+		\begin{column}{0.6\textwidth}
+			We finally reach our target parameter branch, mapping the accumulated signal to the \textbf{\textcolor{lime!80!black}{gradient of the linearity}}:
+			\begin{equation*}
+				\delta_4 = \frac{\partial{e}}{\partial{b^{[1]}}} = \frac{\partial{e}}{\partial{Z^{[1]}}} \frac{\partial{Z^{[1]}}}{\partial{b^{[1]}}}
+			\end{equation*}
+			Since we have traced the gradient all the way back to the parameter of interest, the optimization loop can update this bias vector via gradient descent using a set \textbf{learning rate} $\alpha$:
+			\begin{equation*}
+				b^{[1]} \leftarrow b^{[1]} - \alpha \frac{\partial{e}}{\partial{b^{[1]}}}
+			\end{equation*}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+\subsection[Operator Derivatives]{Operator Derivatives}
+
+\begin{frame}{Operator Derivatives}
+	In this section, we will systematically derive the explicit partial derivatives for each operator embedded within our dense network structure:
+	
+	\begin{itemize}
+		\item Derivatives of non-linear activation functions.
+		\item Derivatives of the affine linear matrix operator.
+	\end{itemize}
+	
+	\vspace{0.3cm}
+	\pause
+	
+	We will mathematically formulate the derivatives of specialized loss functions later in the course. To remain structurally generic for now, we will simply denote the incoming error signal at the final layer as $\delta_0$:
+	
+	\begin{equation*}
+		\delta_0 = \frac{\partial{e}}{\partial{\hat{Y}}}
+	\end{equation*}
+	
+	\vspace{0.3cm}
+	\pause
+	
+	Given a scalar cost $e \in \R$, the derivative of the error evaluates to a column vector $\delta_0 \in \mathcal{M}_{n,m}(\R)$ because the $n$ individual data instances are stacked vertically in our target matrix $Y \in \mathcal{M}_{n,m}(\R)$. The network predictions are structured identically: $\hat{Y} \in \mathcal{M}_{n,m}(\R)$, where $m=1$ for classical regression and binary classification tasks.
+\end{frame}
+
+\begin{frame}{Tensor Logistic Function}
+	\begin{block}{Definition of the Tensor Logistic Function}
+		For an input tensor $Z$ of arbitrary dimensions, the logistic sigmoid mapping is computed element-wise according to the following expression:
+		\begin{equation*}
+			\sigma(Z) = \frac{1_Z}{1_Z + \exp{(-Z)}}
+		\end{equation*}
+		The base exponential function is executed individually on each element of tensor $Z$. The output preserves the exact dimensionality of the input tensor. Here, $1_Z$ represents a tensor of ones matching the dimensions of $Z$.
+	\end{block}
+	Example:
+	\begin{equation*}
+		Z = \begin{pmatrix}
+			2 & 0 \\
+			-1 & 1 
+		\end{pmatrix}; 
+		\exp{(-Z)} = \begin{pmatrix}
+			e^{-2} & e^{0} \\
+			e^{1} & e^{-1} 
+		\end{pmatrix};
+		\sigma(Z) = \begin{pmatrix}
+			\frac{1}{\left(1 + e^{-2}\right)} & \frac{1}{\left(1 + e^{0}\right)} \\
+			\frac{1}{\left(1 + e^{1}\right)}  & \frac{1}{\left(1 + e^{-1}\right)}
+		\end{pmatrix}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Derivative of the Tensor Logistic Function}	
+	\begin{block}{Derivative of the Logistic Mapping with Respect to Inputs $Z$}
+		The partial derivative of the logistic curve evaluated at its input tensor $Z$ yields the following identity:
+		\begin{equation*}
+			\sigma'(Z) = \sigma(Z) \odot \left(1_Z - \sigma(Z)\right)
+		\end{equation*}
+		The output matches the dimensional structure of the input tensor $Z$.
+	\end{block}
+	Note: $\odot$ denotes element-wise matrix multiplication, formally termed the \textbf{Hadamard product}.
+	
+	Example:
+	\begin{equation*}
+		Z = \begin{pmatrix}
+			2 & 0 \\
+			-1 & 1 
+		\end{pmatrix}; 
+		\sigma'(Z) = \begin{pmatrix}
+			\sigma(2) (1 - \sigma(2)) & \sigma(0) (1 - \sigma(0)) \\
+			\sigma(-1) (1 - \sigma(-1)) & \sigma(1) (1 - \sigma(1))
+		\end{pmatrix}
+	\end{equation*}	
+\end{frame}
+
+\begin{frame}{Tensor Hyperbolic Tangent}
+	\begin{block}{Definition of the Tensor Hyperbolic Tangent}
+		For an input tensor $Z$ of arbitrary dimensions, the hyperbolic tangent mapping is defined as:
+		\begin{equation*}
+			\tanh(Z) = \left(1_Z - \exp{(-2 Z)}\right) \oslash \left(1_Z + \exp{(-2 Z)}\right)
+		\end{equation*}
+		The exponential operator is evaluated element-wise on tensor $Z$. The term $1_Z$ represents a tensor of ones matching the dimensions of $Z$. Output tensors strictly retain the dimensional allocation of the input.
+	\end{block}
+	Note: $\oslash$ denotes element-wise matrix division, formally known as \textbf{Hadamard division}.
+	
+	Example:
+	\begin{equation*}
+		Z = \begin{pmatrix}
+			2 & 0 \\
+			-1 & 1 
+		\end{pmatrix}; 
+		\tanh(Z) = \begin{pmatrix}
+			(1 - e^{-4}) / (1 + e^{-4}) & (1 - e^{0}) / (1 + e^{0}) \\
+			(1 - e^{2}) / (1 + e^{2}) & (1 - e^{-2}) / (1 + e^{-2})
+		\end{pmatrix}
+	\end{equation*}	
+\end{frame}
+
+\begin{frame}{Derivative of the Tensor Hyperbolic Tangent}
+	
+	\begin{block}{Derivative of $\tanh$ with Respect to Inputs $Z$}
+		Given an input tensor $Z$ of arbitrary dimensionality, the localized derivative of the hyperbolic tangent operator evaluates to:
+		\begin{equation*}
+			\tanh'(Z) = 1_Z - \tanh{(Z)} \odot \tanh{(Z)}
+		\end{equation*}
+		The resulting matrix perfectly tracks the dimensional footprint of the input tensor $Z$.		
+	\end{block}
+	Example:
+	\begin{equation*}
+		Z = \begin{pmatrix}
+			2 & 0 \\
+			-1 & 1 
+		\end{pmatrix}; 
+		\tanh'(Z) = \begin{pmatrix}
+			1 - \tanh^2{(2)}  & 1 - \tanh^2{(0)} \\
+			1 - \tanh^2{(-1)} & 1 - \tanh^2{(1)}
+		\end{pmatrix}
+	\end{equation*}	
+\end{frame}
+
+\begin{frame}{Tensor Rectified Linear Unit (ReLU)}
+	\begin{block}{Definition of the Tensor Rectified Linear Unit}
+		For an input tensor $Z$ of arbitrary dimensions, the Rectified Linear Unit mapping is written as:
+		\begin{equation*}
+			\operatorname{ReLU}(Z) = Z \odot \mathbb{1}_{Z > 0}
+		\end{equation*}
+		Where $\mathbb{1}_{Z > 0}$ is the indicator function applied element-wise across the tensor. The structural dimensions of the tensor are invariant under this operation.
+	\end{block}
+	\pause
+	Example:
+	\begin{equation*}
+		Z = \begin{pmatrix}
+			2 & 0 \\
+			-1 & 1 
+		\end{pmatrix}; 
+		\mathbb{1}_{Z > 0} = \begin{pmatrix}
+			1 & 0 \\
+			0 & 1 
+		\end{pmatrix};
+		\operatorname{ReLU}(Z) = \begin{pmatrix}
+			2 & 0 \\
+			0 & 1 
+		\end{pmatrix}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Derivative of the Rectified Linear Unit (ReLU)}
+	\begin{block}{Derivative of ReLU with Respect to Inputs $Z$}
+		For any input tensor $Z$ of arbitrary dimensions, the localized derivative of the Rectified Linear Unit operator simplifies to:
+		\begin{equation*}
+			\operatorname{ReLU}'(Z) = \mathbb{1}_{Z > 0}
+		\end{equation*}
+		The output structurally tracks the exact dimensions of the input tensor $Z$.		
+	\end{block}	
+\end{frame}
+
+\begin{frame}{Gradient Propagation through Activation Functions}
+	\begin{block}{Propagating a Gradient $\delta$ through an Activation Operator}
+		For an input tensor $Z$ of arbitrary dimensions, the incoming propagated error signal $\delta$ shares the exact dimensional footprint of $Z$. To pass this gradient backward through \textit{any} generic activation function $\sigma$, we take the element-wise product of $\delta$ and the localized derivative of that activation function:
+		\begin{equation*}
+			\frac{\partial{e}}{\partial{Z}} = \delta \odot \sigma'(Z)
+		\end{equation*}
+	\end{block}
+	Note: The complete mathematical proof is available in the appendix of this course.
+\end{frame}
+
+\begin{frame}{The Linear Operator Case}
+	This is where matrix calculus becomes structurally more involved. As mapped out by the computational graph, the linear affine aggregation step acts as a node from which three distinct paths branch out:
+	
+	\begin{itemize}
+		\item A path leading backward to the activations of the previous layer.
+		\item A path leading directly to the layer's weight parameter.
+		\item A path leading directly to the layer's bias parameter.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{The Linear Operator Case}
+	Furthermore, because layer outputs, inputs, weights, and biases occupy distinct vector spaces, the formal partial derivatives of the linear node outputs with respect to these variables yield high-dimensional tensors of varying dimensions.
+	
+	\vspace{0.3cm}
+	\pause
+	
+	For example, if the input dimensions are $n \times p^{[k]}$ and the outputs span $n \times p^{[k+1]}$, the weight matrix must be $p^{[k]} \times p^{[k+1]}$ and the bias vector is $1 \times p^{[k+1]}$. Their formal derivatives require higher-order tensors of the following sizes:
+	
+	\begin{itemize}
+		\item $\frac{\partial{Z^{[k+1]}}}{\partial{X^{[k]}}}$: $n \times p^{[k+1]} \times n \times p^{[k]}$
+		\item $\frac{\partial{Z^{[k+1]}}}{\partial{W^{[k+1]}}}$: $n \times p^{[k+1]} \times p^{[k]} \times p^{[k+1]}$
+		\item $\frac{\partial{Z^{[k+1]}}}{\partial{b^{[k+1]}}}$: $n \times p^{[k+1]} \times 1 \times p^{[k+1]}$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{The Linear Operator Case}
+	To avoid tracking higher-order Jacobians explicitly, we introduce a mathematical shortcut. Instead of evaluating isolated tensors, we directly compute the contraction of the incoming error signal $\delta$. We know $\delta$ matches the layer output dimensions ($n \times p^{[k+1]}$). The backpropagation step involves a specific tensor contraction between $\delta$ and these derivatives, evaluating to the following dimensions:
+	
+	\begin{itemize}
+		\item $\delta \frac{\partial{Z^{[k+1]}}}{\partial{X^{[k]}}}$: $n \times p^{[k]}$
+		\item $\delta \frac{\partial{Z^{[k+1]}}}{\partial{W^{[k+1]}}}$: $p^{[k]} \times p^{[k+1]}$
+		\item $\delta \frac{\partial{Z^{[k+1]}}}{\partial{b^{[k+1]}}}$: $1 \times p^{[k+1]}$
+	\end{itemize}
+	
+	These dimensions match \textbf{exactly} the spaces occupied by the variables we are differentiating against: namely, the dimensions of the layer inputs, weights, and biases.
+\end{frame}
+
+\begin{frame}{General Case of the Chain Rule}
+	Within multi-dimensional spaces, matrix \textbf{multiplication} along the chain rule behaves explicitly as a \textbf{tensor contraction}:
+	
+	\begin{block}{Chain Rule via Tensor Contraction}
+		Let there be an operator embedded within a neural network topology (either an activation function or a linear node). Let $U \in \mathcal{M}_{n, u}(\R)$ denote its inputs and $V \in \mathcal{M}_{n, v}(\R)$ its outputs. For an activation function, $u = v$. For a linear operator, the weights and biases satisfy compatibility constraints: $W \in \mathcal{M}_{u, v}(\R)$ and $b \in \mathcal{M}_{1, v}(\R)$. We denote the incoming error gradient being propagated as $\delta \in \mathcal{M}_{n, v}(\R)$, which is simply defined as $\frac{\partial{e}}{\partial{V}}$.
+		The multi-dimensional chain rule evaluated via tensor contraction is written as:
+		\begin{equation*}
+			\frac{\partial{e}}{\partial{Q_{i,j}}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V_{\mu,\nu}}}{\partial{Q_{i,j}}}
+		\end{equation*}
+		Where $Q$ can represent $U$, $W$, or $b$ depending on the objective of the derivation.
+	\end{block}
+\end{frame}
+
+\begin{frame}{Unpacking Tensor Contraction}
+	For a multi-variable function $f(x_1, x_2)$, the total differential expands as:
+	\begin{equation*}
+		df = \frac{\partial{f}}{\partial{x_1}} dx_1 + \frac{\partial{f}}{\partial{x_2}} dx_2
+	\end{equation*}
+	\pause
+	This formulation accumulates or \textbf{sums up} the distinct contributions of every underlying variable influencing the outcome. The gradient we are backpropagating is $\frac{\partial{e}}{\partial{V}}$, a matrix matching the dimensions of $V$, while the global cost $e$ is a scalar. Consequently, every individual component of $V$ exerts an influence on $e$. For example, setting $n = 3$ and $v = 2$:
+	\begin{equation*}
+		\begin{aligned}
+			de &= \frac{\partial{e}}{\partial{V_{1,1}}} dV_{1,1} + \frac{\partial{e}}{\partial{V_{1,2}}} dV_{1,2} \\
+			&+ \frac{\partial{e}}{\partial{V_{2,1}}} dV_{2,1} + \frac{\partial{e}}{\partial{V_{2,2}}} dV_{2,2} \\
+			&+ \frac{\partial{e}}{\partial{V_{3,1}}} dV_{3,1} + \frac{\partial{e}}{\partial{V_{3,2}}} dV_{3,2}
+		\end{aligned}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Unpacking Tensor Contraction}
+	We can compress this total differential expansion into compact double summation notation:
+	\begin{equation*}
+		de = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} dV_{\mu,\nu}
+	\end{equation*}
+	\pause
+	We can now introduce the structural variation of any arbitrary matrix quantity $Q$:
+	\begin{equation*}
+		de = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V}_{\mu,\nu}}{\partial{Q}} dQ 
+	\end{equation*}
+	\pause
+	This isolates the exact expression for tensor contraction introduced previously, assuming $e$ depends on other independent branches outside of $Q$:
+	\begin{equation*}
+		\frac{\partial{e}}{\partial{Q}} = \sum_{\mu=1}^n \sum_{\nu=1}^v \frac{\partial{e}}{\partial{V_{\mu,\nu}}} \frac{\partial{V}_{\mu,\nu}}{\partial{Q}}
+	\end{equation*}
+\end{frame}
+
+\begin{frame}{Gradient Propagation through a Linear Operator}
+	\begin{block}{Propagating a Gradient $\delta$ through a Linear Operator}
+		Let there be a linear transformation defined by its weight matrix $W \in \mathcal{M}_{u,v}(\R)$ and its bias vector $b \in \mathcal{M}_{1,v}(\R)$. The operator maps inputs $X \in \mathcal{M}_{n,u}(\R)$ to outputs $Z \in \mathcal{M}_{n,v}(\R)$. The backward propagation of the error signal $\delta \in \mathcal{M}_{n,v}(\R)$ yields the following matrix calculus identities:
+		\begin{equation*}
+			\begin{aligned}
+				\frac{\partial{e}}{\partial{X}} &= \delta W^T \\
+				\frac{\partial{e}}{\partial{W}} &=  X^T \delta \\
+				\frac{\partial{e}}{\partial{b}} &= \mathbf{1}_n^T \delta    
+			\end{aligned}
+		\end{equation*} 
+	\end{block}
+	Note: The complete analytical proofs are available in the appendix of this course.
+\end{frame}
+
+\begin{frame}{Summary of Gradient Backpropagation}
+	In this section, we explored how to:
+	\begin{itemize}
+		\item Formulate and map a neural network topology as a structured \textbf{computational graph}.
+		\item Apply the multi-dimensional \textbf{chain rule} to analytically derive the gradients of the global \textbf{error} with respect to all \textbf{parameters} (weights and biases).
+		\item Mathematically propagate error signals through standard network building blocks (linear nodes and activation operators). 
+	\end{itemize}
+	\pause
+	You have likely noted that we omitted the formal derivative for the softmax function and its explicit backpropagation steps. We will address this specific case later in the course, leveraging a highly elegant shortcut connected directly to cross-entropy loss functions.
+\end{frame}
